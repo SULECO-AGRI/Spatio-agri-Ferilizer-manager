@@ -82,5 +82,3 @@ export function VerticalNav() {
     </nav>
   );
 }
-
-export default VerticalNav;

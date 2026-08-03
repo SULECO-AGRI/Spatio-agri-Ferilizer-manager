@@ -1,10 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { gsap } from "gsap";
+import { useRef, useState } from "react";
 import { KineticPhrase } from "./primitives/KineticPhrase";
-import { GlowButton } from "./primitives/GlowButton";
 import HeroImage from "../../Images/Hero_Image.jpg";
-import { Activity, Shield, Cpu, Compass, Wifi, Check, Sparkles, AlertCircle } from "lucide-react";
+import { Check } from "lucide-react";
 
 export function Hero() {
   const [email, setEmail] = useState("");

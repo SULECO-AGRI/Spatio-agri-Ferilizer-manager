@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { Play, Pause, Volume2, VolumeX, Radio, Wifi, Battery, Disc } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Wifi, Disc } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Reveal } from "./primitives/Reveal";
 

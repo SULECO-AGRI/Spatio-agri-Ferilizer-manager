@@ -133,5 +133,3 @@ export function ProblemSolution() {
     </section>
   );
 }
-
-export default ProblemSolution;

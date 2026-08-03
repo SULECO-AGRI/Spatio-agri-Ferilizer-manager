@@ -337,5 +337,3 @@ export function Workflow() {
     </section>
   );
 }
-
-export default Workflow;

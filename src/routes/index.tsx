@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/landing/Nav";
 import { Hero } from "@/components/landing/Hero";
-import { VideoShowcase } from "@/components/landing/VideoShowcase";
 import { VideoSection } from "@/components/landing/VideoSection";
 import { Workflow } from "@/components/landing/Workflow";
 import { BentoTech } from "@/components/landing/BentoTech";
@@ -25,7 +24,6 @@ function LandingPage() {
         <VerticalNav />
         <main>
           <Hero />
-          {/* <VideoShowcase /> */}
           <ProblemSolution />
           <Workflow />
           <VideoSection />
