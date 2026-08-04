@@ -88,7 +88,7 @@ export function Hero() {
               <button
                 type="submit"
                 disabled={!valid}
-                className="rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm px-5 py-2.5 transition duration-150 disabled:opacity-50 disabled:hover:bg-emerald-500 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.25)] hover:shadow-[0_0_20px_rgba(16,185,129,0.45)]"
+                className="rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm px-5 py-2.5 transition duration-150 disabled:opacity-50 disabled:hover:bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.25)] hover:shadow-[0_0_20px_rgba(16,185,129,0.45)]"
               >
                 Request Access
               </button>

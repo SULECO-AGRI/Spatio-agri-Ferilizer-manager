@@ -70,7 +70,7 @@ export function VerticalNav() {
             <button
               onClick={() => scrollToSection(section.id)}
               aria-label={`Scroll to ${section.label}`}
-              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                 isActive
                   ? "bg-emerald-500 scale-125 shadow-[0_0_10px_#10b981,0_0_20px_#10b981]"
                   : "bg-slate-300 dark:bg-slate-700 border border-black/10 dark:border-white/10 hover:scale-115 hover:bg-slate-400 dark:hover:bg-slate-500"
