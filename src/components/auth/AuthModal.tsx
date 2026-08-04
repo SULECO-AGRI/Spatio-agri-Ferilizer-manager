@@ -89,7 +89,7 @@ export default function AuthModal() {
             </div>
 
             {/* Smooth Form Switch Container */}
-            <div className="relative w-full">
+            <div className="relative w-full min-h-[372px] flex items-center">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={mode}
