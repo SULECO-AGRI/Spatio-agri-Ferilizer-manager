@@ -57,6 +57,28 @@ const steps = [
   },
 ];
 
+// Builds a smooth alternating S-curve through each step's badge position, replacing a straight spine.
+function buildWorkflowCurve(count: number, viewHeight: number) {
+  const centerX = 24;
+  const amplitude = 64;
+  const rowHeight = viewHeight / count;
+  const ys = Array.from({ length: count }, (_, i) => (i + 0.5) * rowHeight);
+  let d = `M ${centerX},${ys[0]}`;
+  for (let i = 0; i < ys.length - 1; i++) {
+    const y0 = ys[i];
+    const y1 = ys[i + 1];
+    const dir = i % 2 === 0 ? 1 : -1;
+    const cx = centerX + dir * amplitude;
+    const c1y = y0 + (y1 - y0) * 0.33;
+    const c2y = y0 + (y1 - y0) * 0.67;
+    d += ` C ${cx},${c1y} ${cx},${c2y} ${centerX},${y1}`;
+  }
+  return d;
+}
+
+const WORKFLOW_CURVE_HEIGHT = steps.length * 160;
+const workflowCurvePath = buildWorkflowCurve(steps.length, WORKFLOW_CURVE_HEIGHT);
+
 export function Workflow() {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -106,7 +128,7 @@ export function Workflow() {
           <div className="absolute left-1/2 -translate-x-1/2 top-8 bottom-8 w-12 hidden md:block pointer-events-none z-0">
             <svg
               className="w-full h-full overflow-visible"
-              viewBox="0 0 48 800"
+              viewBox={`0 0 48 ${WORKFLOW_CURVE_HEIGHT}`}
               preserveAspectRatio="none"
               fill="none"
             >
@@ -119,59 +141,21 @@ export function Workflow() {
                 </linearGradient>
               </defs>
 
-              {/* Base grey line */}
+              {/* Base grey curve */}
               <path
-                d="M 24,0 L 24,800"
+                d={workflowCurvePath}
                 stroke="#e2e8f0"
                 strokeWidth="2.5"
                 strokeDasharray="6 6"
                 className="opacity-70"
               />
 
-              {/* Animated straight dashed path */}
+              {/* Animated scroll-linked curve */}
               <motion.path
-                d="M 24,0 L 24,800"
+                d={workflowCurvePath}
                 stroke="url(#line-grad)"
                 strokeWidth="3"
                 strokeDasharray="6 6"
-                style={{ pathLength }}
-              />
-
-              {/* Clean downward chevrons (glowing arrows) between the steps */}
-              {/* Chevron 1 (Step 1 -> 2) */}
-              <motion.path
-                d="M 18,110 L 24,117 L 30,110"
-                stroke="#2563eb"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ pathLength }}
-              />
-              {/* Chevron 2 (Step 2 -> 3) */}
-              <motion.path
-                d="M 18,270 L 24,277 L 30,270"
-                stroke="#14b8a6"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ pathLength }}
-              />
-              {/* Chevron 3 (Step 3 -> 4) */}
-              <motion.path
-                d="M 18,430 L 24,437 L 30,430"
-                stroke="#4f46e5"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ pathLength }}
-              />
-              {/* Chevron 4 (Step 4 -> 5) */}
-              <motion.path
-                d="M 18,590 L 24,597 L 30,590"
-                stroke="#10b981"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
                 style={{ pathLength }}
               />
             </svg>
