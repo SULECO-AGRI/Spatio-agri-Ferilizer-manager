@@ -25,16 +25,16 @@ export function Hero() {
           muted
           loop
           playsInline
-          className="w-full h-full object-cover opacity-85 filter brightness-[1.0] contrast-[1.0]"
+          className="w-full h-full scale-[1.3] translate-x-[5%] translate-y-[5%] object-cover opacity-95 filter brightness-[1.0] contrast-[1.0]"
           src="/Video/Hero_background.mp4"
           poster={HeroImage}
         />
         {/* Left-to-right dark gradient mask to give the left text high readability while keeping the right side clear */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#11161d] via-[#11161d]/65 via-[45%] to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#11161d]/85 via-[#11161d]/50 via-[45%] to-transparent" />
         {/* Bottom smooth fade to combine with the next section */}
         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#11161d] to-transparent" />
         {/* Top smooth fade for header navigation */}
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#11161d]/75 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#11161d]/60 to-transparent" />
         {/* Fine grid pattern overlay */}
         <div className="absolute inset-0 bg-grid-bg opacity-[0.02] mix-blend-overlay" />
       </div>
