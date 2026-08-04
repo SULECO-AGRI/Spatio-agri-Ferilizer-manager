@@ -77,14 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Spatio Agri — Precision Fertilization by the Foot" },
+      { title: "Spatio Agri Fertilizer Manager" },
       {
         name: "description",
         content:
           "Drone and satellite telemetry that turns every field into a variable-rate prescription. Book a scan, get a tractor-ready map.",
       },
       { name: "author", content: "Spatio Agri" },
-      { property: "og:title", content: "Spatio Agri — Fertilize by the Foot" },
+      { property: "og:title", content: "Spatio Agri Fertilizer Manager" },
       {
         property: "og:description",
         content:
@@ -92,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Spatio Agri — Fertilize by the Foot" },
+      { name: "twitter:title", content: "Spatio Agri Fertilizer Manager" },
       {
         name: "twitter:description",
         content: "Drone + satellite telemetry for hyper-local variable-rate fertilization.",
@@ -106,7 +106,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     ],
   }),
   shellComponent: RootShell,
