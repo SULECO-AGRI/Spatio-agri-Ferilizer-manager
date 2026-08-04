@@ -9,7 +9,6 @@ const navLinks = [
   { href: "#roi", label: "Approach" },
   { href: "#how-it-works", label: "Process" },
   { href: "#demo", label: "Live Demo" },
-  { href: "#tech", label: "Technology" },
   { href: "#cta", label: "Contact" },
 ];
 
@@ -28,7 +27,7 @@ export function Nav() {
   }, []);
 
   useEffect(() => {
-    const sections = ["hero", "roi", "how-it-works", "demo", "tech", "cta"];
+    const sections = ["hero", "roi", "how-it-works", "demo", "cta"];
     
     const observerOptions = {
       root: null,

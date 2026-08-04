@@ -5,7 +5,6 @@ const sections = [
   { id: "roi", label: "Approach" },
   { id: "how-it-works", label: "Process" },
   { id: "demo", label: "Live Demo" },
-  { id: "tech", label: "Technology" },
   { id: "cta", label: "Contact" },
 ];
 

@@ -9,7 +9,6 @@ const linkGroups = [
       { label: "Approach", href: "#roi" },
       { label: "Process", href: "#how-it-works" },
       { label: "Live Demo", href: "#demo" },
-      { label: "Technology", href: "#tech" },
     ],
   },
   {

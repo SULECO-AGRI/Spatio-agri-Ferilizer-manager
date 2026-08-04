@@ -3,7 +3,6 @@ import { Nav } from "@/components/landing/Nav";
 import { Hero } from "@/components/landing/Hero";
 import { VideoSection } from "@/components/landing/VideoSection";
 import { Workflow } from "@/components/landing/Workflow";
-import { BentoTech } from "@/components/landing/BentoTech";
 import { Partners } from "@/components/landing/Partners";
 import { ClosingCta } from "@/components/landing/ClosingCta";
 import { Footer } from "@/components/landing/Footer";
@@ -28,7 +27,6 @@ function LandingPage() {
           <Workflow />
           <VideoSection />
           <Partners />
-          <BentoTech />
           <ClosingCta />
         </main>
         <Footer />
