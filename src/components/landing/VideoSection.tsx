@@ -68,16 +68,6 @@ export function VideoSection() {
           {/* Left Content Side */}
           <div className="lg:col-span-5 space-y-6">
             <Reveal>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-mono font-semibold tracking-wider border border-emerald-500/20 uppercase">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                LIVE SIMULATION
-              </span>
-            </Reveal>
-
-            <Reveal>
               <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-white md:text-5xl leading-[1.1]">
                 Observe the Smart Telemetry
               </h2>

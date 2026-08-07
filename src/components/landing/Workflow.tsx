@@ -111,9 +111,6 @@ export function Workflow() {
       <div className="relative max-w-6xl mx-auto px-6 z-10">
         {/* Section Header */}
         <Reveal className="mb-20 text-center max-w-3xl mx-auto">
-          <span className="inline-block px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary bg-primary/10 rounded-full mb-3">
-            Workflow Step-by-Step
-          </span>
           <h2 className="font-display text-4xl font-bold tracking-tight text-slate-900 md:text-5xl leading-tight">
             From Sky to Soil in 5 Steps
           </h2>

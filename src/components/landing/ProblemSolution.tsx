@@ -47,9 +47,6 @@ export function ProblemSolution() {
       <div className="absolute bottom-1/4 right-1/10 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <Reveal className="mb-16 text-center">
-        <span className="inline-block px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary bg-primary/10 rounded-full mb-3">
-          Field Analytics & ROI
-        </span>
         <h2 className="font-display text-4xl font-bold tracking-tight text-foreground md:text-5xl max-w-3xl mx-auto leading-[1.15]">
           Precision is the Difference Between Profit and Loss
         </h2>
