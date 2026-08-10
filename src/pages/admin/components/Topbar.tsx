@@ -45,7 +45,9 @@ export function Topbar() {
         <div className="flex items-center gap-3 pl-2 py-1 select-none">
           <div className="text-right leading-none">
             <p className="text-xs font-normal text-slate-800">Admin User</p>
-            <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wide mt-1 block">Operations</span>
+            <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wide mt-1 block">
+              Operations
+            </span>
           </div>
           <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-normal text-xs flex items-center justify-center shadow-xs">
             AU

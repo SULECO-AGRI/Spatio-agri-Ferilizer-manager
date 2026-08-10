@@ -11,10 +11,11 @@ import {
   User,
   Menu,
   X,
-  ArrowLeft
+  ArrowLeft,
 } from "lucide-react";
 
-export type TabId = "dashboard" | "requests" | "pilots" | "farmers" | "reports" | "payments" | "settings" | "profile";
+export type TabId =
+  "dashboard" | "requests" | "pilots" | "farmers" | "reports" | "payments" | "settings" | "profile";
 
 interface SidebarProps {
   activeTab: TabId;
@@ -45,13 +46,22 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
-      <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-white border-r border-slate-200 transition-transform duration-300 lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-white border-r border-slate-200 transition-transform duration-300 lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+      >
         {/* Header / Logo */}
         <div className="p-6 flex items-center gap-3 border-b border-slate-100 font-sans">
           <svg className="w-9 h-9 shrink-0 shadow-xs rounded-lg" viewBox="0 0 32 32">
-            <rect width="32" height="32" rx="8" fill="#062419"/>
-            <path d="M9 21c4-1 7-4 8-12 5 4 5 12-1 14-3 1-6-.5-7-2Z" fill="#10b981"/>
-            <path d="M9 21c3-1 6-4 8-12" stroke="#d1fae5" stroke-opacity="0.7" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <rect width="32" height="32" rx="8" fill="#062419" />
+            <path d="M9 21c4-1 7-4 8-12 5 4 5 12-1 14-3 1-6-.5-7-2Z" fill="#10b981" />
+            <path
+              d="M9 21c3-1 6-4 8-12"
+              stroke="#d1fae5"
+              stroke-opacity="0.7"
+              stroke-width="1"
+              fill="none"
+              stroke-linecap="round"
+            />
           </svg>
           <div>
             <h2 className="font-medium text-base text-slate-800 leading-none">SpatioAgri</h2>
@@ -66,7 +76,10 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             return (
               <button
                 key={id}
-                onClick={() => { onTabChange(id); setIsOpen(false); }}
+                onClick={() => {
+                  onTabChange(id);
+                  setIsOpen(false);
+                }}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-normal transition-all duration-200 cursor-pointer ${
                   isActive
                     ? "bg-slate-100 text-slate-900"
@@ -82,7 +95,10 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
         {/* Footer */}
         <div className="p-4 border-t border-slate-100 font-sans">
-          <Link to="/" className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-normal text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-slate-200 transition-all duration-200">
+          <Link
+            to="/"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-normal text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-slate-200 transition-all duration-200"
+          >
             <ArrowLeft className="w-3.5 h-3.5 text-slate-400" />
             <span>Back to Portal Home</span>
           </Link>

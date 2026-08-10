@@ -13,13 +13,13 @@ const mockMetrics = [
   { title: "Revenue", value: "LKR 2.4M" },
   { title: "Pilot Performance", value: "4.7 avg" },
   { title: "Farmer Growth", value: "+18%" },
-  { title: "Drone Utilization", value: "72%" }
+  { title: "Drone Utilization", value: "72%" },
 ];
 
 const mockPilotPerformance: PilotPerf[] = [
   { pilot: "Nimal Perera", missions: 312, rating: 4.9, onTime: "98%", flightHours: "1,240 hrs" },
   { pilot: "Sanduni Fernando", missions: 201, rating: 4.7, onTime: "95%", flightHours: "860 hrs" },
-  { pilot: "Amal Jayasuriya", missions: 154, rating: 4.8, onTime: "97%", flightHours: "610 hrs" }
+  { pilot: "Amal Jayasuriya", missions: 154, rating: 4.8, onTime: "97%", flightHours: "610 hrs" },
 ];
 
 // Monthly Missions Completed (for the bar chart)
@@ -30,7 +30,7 @@ const barChartData = [
   { month: "Apr", value: 260, height: "130px" },
   { month: "May", value: 290, height: "145px" },
   { month: "Jun", value: 230, height: "115px" },
-  { month: "Jul", value: 312, height: "156px" }
+  { month: "Jul", value: 312, height: "156px" },
 ];
 
 export function ReportsView() {
@@ -38,9 +38,7 @@ export function ReportsView() {
     <div className="space-y-6 font-sans">
       {/* Header Info */}
       <div>
-        <h1 className="text-3xl font-medium tracking-tight text-slate-900 font-display">
-          Reports
-        </h1>
+        <h1 className="text-3xl font-medium tracking-tight text-slate-900 font-display">Reports</h1>
         <p className="text-slate-400 text-xs md:text-sm mt-1 font-normal">
           Analytics dashboard for operations, revenue and performance
         </p>
@@ -49,13 +47,14 @@ export function ReportsView() {
       {/* Metrics Row (5 columns) */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {mockMetrics.map((m) => (
-          <div key={m.title} className="bg-white border border-slate-200/80 rounded-2xl p-5 flex flex-col shadow-xs">
+          <div
+            key={m.title}
+            className="bg-white border border-slate-200/80 rounded-2xl p-5 flex flex-col shadow-xs"
+          >
             <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wider block">
               {m.title}
             </span>
-            <span className="text-2xl font-medium text-slate-900 mt-2 font-display">
-              {m.value}
-            </span>
+            <span className="text-2xl font-medium text-slate-900 mt-2 font-display">{m.value}</span>
           </div>
         ))}
       </div>
@@ -105,7 +104,7 @@ export function ReportsView() {
               <line x1="0" y1="25" x2="500" y2="25" stroke="#f1f5f9" strokeWidth="1" />
               <line x1="0" y1="75" x2="500" y2="75" stroke="#f1f5f9" strokeWidth="1" />
               <line x1="0" y1="125" x2="500" y2="125" stroke="#f1f5f9" strokeWidth="1" />
-              
+
               {/* Trend Polyline */}
               <polyline
                 fill="none"
@@ -113,7 +112,7 @@ export function ReportsView() {
                 strokeWidth="1.5"
                 points="35,115 110,85 185,100 260,70 335,80 410,50 475,65"
               />
-              
+
               {/* Data points (circles) */}
               <circle cx="35" cy="115" r="3.5" fill="white" stroke="#64748b" strokeWidth="1.5" />
               <circle cx="110" cy="85" r="3.5" fill="white" stroke="#64748b" strokeWidth="1.5" />
@@ -139,9 +138,7 @@ export function ReportsView() {
 
       {/* Pilot Performance Table */}
       <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-xs space-y-6">
-        <h3 className="text-xl font-normal text-slate-900 font-display">
-          Pilot Performance Table
-        </h3>
+        <h3 className="text-xl font-normal text-slate-900 font-display">Pilot Performance Table</h3>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[700px]">
@@ -157,24 +154,16 @@ export function ReportsView() {
             <tbody className="divide-y divide-slate-100/50 text-sm">
               {mockPilotPerformance.map((p, idx) => (
                 <tr key={idx} className="hover:bg-slate-50/20 transition-colors">
-                  <td className="py-4 pl-2 text-slate-850 font-normal">
-                    {p.pilot}
-                  </td>
-                  <td className="py-4 text-slate-600 font-normal">
-                    {p.missions}
-                  </td>
+                  <td className="py-4 pl-2 text-slate-850 font-normal">{p.pilot}</td>
+                  <td className="py-4 text-slate-600 font-normal">{p.missions}</td>
                   <td className="py-4 text-slate-600 font-normal">
                     <span className="inline-flex items-center gap-1">
                       {p.rating}
                       <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                     </span>
                   </td>
-                  <td className="py-4 text-slate-600 font-normal">
-                    {p.onTime}
-                  </td>
-                  <td className="py-4 text-slate-600 font-normal">
-                    {p.flightHours}
-                  </td>
+                  <td className="py-4 text-slate-600 font-normal">{p.onTime}</td>
+                  <td className="py-4 text-slate-600 font-normal">{p.flightHours}</td>
                 </tr>
               ))}
             </tbody>

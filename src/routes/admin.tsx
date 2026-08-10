@@ -64,7 +64,8 @@ function AdminPage() {
                   {activeTab.replace("-", " ")} Section
                 </h2>
                 <p className="text-slate-400 text-sm leading-relaxed mb-8 max-w-md mx-auto">
-                  This segment of the SpatioAgri portal is under configuration. The database, shapefile generation services, and telemetry feeds will map directly to this view.
+                  This segment of the SpatioAgri portal is under configuration. The database,
+                  shapefile generation services, and telemetry feeds will map directly to this view.
                 </p>
                 <button
                   onClick={() => setActiveTab("dashboard")}

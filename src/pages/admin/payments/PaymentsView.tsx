@@ -16,17 +16,51 @@ interface Transaction {
 const mockMetrics = [
   { title: "Pending Payments", value: "LKR 42,100", footer: "8 invoices" },
   { title: "Completed Payments", value: "LKR 2.1M", footer: "this year" },
-  { title: "Pilot Earnings (MTD)", value: "LKR 318,000", footer: "14 pilots" }
+  { title: "Pilot Earnings (MTD)", value: "LKR 318,000", footer: "14 pilots" },
 ];
 
 const mockTransactions: Transaction[] = [
-  { id: "TXN-3312", type: "Invoice", party: "Kamal Silva", amount: "LKR 9,800", status: "Paid", date: "Jul 19" },
-  { id: "TXN-3311", type: "Pilot Payout", party: "Nimal Perera", amount: "LKR 6,200", status: "Pending", date: "Jul 19" },
-  { id: "TXN-3309", type: "Invoice", party: "W. Bandara", amount: "LKR 4,500", status: "Overdue", date: "Jul 12" },
-  { id: "TXN-3305", type: "Pilot Payout", party: "S. Fernando", amount: "LKR 5,100", status: "Paid", date: "Jul 10" }
+  {
+    id: "TXN-3312",
+    type: "Invoice",
+    party: "Kamal Silva",
+    amount: "LKR 9,800",
+    status: "Paid",
+    date: "Jul 19",
+  },
+  {
+    id: "TXN-3311",
+    type: "Pilot Payout",
+    party: "Nimal Perera",
+    amount: "LKR 6,200",
+    status: "Pending",
+    date: "Jul 19",
+  },
+  {
+    id: "TXN-3309",
+    type: "Invoice",
+    party: "W. Bandara",
+    amount: "LKR 4,500",
+    status: "Overdue",
+    date: "Jul 12",
+  },
+  {
+    id: "TXN-3305",
+    type: "Pilot Payout",
+    party: "S. Fernando",
+    amount: "LKR 5,100",
+    status: "Paid",
+    date: "Jul 10",
+  },
 ];
 
-const filters = ["Invoices", "Pending Payments", "Completed Payments", "Pilot Earnings", "Farmer Payments"];
+const filters = [
+  "Invoices",
+  "Pending Payments",
+  "Completed Payments",
+  "Pilot Earnings",
+  "Farmer Payments",
+];
 
 export function PaymentsView() {
   const [activeFilter, setActiveFilter] = useState("Invoices");
@@ -35,7 +69,8 @@ export function PaymentsView() {
   const filteredTransactions = mockTransactions.filter((txn) => {
     if (activeFilter === "Invoices") return txn.type === "Invoice";
     if (activeFilter === "Pending Payments") return txn.status === "Pending";
-    if (activeFilter === "Completed Payments") return txn.status === "Paid" && txn.type === "Invoice";
+    if (activeFilter === "Completed Payments")
+      return txn.status === "Paid" && txn.type === "Invoice";
     if (activeFilter === "Pilot Earnings") return txn.type === "Pilot Payout";
     return true; // Farmer Payments shows all or invoices
   });
@@ -55,16 +90,15 @@ export function PaymentsView() {
       {/* Metrics Row (3 columns) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {mockMetrics.map((m) => (
-          <div key={m.title} className="bg-white border border-slate-200/80 rounded-2xl p-5 flex flex-col shadow-xs">
+          <div
+            key={m.title}
+            className="bg-white border border-slate-200/80 rounded-2xl p-5 flex flex-col shadow-xs"
+          >
             <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wider block">
               {m.title}
             </span>
-            <span className="text-2xl font-medium text-slate-900 mt-2 font-display">
-              {m.value}
-            </span>
-            <span className="text-xs text-slate-400 mt-1 font-normal">
-              {m.footer}
-            </span>
+            <span className="text-2xl font-medium text-slate-900 mt-2 font-display">{m.value}</span>
+            <span className="text-xs text-slate-400 mt-1 font-normal">{m.footer}</span>
           </div>
         ))}
       </div>
@@ -91,9 +125,7 @@ export function PaymentsView() {
 
       {/* Transaction History Table */}
       <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-xs space-y-6">
-        <h3 className="text-xl font-normal text-slate-900 font-display">
-          Transaction History
-        </h3>
+        <h3 className="text-xl font-normal text-slate-900 font-display">Transaction History</h3>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[700px]">
@@ -111,18 +143,10 @@ export function PaymentsView() {
             <tbody className="divide-y divide-slate-100/50 text-sm">
               {filteredTransactions.map((txn) => (
                 <tr key={txn.id} className="hover:bg-slate-50/20 transition-colors cursor-pointer">
-                  <td className="py-4 pl-2 text-slate-850 font-normal">
-                    {txn.id}
-                  </td>
-                  <td className="py-4 text-slate-600 font-normal">
-                    {txn.type}
-                  </td>
-                  <td className="py-4 text-slate-600 font-normal">
-                    {txn.party}
-                  </td>
-                  <td className="py-4 text-slate-850 font-normal">
-                    {txn.amount}
-                  </td>
+                  <td className="py-4 pl-2 text-slate-850 font-normal">{txn.id}</td>
+                  <td className="py-4 text-slate-600 font-normal">{txn.type}</td>
+                  <td className="py-4 text-slate-600 font-normal">{txn.party}</td>
+                  <td className="py-4 text-slate-850 font-normal">{txn.amount}</td>
                   <td className="py-4">
                     <span
                       className={`inline-flex px-2.5 py-0.5 rounded-lg text-[10px] font-normal border ${
@@ -136,9 +160,7 @@ export function PaymentsView() {
                       {txn.status}
                     </span>
                   </td>
-                  <td className="py-4 text-slate-600 font-normal">
-                    {txn.date}
-                  </td>
+                  <td className="py-4 text-slate-600 font-normal">{txn.date}</td>
                   <td className="py-4 pr-2 text-right">
                     <button className="inline-flex items-center gap-1 text-slate-800 hover:text-slate-900 text-xs font-normal cursor-pointer">
                       <span>View</span>

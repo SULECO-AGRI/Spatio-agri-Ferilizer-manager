@@ -8,7 +8,6 @@ export function Hero() {
   const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const [submitted, setSubmitted] = useState(false);
 
-
   const sectionRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -42,8 +41,6 @@ export function Hero() {
       <div className="mx-auto grid max-w-6xl w-full grid-cols-1 items-center gap-14 px-6 lg:grid-cols-12 relative z-10 text-left">
         {/* Left Text Block */}
         <div className="lg:col-span-7 flex flex-col items-start space-y-6">
-
-
           <h1 className="hero-title font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.15] tracking-tight text-white">
             Stop blanketing your fields.
             <br />
@@ -99,4 +96,3 @@ export function Hero() {
     </section>
   );
 }
-

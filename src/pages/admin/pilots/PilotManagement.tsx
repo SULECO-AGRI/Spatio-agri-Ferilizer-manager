@@ -18,12 +18,84 @@ interface Pilot {
 }
 
 const mockPilots: Pilot[] = [
-  { id: "1", name: "Nimal Perera", initials: "NP", status: "Available", license: "DP-2291", drone: "DJI Agras T40", experience: "6 yrs", rating: 4.9, missions: 312, flightHours: "1,240", batteryLevel: 85 },
-  { id: "2", name: "Sanduni Fernando", initials: "SF", status: "Busy", license: "DP-2104", drone: "DJI Agras T30", experience: "4 yrs", rating: 4.7, missions: 201, flightHours: "860", batteryLevel: 70 },
-  { id: "3", name: "Amal Jayasuriya", initials: "AJ", status: "Available", license: "DP-2337", drone: "XAG P100", experience: "3 yrs", rating: 4.8, missions: 154, flightHours: "610", batteryLevel: 95 },
-  { id: "4", name: "Ruwan Kumara", initials: "RK", status: "Offline", license: "DP-1988", drone: "DJI Agras T40", experience: "7 yrs", rating: 4.6, missions: 402, flightHours: "1,510", batteryLevel: 0 },
-  { id: "5", name: "Chathurika Silva", initials: "CS", status: "Online", license: "DP-2410", drone: "XAG P100", experience: "2 yrs", rating: 4.9, missions: 98, flightHours: "340", batteryLevel: 60 },
-  { id: "6", name: "Dinesh Rajapaksa", initials: "DR", status: "Available", license: "DP-2055", drone: "DJI Agras T30", experience: "5 yrs", rating: 4.5, missions: 267, flightHours: "980", batteryLevel: 80 }
+  {
+    id: "1",
+    name: "Nimal Perera",
+    initials: "NP",
+    status: "Available",
+    license: "DP-2291",
+    drone: "DJI Agras T40",
+    experience: "6 yrs",
+    rating: 4.9,
+    missions: 312,
+    flightHours: "1,240",
+    batteryLevel: 85,
+  },
+  {
+    id: "2",
+    name: "Sanduni Fernando",
+    initials: "SF",
+    status: "Busy",
+    license: "DP-2104",
+    drone: "DJI Agras T30",
+    experience: "4 yrs",
+    rating: 4.7,
+    missions: 201,
+    flightHours: "860",
+    batteryLevel: 70,
+  },
+  {
+    id: "3",
+    name: "Amal Jayasuriya",
+    initials: "AJ",
+    status: "Available",
+    license: "DP-2337",
+    drone: "XAG P100",
+    experience: "3 yrs",
+    rating: 4.8,
+    missions: 154,
+    flightHours: "610",
+    batteryLevel: 95,
+  },
+  {
+    id: "4",
+    name: "Ruwan Kumara",
+    initials: "RK",
+    status: "Offline",
+    license: "DP-1988",
+    drone: "DJI Agras T40",
+    experience: "7 yrs",
+    rating: 4.6,
+    missions: 402,
+    flightHours: "1,510",
+    batteryLevel: 0,
+  },
+  {
+    id: "5",
+    name: "Chathurika Silva",
+    initials: "CS",
+    status: "Online",
+    license: "DP-2410",
+    drone: "XAG P100",
+    experience: "2 yrs",
+    rating: 4.9,
+    missions: 98,
+    flightHours: "340",
+    batteryLevel: 60,
+  },
+  {
+    id: "6",
+    name: "Dinesh Rajapaksa",
+    initials: "DR",
+    status: "Available",
+    license: "DP-2055",
+    drone: "DJI Agras T30",
+    experience: "5 yrs",
+    rating: 4.5,
+    missions: 267,
+    flightHours: "980",
+    batteryLevel: 80,
+  },
 ];
 
 export function PilotManagement() {
@@ -103,9 +175,7 @@ export function PilotManagement() {
                   {pilot.initials}
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-sm font-medium text-slate-800 leading-none">
-                    {pilot.name}
-                  </h4>
+                  <h4 className="text-sm font-medium text-slate-800 leading-none">{pilot.name}</h4>
                   <span
                     className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-normal border ${
                       pilot.status === "Available"
@@ -127,10 +197,14 @@ export function PilotManagement() {
                 <div>License: {pilot.license}</div>
                 <div>Drone: {pilot.drone}</div>
                 <div className="flex items-center gap-1">
-                  <span>Experience: {pilot.experience} | Rating: {pilot.rating}</span>
+                  <span>
+                    Experience: {pilot.experience} | Rating: {pilot.rating}
+                  </span>
                   <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                 </div>
-                <div>Missions: {pilot.missions} | Flight hrs: {pilot.flightHours} hrs</div>
+                <div>
+                  Missions: {pilot.missions} | Flight hrs: {pilot.flightHours} hrs
+                </div>
               </div>
             </div>
 

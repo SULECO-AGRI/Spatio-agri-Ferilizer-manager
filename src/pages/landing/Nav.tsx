@@ -29,7 +29,7 @@ export function Nav() {
 
   useEffect(() => {
     const sections = ["hero", "roi", "how-it-works", "demo", "cta"];
-    
+
     const observerOptions = {
       root: null,
       rootMargin: "-40% 0px -40% 0px", // Trigger when section occupies the middle 20% of the viewport
@@ -68,7 +68,9 @@ export function Nav() {
             : "bg-zinc-950/20 border border-white/10 backdrop-blur-lg shadow-none"
         }`}
       >
-        <Logo className={`shrink-0 transition-colors duration-300 ${isScrolled ? "text-[#062419]" : "text-white"}`} />
+        <Logo
+          className={`shrink-0 transition-colors duration-300 ${isScrolled ? "text-[#062419]" : "text-white"}`}
+        />
 
         {/* Navigation links for every page section with active sliding indicator line */}
         <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-sm font-medium">
@@ -89,7 +91,7 @@ export function Nav() {
                 }`}
               >
                 <span>{link.label}</span>
-                
+
                 {/* Underline Indicator */}
                 {isActive && (
                   <motion.span

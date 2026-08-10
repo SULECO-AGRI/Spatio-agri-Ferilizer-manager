@@ -7,7 +7,7 @@ const settingsTabs = [
   "Mission Templates",
   "User Roles",
   "Permissions",
-  "Notification Settings"
+  "Notification Settings",
 ];
 
 export function SettingsView() {
@@ -18,7 +18,7 @@ export function SettingsView() {
     phoneNumber: "+94 77 123 4567",
     address: "123, Galle Road, Colombo 03, Sri Lanka",
     serviceRegion: "North & North Central Province",
-    timeZone: "UTC+05:30 (Asia/Colombo)"
+    timeZone: "UTC+05:30 (Asia/Colombo)",
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -73,9 +73,7 @@ export function SettingsView() {
                   <span className="text-[10px] text-slate-400 font-normal">Logo</span>
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-xs font-medium text-slate-600">
-                    Organization Logo
-                  </h4>
+                  <h4 className="text-xs font-medium text-slate-600">Organization Logo</h4>
                   <p className="text-[10px] text-slate-400 font-normal">
                     Upload square PNG, min 256×256
                   </p>

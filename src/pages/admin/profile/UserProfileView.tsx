@@ -7,7 +7,7 @@ const permissionsList = [
   "Approve Invoices",
   "Create Reports",
   "Manage Users",
-  "Configure System"
+  "Configure System",
 ];
 
 export function UserProfileView() {
@@ -15,13 +15,13 @@ export function UserProfileView() {
     name: "Admin User",
     email: "ops@spatioagri.com",
     phone: "+94 77 123 4567",
-    department: "Operations Manager"
+    department: "Operations Manager",
   });
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   const handleProfileChange = (field: string, value: string) => {
@@ -60,9 +60,7 @@ export function UserProfileView() {
                 AU
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-medium text-slate-700 leading-none">
-                  Profile Picture
-                </h4>
+                <h4 className="text-sm font-medium text-slate-700 leading-none">Profile Picture</h4>
                 <p className="text-[10px] text-slate-400 font-normal">
                   Initial icon generated from account initials
                 </p>
@@ -72,9 +70,7 @@ export function UserProfileView() {
             {/* Form grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="text-xs text-slate-500 font-normal block mb-1.5">
-                  Full Name
-                </label>
+                <label className="text-xs text-slate-500 font-normal block mb-1.5">Full Name</label>
                 <input
                   type="text"
                   value={profileData.name}
@@ -134,7 +130,8 @@ export function UserProfileView() {
               </h3>
             </div>
             <p className="text-xs text-slate-400 font-normal max-w-xl leading-relaxed">
-              Your account is assigned the **Operations Manager** system role. The following policy tags determine what actions you can execute inside the SpatioAgri admin dashboard:
+              Your account is assigned the **Operations Manager** system role. The following policy
+              tags determine what actions you can execute inside the SpatioAgri admin dashboard:
             </p>
 
             <div className="flex flex-wrap gap-2 pt-2">
@@ -155,9 +152,7 @@ export function UserProfileView() {
           <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-xs space-y-6">
             <div className="flex items-center gap-2">
               <KeyRound className="w-5 h-5 text-slate-400" />
-              <h3 className="text-xl font-normal text-slate-900 font-display">
-                Change Password
-              </h3>
+              <h3 className="text-xl font-normal text-slate-900 font-display">Change Password</h3>
             </div>
 
             <div className="space-y-4">

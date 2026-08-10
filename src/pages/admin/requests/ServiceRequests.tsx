@@ -18,13 +18,90 @@ interface ServiceRequest {
 }
 
 const mockRequests: ServiceRequest[] = [
-  { id: "REQ-1042", farmer: "Kamal Silva", field: "North Paddy Field", crop: "Rice", area: "2.4 ha", service: "Spraying", prefDate: "Jul 21", weather: "Clear", priority: "High", status: "Pending" },
-  { id: "REQ-1041", farmer: "W. Bandara", field: "East Tea Estate", crop: "Tea", area: "5.1 ha", service: "Fertilizing", prefDate: "Jul 21", weather: "Rain 40%", priority: "Medium", status: "Pending" },
-  { id: "REQ-1040", farmer: "N. Perera", field: "South Maize Plot", crop: "Maize", area: "3.2 ha", service: "Mapping", prefDate: "Jul 22", weather: "Clear", priority: "Low", status: "Assigned" },
-  { id: "REQ-1039", farmer: "S. Fernando", field: "West Paddy Field", crop: "Rice", area: "1.8 ha", service: "Spraying", prefDate: "Jul 22", weather: "Cloudy", priority: "High", status: "Completed" },
-  { id: "REQ-1038", farmer: "K. Silva", field: "North Paddy Field", crop: "Rice", area: "2.4 ha", service: "Fertilizing", prefDate: "Jul 20", weather: "Clear", priority: "High", status: "Completed" },
-  { id: "REQ-1037", farmer: "M. Fernando", field: "East Tea Estate", crop: "Tea", area: "4.5 h", service: "Mapping", prefDate: "Jul 19", weather: "Rain 60%", priority: "Medium", status: "Cancelled" },
-  { id: "REQ-1036", farmer: "A. Silva", field: "South Maize Plot", crop: "Maize", area: "3.0 ha", service: "Spraying", prefDate: "Jul 18", weather: "Clear", priority: "Low", status: "Completed" },
+  {
+    id: "REQ-1042",
+    farmer: "Kamal Silva",
+    field: "North Paddy Field",
+    crop: "Rice",
+    area: "2.4 ha",
+    service: "Spraying",
+    prefDate: "Jul 21",
+    weather: "Clear",
+    priority: "High",
+    status: "Pending",
+  },
+  {
+    id: "REQ-1041",
+    farmer: "W. Bandara",
+    field: "East Tea Estate",
+    crop: "Tea",
+    area: "5.1 ha",
+    service: "Fertilizing",
+    prefDate: "Jul 21",
+    weather: "Rain 40%",
+    priority: "Medium",
+    status: "Pending",
+  },
+  {
+    id: "REQ-1040",
+    farmer: "N. Perera",
+    field: "South Maize Plot",
+    crop: "Maize",
+    area: "3.2 ha",
+    service: "Mapping",
+    prefDate: "Jul 22",
+    weather: "Clear",
+    priority: "Low",
+    status: "Assigned",
+  },
+  {
+    id: "REQ-1039",
+    farmer: "S. Fernando",
+    field: "West Paddy Field",
+    crop: "Rice",
+    area: "1.8 ha",
+    service: "Spraying",
+    prefDate: "Jul 22",
+    weather: "Cloudy",
+    priority: "High",
+    status: "Completed",
+  },
+  {
+    id: "REQ-1038",
+    farmer: "K. Silva",
+    field: "North Paddy Field",
+    crop: "Rice",
+    area: "2.4 ha",
+    service: "Fertilizing",
+    prefDate: "Jul 20",
+    weather: "Clear",
+    priority: "High",
+    status: "Completed",
+  },
+  {
+    id: "REQ-1037",
+    farmer: "M. Fernando",
+    field: "East Tea Estate",
+    crop: "Tea",
+    area: "4.5 h",
+    service: "Mapping",
+    prefDate: "Jul 19",
+    weather: "Rain 60%",
+    priority: "Medium",
+    status: "Cancelled",
+  },
+  {
+    id: "REQ-1036",
+    farmer: "A. Silva",
+    field: "South Maize Plot",
+    crop: "Maize",
+    area: "3.0 ha",
+    service: "Spraying",
+    prefDate: "Jul 18",
+    weather: "Clear",
+    priority: "Low",
+    status: "Completed",
+  },
 ];
 
 export function ServiceRequests() {
@@ -129,34 +206,19 @@ export function ServiceRequests() {
           </thead>
           <tbody className="divide-y divide-slate-100/50 text-sm">
             {sortedRequests.map((req) => (
-              <tr
-                key={req.id}
-                className="hover:bg-slate-50/20 transition-colors cursor-pointer"
-              >
-                <td className="p-4 pl-6 text-slate-850 font-normal">
-                  {req.id}
-                </td>
-                <td className="p-4 text-slate-600 font-normal">
-                  {req.farmer}
-                </td>
-                <td className="p-4 text-slate-600 font-normal">
-                  {req.field}
-                </td>
-                <td className={`p-4 font-normal ${req.crop === "Tea" ? "text-amber-900" : "text-slate-800"}`}>
+              <tr key={req.id} className="hover:bg-slate-50/20 transition-colors cursor-pointer">
+                <td className="p-4 pl-6 text-slate-850 font-normal">{req.id}</td>
+                <td className="p-4 text-slate-600 font-normal">{req.farmer}</td>
+                <td className="p-4 text-slate-600 font-normal">{req.field}</td>
+                <td
+                  className={`p-4 font-normal ${req.crop === "Tea" ? "text-amber-900" : "text-slate-800"}`}
+                >
                   {req.crop}
                 </td>
-                <td className="p-4 text-slate-600 font-normal">
-                  {req.area}
-                </td>
-                <td className="p-4 text-slate-600 font-normal">
-                  {req.service}
-                </td>
-                <td className="p-4 text-indigo-600 font-normal">
-                  {req.prefDate}
-                </td>
-                <td className="p-4 text-slate-600 font-normal">
-                  {req.weather}
-                </td>
+                <td className="p-4 text-slate-600 font-normal">{req.area}</td>
+                <td className="p-4 text-slate-600 font-normal">{req.service}</td>
+                <td className="p-4 text-indigo-600 font-normal">{req.prefDate}</td>
+                <td className="p-4 text-slate-600 font-normal">{req.weather}</td>
                 <td className="p-4">
                   <span
                     className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-normal border ${

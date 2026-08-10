@@ -13,11 +13,56 @@ interface Farmer {
 }
 
 const mockFarmers: Farmer[] = [
-  { id: "1", name: "Kamal Silva", location: "Anuradhapura", fields: 3, activeRequests: 1, totalSpend: "LKR 84,200", memberSince: 2024, nic: "198823489201" },
-  { id: "2", name: "W. Bandara", location: "Kandy", fields: 2, activeRequests: 1, totalSpend: "LKR 61,500", memberSince: 2023, nic: "197548392012" },
-  { id: "3", name: "S. Fernando", location: "Polonnaruwa", fields: 4, activeRequests: 0, totalSpend: "LKR 112,900", memberSince: 2022, nic: "199248301290" },
-  { id: "4", name: "N. Ratnayake", location: "Badulla", fields: 1, activeRequests: 0, totalSpend: "LKR 22,300", memberSince: 2025, nic: "196849302194" },
-  { id: "5", name: "Chathurika Silva", location: "Matale", fields: 2, activeRequests: 0, totalSpend: "LKR 45,700", memberSince: 2024, nic: "199583920194" },
+  {
+    id: "1",
+    name: "Kamal Silva",
+    location: "Anuradhapura",
+    fields: 3,
+    activeRequests: 1,
+    totalSpend: "LKR 84,200",
+    memberSince: 2024,
+    nic: "198823489201",
+  },
+  {
+    id: "2",
+    name: "W. Bandara",
+    location: "Kandy",
+    fields: 2,
+    activeRequests: 1,
+    totalSpend: "LKR 61,500",
+    memberSince: 2023,
+    nic: "197548392012",
+  },
+  {
+    id: "3",
+    name: "S. Fernando",
+    location: "Polonnaruwa",
+    fields: 4,
+    activeRequests: 0,
+    totalSpend: "LKR 112,900",
+    memberSince: 2022,
+    nic: "199248301290",
+  },
+  {
+    id: "4",
+    name: "N. Ratnayake",
+    location: "Badulla",
+    fields: 1,
+    activeRequests: 0,
+    totalSpend: "LKR 22,300",
+    memberSince: 2025,
+    nic: "196849302194",
+  },
+  {
+    id: "5",
+    name: "Chathurika Silva",
+    location: "Matale",
+    fields: 2,
+    activeRequests: 0,
+    totalSpend: "LKR 45,700",
+    memberSince: 2024,
+    nic: "199583920194",
+  },
 ];
 
 export function FarmersList() {
@@ -35,9 +80,7 @@ export function FarmersList() {
     <div className="space-y-6 font-sans">
       {/* Header Title */}
       <div>
-        <h1 className="text-3xl font-medium tracking-tight text-slate-900 font-display">
-          Farmers
-        </h1>
+        <h1 className="text-3xl font-medium tracking-tight text-slate-900 font-display">Farmers</h1>
         <p className="text-slate-400 text-xs md:text-sm mt-1 font-normal">
           All registered farmers using SpatioAgri drone services
         </p>
@@ -71,28 +114,13 @@ export function FarmersList() {
           </thead>
           <tbody className="divide-y divide-slate-100/50 text-sm">
             {filteredFarmers.map((farmer) => (
-              <tr
-                key={farmer.id}
-                className="hover:bg-slate-50/20 transition-colors cursor-pointer"
-              >
-                <td className="p-4 pl-6 text-slate-850 font-normal">
-                  {farmer.name}
-                </td>
-                <td className="p-4 text-slate-600 font-normal">
-                  {farmer.location}
-                </td>
-                <td className="p-4 text-slate-600 font-normal">
-                  {farmer.fields}
-                </td>
-                <td className="p-4 text-slate-600 font-normal">
-                  {farmer.activeRequests}
-                </td>
-                <td className="p-4 text-slate-855 font-normal">
-                  {farmer.totalSpend}
-                </td>
-                <td className="p-4 text-slate-600 font-normal">
-                  {farmer.memberSince}
-                </td>
+              <tr key={farmer.id} className="hover:bg-slate-50/20 transition-colors cursor-pointer">
+                <td className="p-4 pl-6 text-slate-850 font-normal">{farmer.name}</td>
+                <td className="p-4 text-slate-600 font-normal">{farmer.location}</td>
+                <td className="p-4 text-slate-600 font-normal">{farmer.fields}</td>
+                <td className="p-4 text-slate-600 font-normal">{farmer.activeRequests}</td>
+                <td className="p-4 text-slate-855 font-normal">{farmer.totalSpend}</td>
+                <td className="p-4 text-slate-600 font-normal">{farmer.memberSince}</td>
                 <td className="p-4 pr-6 text-right">
                   <button className="inline-flex items-center gap-1 text-slate-800 hover:text-slate-900 text-xs font-normal cursor-pointer">
                     <span>View Profile</span>

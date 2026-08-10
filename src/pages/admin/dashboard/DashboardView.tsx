@@ -24,35 +24,15 @@ export function DashboardView() {
 
       {/* Row 1 Metrics: 4 columns */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          title="Pending Requests"
-          value={14}
-          footer="Need review"
-        />
-        <MetricCard
-          title="Active Missions"
-          value={5}
-          footer="Live now"
-        />
-        <MetricCard
-          title="Available Pilots"
-          value={9}
-          footer="of 32 total"
-        />
-        <MetricCard
-          title="Today's Revenue"
-          value="LKR 128,400"
-          footer="+12% vs yesterday"
-        />
+        <MetricCard title="Pending Requests" value={14} footer="Need review" />
+        <MetricCard title="Active Missions" value={5} footer="Live now" />
+        <MetricCard title="Available Pilots" value={9} footer="of 32 total" />
+        <MetricCard title="Today's Revenue" value="LKR 128,400" footer="+12% vs yesterday" />
       </div>
 
       {/* Row 2 Metrics: 1 column aligned to the left */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          title="Mission Success Rate"
-          value="96%"
-          footer="Last 90 days"
-        />
+        <MetricCard title="Mission Success Rate" value="96%" footer="Last 90 days" />
       </div>
 
       {/* Activity and Schedule Grid */}

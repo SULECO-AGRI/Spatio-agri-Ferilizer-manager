@@ -18,7 +18,7 @@ export function Reveal({
   className?: string;
   as?: keyof React.JSX.IntrinsicElements;
 }) {
-  const MotionTag = motion(As as any);
+  const MotionTag = motion(As as "div");
   return (
     <MotionTag
       className={className}

@@ -3,9 +3,7 @@ import { UserPlus, Plane, FileText, ArrowRight } from "lucide-react";
 export function QuickActions() {
   return (
     <div className="space-y-4 font-sans">
-      <h3 className="text-xs font-normal uppercase tracking-wider text-slate-400">
-        Quick Actions
-      </h3>
+      <h3 className="text-xs font-normal uppercase tracking-wider text-slate-400">Quick Actions</h3>
 
       <div className="flex flex-col sm:flex-row gap-4 items-start">
         <button className="flex items-center justify-between gap-4 bg-[#14532d] hover:bg-[#166534] text-white px-5 py-2.5 rounded-lg text-sm font-normal transition-colors duration-200 cursor-pointer min-w-[200px]">
