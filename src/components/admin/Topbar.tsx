@@ -14,7 +14,7 @@ export function Topbar() {
           <input
             type="text"
             placeholder="Search requests, pilots, farmers..."
-            className="w-full pl-11 pr-4 py-2 rounded-lg text-sm bg-white border border-slate-200 focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400 text-slate-800"
+            className="w-full pl-11 pr-4 py-2 rounded-lg text-sm bg-white border border-slate-200 focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400 text-slate-800 font-normal"
           />
         </div>
       </div>
@@ -23,19 +23,19 @@ export function Topbar() {
       <div className="flex flex-wrap items-center justify-end gap-4 w-full md:w-auto">
         <div className="flex items-center gap-2">
           {/* Weather Widget */}
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-normal border border-slate-200 bg-white text-slate-600">
             <CloudSun className="w-3.5 h-3.5 text-slate-400" />
             <span>28°C Clear</span>
           </div>
 
           {/* Online Pilots */}
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-normal border border-slate-200 bg-white text-slate-600">
             <Radio className="w-3.5 h-3.5 text-slate-400" />
             <span>12 Online</span>
           </div>
 
           {/* Active Missions */}
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-normal border border-slate-200 bg-white text-slate-600">
             <PlayCircle className="w-3.5 h-3.5 text-slate-400" />
             <span>5 Active</span>
           </div>
@@ -44,10 +44,10 @@ export function Topbar() {
         {/* User Block */}
         <div className="flex items-center gap-3 pl-2 py-1 select-none">
           <div className="text-right leading-none">
-            <p className="text-xs font-bold text-slate-800">Admin User</p>
-            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mt-1 block">Operations</span>
+            <p className="text-xs font-normal text-slate-800">Admin User</p>
+            <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wide mt-1 block">Operations</span>
           </div>
-          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-bold text-xs flex items-center justify-center shadow-xs">
+          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-normal text-xs flex items-center justify-center shadow-xs">
             AU
           </div>
         </div>
