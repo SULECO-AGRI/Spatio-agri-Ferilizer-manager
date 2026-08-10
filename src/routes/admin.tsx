@@ -61,7 +61,7 @@ function AdminPage() {
                   <Construction className="w-8 h-8 text-slate-500" />
                 </div>
                 <h2 className="text-2xl font-medium text-slate-900 mb-3 capitalize font-display">
-                  {activeTab.replace("-", " ")} Section
+                  {(activeTab as string).replace("-", " ")} Section
                 </h2>
                 <p className="text-slate-400 text-sm leading-relaxed mb-8 max-w-md mx-auto">
                   This segment of the SpatioAgri portal is under configuration. The database,
