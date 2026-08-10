@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Nav } from "@/components/landing/Nav";
-import { Hero } from "@/components/landing/Hero";
-import { VideoSection } from "@/components/landing/VideoSection";
-import { Workflow } from "@/components/landing/Workflow";
-import { Partners } from "@/components/landing/Partners";
-import { ClosingCta } from "@/components/landing/ClosingCta";
-import { Footer } from "@/components/landing/Footer";
-import { ProblemSolution } from "@/components/landing/ProblemSolution";
-import { VerticalNav } from "@/components/landing/VerticalNav";
+import { Nav } from "@/pages/landing/Nav";
+import { Hero } from "@/pages/landing/Hero";
+import { VideoSection } from "@/pages/landing/VideoSection";
+import { Workflow } from "@/pages/landing/Workflow";
+import { Partners } from "@/pages/landing/Partners";
+import { ClosingCta } from "@/pages/landing/ClosingCta";
+import { Footer } from "@/pages/landing/Footer";
+import { ProblemSolution } from "@/pages/landing/ProblemSolution";
+import { VerticalNav } from "@/pages/landing/VerticalNav";
 import { AuthModalProvider } from "@/context/AuthModalContext";
-import AuthModal from "@/components/auth/AuthModal";
+import AuthModal from "@/pages/auth/AuthModal";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,

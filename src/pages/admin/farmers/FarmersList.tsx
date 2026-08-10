@@ -87,7 +87,7 @@ export function FarmersList() {
                 <td className="p-4 text-slate-600 font-normal">
                   {farmer.activeRequests}
                 </td>
-                <td className="p-4 text-slate-850 font-normal">
+                <td className="p-4 text-slate-855 font-normal">
                   {farmer.totalSpend}
                 </td>
                 <td className="p-4 text-slate-600 font-normal">

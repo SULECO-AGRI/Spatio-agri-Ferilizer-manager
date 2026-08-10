@@ -1,18 +1,15 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Construction, ArrowRight } from "lucide-react";
-import { Sidebar, TabId } from "@/components/admin/Sidebar";
-import { Topbar } from "@/components/admin/Topbar";
-import { MetricCard } from "@/components/admin/MetricCard";
-import { RecentActivity } from "@/components/admin/RecentActivity";
-import { ScheduleTable } from "@/components/admin/ScheduleTable";
-import { QuickActions } from "@/components/admin/QuickActions";
-import { ServiceRequests } from "@/components/admin/ServiceRequests";
-import { PilotManagement } from "@/components/admin/PilotManagement";
-import { FarmersList } from "@/components/admin/FarmersList";
-import { ReportsView } from "@/components/admin/ReportsView";
-import { PaymentsView } from "@/components/admin/PaymentsView";
-import { SettingsView } from "@/components/admin/SettingsView";
+import { Sidebar, TabId } from "@/pages/admin/components/Sidebar";
+import { Topbar } from "@/pages/admin/components/Topbar";
+import { DashboardView } from "@/pages/admin/dashboard/DashboardView";
+import { ServiceRequests } from "@/pages/admin/requests/ServiceRequests";
+import { PilotManagement } from "@/pages/admin/pilots/PilotManagement";
+import { FarmersList } from "@/pages/admin/farmers/FarmersList";
+import { ReportsView } from "@/pages/admin/reports/ReportsView";
+import { PaymentsView } from "@/pages/admin/payments/PaymentsView";
+import { SettingsView } from "@/pages/admin/settings/SettingsView";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -20,12 +17,6 @@ export const Route = createFileRoute("/admin")({
 
 function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
-  
-  const todayStr = new Date().toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex relative overflow-hidden">
@@ -46,59 +37,7 @@ function AdminPage() {
           <Topbar />
 
           {activeTab === "dashboard" ? (
-            <div className="space-y-6 md:space-y-8">
-              {/* Header Title */}
-              <div>
-                <h1 className="text-3xl font-medium tracking-tight text-slate-900 font-display">
-                  Dashboard
-                </h1>
-                <p className="text-slate-400 text-xs md:text-sm font-normal mt-1 font-sans">
-                  Overview of drone service operations — Today, {todayStr}
-                </p>
-              </div>
-
-              {/* Row 1 Metrics: 4 columns */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <MetricCard
-                  title="Pending Requests"
-                  value={14}
-                  footer="Need review"
-                />
-                <MetricCard
-                  title="Active Missions"
-                  value={5}
-                  footer="Live now"
-                />
-                <MetricCard
-                  title="Available Pilots"
-                  value={9}
-                  footer="of 32 total"
-                />
-                <MetricCard
-                  title="Today's Revenue"
-                  value="LKR 128,400"
-                  footer="+12% vs yesterday"
-                />
-              </div>
-
-              {/* Row 2 Metrics: 1 column aligned to the left */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <MetricCard
-                  title="Mission Success Rate"
-                  value="96%"
-                  footer="Last 90 days"
-                />
-              </div>
-
-              {/* Activity and Schedule Grid */}
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8 items-start">
-                <RecentActivity />
-                <ScheduleTable />
-              </div>
-
-              {/* Quick Actions Panel */}
-              <QuickActions />
-            </div>
+            <DashboardView />
           ) : activeTab === "requests" ? (
             <ServiceRequests />
           ) : activeTab === "pilots" ? (
@@ -112,7 +51,7 @@ function AdminPage() {
           ) : activeTab === "settings" ? (
             <SettingsView />
           ) : (
-            // Fallback screen for other tabs
+            // Fallback screen for other tabs (e.g. user profile)
             <div className="flex-1 py-12 flex items-center justify-center">
               <div className="w-full max-w-xl bg-white border border-slate-200 rounded-2xl p-8 md:p-12 text-center shadow-xs font-sans">
                 <div className="mx-auto w-16 h-16 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center mb-6">
