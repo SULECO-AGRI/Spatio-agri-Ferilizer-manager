@@ -9,6 +9,7 @@ import { ScheduleTable } from "@/components/admin/ScheduleTable";
 import { QuickActions } from "@/components/admin/QuickActions";
 import { ServiceRequests } from "@/components/admin/ServiceRequests";
 import { PilotManagement } from "@/components/admin/PilotManagement";
+import { FarmersList } from "@/components/admin/FarmersList";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -99,6 +100,8 @@ function AdminPage() {
             <ServiceRequests />
           ) : activeTab === "pilots" ? (
             <PilotManagement />
+          ) : activeTab === "farmers" ? (
+            <FarmersList />
           ) : (
             // Fallback screen for other tabs
             <div className="flex-1 py-12 flex items-center justify-center">
