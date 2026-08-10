@@ -10,6 +10,7 @@ import { FarmersList } from "@/pages/admin/farmers/FarmersList";
 import { ReportsView } from "@/pages/admin/reports/ReportsView";
 import { PaymentsView } from "@/pages/admin/payments/PaymentsView";
 import { SettingsView } from "@/pages/admin/settings/SettingsView";
+import { UserProfileView } from "@/pages/admin/profile/UserProfileView";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -50,6 +51,8 @@ function AdminPage() {
             <PaymentsView />
           ) : activeTab === "settings" ? (
             <SettingsView />
+          ) : activeTab === "profile" ? (
+            <UserProfileView />
           ) : (
             // Fallback screen for other tabs (e.g. user profile)
             <div className="flex-1 py-12 flex items-center justify-center">
