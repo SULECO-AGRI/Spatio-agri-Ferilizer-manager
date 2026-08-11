@@ -51,8 +51,8 @@ export function ProblemSolution() {
           Precision is the Difference Between Profit and Loss
         </h2>
         <p className="mt-4 text-muted-foreground max-w-xl mx-auto text-base md:text-lg">
-          Stop guessing. Traditional farming blankets fields blindly, while Fertilizer manager delivers
-          surgical accuracy to every square foot.
+          Stop guessing. Traditional farming blankets fields blindly, while Fertilizer manager
+          delivers surgical accuracy to every square foot.
         </p>
       </Reveal>
 
