@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Search, ArrowUpDown, ChevronRight } from "lucide-react";
+import { RequestDetails } from "./RequestDetails";
 
 type RequestStatus = "Pending" | "Assigned" | "Completed" | "Cancelled";
 type Priority = "High" | "Medium" | "Low";
@@ -105,6 +106,7 @@ const mockRequests: ServiceRequest[] = [
 ];
 
 export function ServiceRequests() {
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<RequestStatus | "All">("Pending");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortAsc, setSortAsc] = useState(false);
@@ -128,6 +130,12 @@ export function ServiceRequests() {
   });
 
   const tabs: (RequestStatus | "All")[] = ["All", "Pending", "Assigned", "Completed", "Cancelled"];
+
+  if (selectedRequestId) {
+    return (
+      <RequestDetails requestId={selectedRequestId} onBack={() => setSelectedRequestId(null)} />
+    );
+  }
 
   return (
     <div className="space-y-6 font-sans">
@@ -206,7 +214,11 @@ export function ServiceRequests() {
           </thead>
           <tbody className="divide-y divide-slate-100/50 text-sm">
             {sortedRequests.map((req) => (
-              <tr key={req.id} className="hover:bg-slate-50/20 transition-colors cursor-pointer">
+              <tr
+                key={req.id}
+                onClick={() => setSelectedRequestId(req.id)}
+                className="hover:bg-slate-50/20 transition-colors cursor-pointer"
+              >
                 <td className="p-4 pl-6 text-slate-850 font-normal">{req.id}</td>
                 <td className="p-4 text-slate-600 font-normal">{req.farmer}</td>
                 <td className="p-4 text-slate-600 font-normal">{req.field}</td>
