@@ -7,6 +7,7 @@ import { DashboardView } from "@/pages/admin/dashboard/DashboardView";
 import { ServiceRequests } from "@/pages/admin/requests/ServiceRequests";
 import { PilotManagement } from "@/pages/admin/pilots/PilotManagement";
 import { FarmersList } from "@/pages/admin/farmers/FarmersList";
+import FarmerProfile from "@/pages/admin/farmers/FarmerProfile";
 import { ReportsView } from "@/pages/admin/reports/ReportsView";
 import { PaymentsView } from "@/pages/admin/payments/PaymentsView";
 import { SettingsView } from "@/pages/admin/settings/SettingsView";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/admin")({
 
 function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
+  const [selectedFarmerId, setSelectedFarmerId] = useState<string | null>(null);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex relative overflow-hidden">
@@ -44,7 +46,11 @@ function AdminPage() {
           ) : activeTab === "pilots" ? (
             <PilotManagement />
           ) : activeTab === "farmers" ? (
-            <FarmersList />
+            selectedFarmerId ? (
+              <FarmerProfile farmerId={selectedFarmerId} onBack={() => setSelectedFarmerId(null)} />
+            ) : (
+              <FarmersList onViewProfile={(id: string) => setSelectedFarmerId(id)} />
+            )
           ) : activeTab === "reports" ? (
             <ReportsView />
           ) : activeTab === "payments" ? (
