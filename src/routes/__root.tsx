@@ -77,14 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Spatio Agri Fertilizer Manager" },
+      { title: "Fertilizer manager" },
       {
         name: "description",
         content:
           "Drone and satellite telemetry that turns every field into a variable-rate prescription. Book a scan, get a tractor-ready map.",
       },
-      { name: "author", content: "Spatio Agri" },
-      { property: "og:title", content: "Spatio Agri Fertilizer Manager" },
+      { name: "author", content: "Fertilizer manager" },
+      { property: "og:title", content: "Fertilizer manager" },
       {
         property: "og:description",
         content:
@@ -92,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Spatio Agri Fertilizer Manager" },
+      { name: "twitter:title", content: "Fertilizer manager" },
       {
         name: "twitter:description",
         content: "Drone + satellite telemetry for hyper-local variable-rate fertilization.",

@@ -13,7 +13,7 @@ const settingsTabs = [
 export function SettingsView() {
   const [activeTab, setActiveTab] = useState("Organization Settings");
   const [formData, setFormData] = useState({
-    orgName: "SpatioAgri Operations",
+    orgName: "Fertilizer manager Operations",
     contactEmail: "ops@spatioagri.com",
     phoneNumber: "+94 77 123 4567",
     address: "123, Galle Road, Colombo 03, Sri Lanka",

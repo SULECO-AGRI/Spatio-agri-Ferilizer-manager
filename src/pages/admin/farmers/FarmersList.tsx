@@ -82,7 +82,7 @@ export function FarmersList({ onViewProfile }: { onViewProfile?: (id: string) =>
       <div>
         <h1 className="text-3xl font-medium tracking-tight text-slate-900 font-display">Farmers</h1>
         <p className="text-slate-400 text-xs md:text-sm mt-1 font-normal">
-          All registered farmers using SpatioAgri drone services
+          All registered farmers using Fertilizer manager drone services
         </p>
       </div>
 

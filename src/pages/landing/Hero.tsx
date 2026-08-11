@@ -50,7 +50,7 @@ export function Hero() {
           </h1>
 
           <p className="hero-desc text-zinc-400 text-base leading-relaxed max-w-xl font-sans">
-            Every acre varies. Spatio Agri fuses drone and satellite telemetry to compute
+            Every acre varies. Fertilizer manager fuses drone and satellite telemetry to compute
             variable-rate prescription grids — optimizing every input, automatically. You request
             the flight, our localized pilots deploy the drones.
           </p>

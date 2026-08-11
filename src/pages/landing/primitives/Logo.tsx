@@ -31,7 +31,7 @@ export function Logo({ className = "" }: { className?: string }) {
         />
       </svg>
       <span className="font-display text-[15px] font-semibold tracking-tight">
-        Spatio<span className="text-primary">Agri</span>
+        Fertilizer <span className="text-primary">manager</span>
       </span>
     </span>
   );

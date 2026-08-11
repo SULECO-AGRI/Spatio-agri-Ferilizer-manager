@@ -131,7 +131,7 @@ export function UserProfileView() {
             </div>
             <p className="text-xs text-slate-400 font-normal max-w-xl leading-relaxed">
               Your account is assigned the **Operations Manager** system role. The following policy
-              tags determine what actions you can execute inside the SpatioAgri admin dashboard:
+              tags determine what actions you can execute inside the Fertilizer manager admin dashboard:
             </p>
 
             <div className="flex flex-wrap gap-2 pt-2">

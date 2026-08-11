@@ -64,7 +64,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             />
           </svg>
           <div>
-            <h2 className="font-medium text-base text-slate-800 leading-none">SpatioAgri</h2>
+            <h2 className="font-medium text-base text-slate-800 leading-none">Fertilizer manager</h2>
             <span className="text-[11px] font-normal text-slate-400 mt-1 block">Admin</span>
           </div>
         </div>

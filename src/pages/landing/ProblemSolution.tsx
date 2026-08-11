@@ -20,7 +20,7 @@ const comparisons = [
     bulletClass: "text-red-200 bg-red-950/30 border-red-500/10 hover:bg-red-950/45",
   },
   {
-    title: "Spatio Agri Precision",
+    title: "Fertilizer manager Precision",
     badge: "The Solution",
     badgeClass: "bg-emerald-500/15 text-emerald-300 border-emerald-500/25",
     icon: CircleCheck,
@@ -51,7 +51,7 @@ export function ProblemSolution() {
           Precision is the Difference Between Profit and Loss
         </h2>
         <p className="mt-4 text-muted-foreground max-w-xl mx-auto text-base md:text-lg">
-          Stop guessing. Traditional farming blankets fields blindly, while Spatio Agri delivers
+          Stop guessing. Traditional farming blankets fields blindly, while Fertilizer manager delivers
           surgical accuracy to every square foot.
         </p>
       </Reveal>

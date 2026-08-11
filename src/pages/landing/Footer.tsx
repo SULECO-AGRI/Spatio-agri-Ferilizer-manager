@@ -135,7 +135,7 @@ export function Footer() {
 
         {/* Bottom bar: contact + legal + copyright, all in one row */}
         <div className="mt-5 flex flex-col items-center justify-between gap-3 border-t border-zinc-900 pt-4 text-xs text-zinc-600 md:flex-row">
-          <p>© {new Date().getFullYear()} Spatio Agri. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Fertilizer manager. All rights reserved.</p>
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             <a
               href="mailto:hello@spatioagri.com"

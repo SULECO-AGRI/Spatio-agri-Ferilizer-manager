@@ -75,7 +75,7 @@ export function VideoSection() {
 
             <Reveal>
               <p className="text-zinc-400 text-sm sm:text-base leading-relaxed font-sans">
-                Watch how Spatio Agri processes multispectral imagery in real time. We map
+                Watch how Fertilizer manager processes multispectral imagery in real time. We map
                 individual crop health coordinates and compile high-definition variable-rate maps
                 with zero rendering lag.
               </p>
