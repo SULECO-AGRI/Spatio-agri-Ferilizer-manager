@@ -3,7 +3,8 @@
 node_modules
 dist
 dist-ssr
-.agents
+.agents/*
+!.agents/skills/
 .output
 .vinxi
 .tanstack/**

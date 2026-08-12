@@ -24,8 +24,8 @@ export function Hero() {
           muted
           loop
           playsInline
-          className="w-full h-full object-cover"
-          src="/Video/Hero_video.mp4"
+          className="absolute inset-0 w-full h-full object-cover"
+          src="/Video/Hero_Video_1.mp4"
           poster={HeroImage}
         />
         {/* Left-to-right dark gradient mask to give the left text high readability while keeping the right side clear */}
