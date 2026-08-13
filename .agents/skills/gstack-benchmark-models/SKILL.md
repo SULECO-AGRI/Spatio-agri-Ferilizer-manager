@@ -9,6 +9,7 @@ description: |
   "which model is best for X", "cross-model comparison", "model shootout". (gstack)
   Voice triggers (speech-to-text aliases): "compare models", "model shootout", "which model is best".
 ---
+
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
 <!-- Regenerate: bun run gen:skill-docs -->
 
@@ -149,6 +150,7 @@ If output shows `UPGRADE_AVAILABLE <old> <new>`: read `$GSTACK_ROOT/gstack-upgra
 If output shows `JUST_UPGRADED <from> <to>`: print "Running gstack v{to} (just updated!)". If `SPAWNED_SESSION` is true, skip feature discovery.
 
 Feature discovery, max one prompt per session:
+
 - Missing `$GSTACK_ROOT/.feature-prompted-continuous-checkpoint`: AskUserQuestion for Continuous checkpoint auto-commits. If accepted, run `$GSTACK_BIN/gstack-config set checkpoint_mode continuous`. Always touch marker.
 - Missing `$GSTACK_ROOT/.feature-prompted-model-overlay`: inform "Model overlays are active. MODEL_OVERLAY shows the patch." Always touch marker.
 
@@ -159,6 +161,7 @@ If `WRITING_STYLE_PENDING` is `yes`: ask once about writing style:
 > v1 prompts are simpler: first-use jargon glosses, outcome-framed questions, shorter prose. Keep default or restore terse?
 
 Options:
+
 - A) Keep the new default (recommended — good writing helps everyone)
 - B) Restore V0 prose — set `explain_level: terse`
 
@@ -166,6 +169,7 @@ If A: leave `explain_level` unset (defaults to `default`).
 If B: run `$GSTACK_BIN/gstack-config set explain_level terse`.
 
 Always run (regardless of choice):
+
 ```bash
 rm -f ~/.gstack/.writing-style-prompt-pending
 touch ~/.gstack/.writing-style-prompted
@@ -187,6 +191,7 @@ If `TEL_PROMPTED` is `no` AND `LAKE_INTRO` is `yes`: ask telemetry once via AskU
 > Help gstack get better. Share usage data only: skill, duration, crashes, stable device ID. No code or file paths. Your repo name is recorded locally only and stripped before any upload.
 
 Options:
+
 - A) Help gstack get better! (recommended)
 - B) No thanks
 
@@ -197,6 +202,7 @@ If B: ask follow-up:
 > Anonymous mode sends only aggregate usage, no unique ID.
 
 Options:
+
 - A) Sure, anonymous is fine
 - B) No thanks, fully off
 
@@ -204,6 +210,7 @@ If B→A: run `$GSTACK_BIN/gstack-config set telemetry anonymous`
 If B→B: run `$GSTACK_BIN/gstack-config set telemetry off`
 
 Always run:
+
 ```bash
 touch ~/.gstack/.telemetry-prompted
 ```
@@ -215,6 +222,7 @@ If `PROACTIVE_PROMPTED` is `no` AND `TEL_PROMPTED` is `yes`: ask once:
 > Let gstack proactively suggest skills, like /qa for "does this work?" or /investigate for bugs?
 
 Options:
+
 - A) Keep it on (recommended)
 - B) Turn it off — I'll type /commands myself
 
@@ -222,6 +230,7 @@ If A: run `$GSTACK_BIN/gstack-config set proactive true`
 If B: run `$GSTACK_BIN/gstack-config set proactive false`
 
 Always run:
+
 ```bash
 touch ~/.gstack/.proactive-prompted
 ```
@@ -231,6 +240,7 @@ Skip if `PROACTIVE_PROMPTED` is `yes`.
 ## First-run guidance (one-time)
 
 If `ACTIVATED` is `no` (first skill run on this machine) AND the preamble printed a non-empty `FIRST_TASK:` value that is NOT `nongit`: show ONE short, project-specific line mapped from the token, as a heads-up, then CONTINUE with whatever the user actually asked — do NOT halt their task. Map the token: `greenfield` → "Fresh repo — shape it first with `/spec` or `/office-hours`." `code_node`/`code_python`/`code_rust`/`code_go`/`code_ruby`/`code_ios` → "There's code here — `/qa` to see it work, or `/investigate` if something's off." `branch_ahead` → "Unshipped work on this branch — `/review` then `/ship`." `dirty_default` → "Uncommitted changes — `/review` before committing." `clean_default` → "Pick one: `/spec`, `/investigate`, or `/qa`." Then substitute the token you saw for TASK_TOKEN and run (best-effort), and mark activated:
+
 ```bash
 $GSTACK_BIN/gstack-telemetry-log --event-type first_task_scaffold_shown --skill "TASK_TOKEN" --outcome shown 2>/dev/null || true
 touch ~/.gstack/.activated 2>/dev/null || true
@@ -254,18 +264,19 @@ Use AskUserQuestion:
 > gstack works best when your project's CLAUDE.md includes skill routing rules.
 
 Options:
+
 - A) Add routing rules to CLAUDE.md (recommended)
 - B) No thanks, I'll invoke skills manually
 
 If A: Append this section to the end of CLAUDE.md:
 
 ```markdown
-
 ## Skill routing
 
 When the user's request matches an available skill, invoke it via the Skill tool. When in doubt, invoke the skill.
 
 Key routing rules:
+
 - Product ideas/brainstorming → invoke /office-hours
 - Strategy/scope → invoke /plan-ceo-review
 - Architecture → invoke /plan-eng-review
@@ -293,10 +304,12 @@ If `VENDORED_GSTACK` is `yes`, warn once via AskUserQuestion unless `~/.gstack/.
 > Migrate to team mode?
 
 Options:
+
 - A) Yes, migrate to team mode now
 - B) No, I'll handle it myself
 
 If A:
+
 1. Run `git rm -r .agents/skills/gstack/`
 2. Run `echo '.agents/skills/gstack/' >> .gitignore`
 3. Run `$GSTACK_BIN/gstack-team-init required` (or `optional`)
@@ -306,6 +319,7 @@ If A:
 If B: say "OK, you're on your own to keep the vendored copy up to date."
 
 Always run (regardless of choice):
+
 ```bash
 eval "$($GSTACK_BIN/gstack-slug 2>/dev/null)" 2>/dev/null || true
 touch ~/.gstack/.vendoring-warned-${SLUG:-unknown}
@@ -315,6 +329,7 @@ If marker exists, skip.
 
 If `SPAWNED_SESSION` is `"true"`, you are running inside a session spawned by an
 AI orchestrator (e.g., OpenClaw). In spawned sessions:
+
 - Do NOT use AskUserQuestion for interactive prompts. Auto-choose the recommended option.
 - Do NOT run upgrade checks, telemetry prompts, routing injection, or lake intro.
 - Focus on completing the task and reporting results via prose output.
@@ -417,13 +432,12 @@ else
 fi
 ```
 
-
-
 Privacy stop-gate: if output shows `ARTIFACTS_SYNC: off`, `artifacts_sync_mode_prompted` is `false`, and gbrain is on PATH or `gbrain doctor --fast --json` works, ask once:
 
 > gstack can publish your artifacts (CEO plans, designs, reports) to a private GitHub repo that GBrain indexes across machines. How much should sync?
 
 Options:
+
 - A) Everything allowlisted (recommended)
 - B) Only artifacts
 - C) Decline, keep everything local
@@ -444,7 +458,6 @@ At skill END before telemetry:
 "$GSTACK_BIN/gstack-brain-sync" --discover-new 2>/dev/null || true
 "$GSTACK_BIN/gstack-brain-sync" --once 2>/dev/null || true
 ```
-
 
 ## Model-Specific Behavioral Patch (claude)
 
@@ -475,6 +488,7 @@ The user has context you do not. Cross-model agreement is a recommendation, not 
 ## Completion Status Protocol
 
 When completing a skill workflow, report status using one of:
+
 - **DONE** — completed with evidence.
 - **DONE_WITH_CONCERNS** — completed, but list concerns.
 - **BLOCKED** — cannot proceed; state blocker and what was tried.
@@ -549,6 +563,7 @@ If not found, stop and tell the user to reinstall gstack.
 ## Step 1: Choose a prompt
 
 Use AskUserQuestion with the preamble format:
+
 - **Re-ground:** current project + branch.
 - **Simplify:** "A cross-model benchmark runs the same prompt through 2-3 AI models and shows you how they compare on speed, cost, and output quality. What prompt should we use?"
 - **RECOMMENDATION:** A because benchmarking against a real skill exposes tool-use differences, not just raw generation.
@@ -576,6 +591,7 @@ Show the dry-run output. The "Adapter availability" section tells the user which
 If ALL three show NOT READY: stop with a clear message — benchmark can't run without at least one authed provider. Suggest `claude login`, `codex login`, or `gemini login` / `export GOOGLE_API_KEY`.
 
 If at least one is OK: AskUserQuestion:
+
 - **Simplify:** "Which models should we include? The dry-run above showed which are authed. Unauthed ones will be skipped cleanly — they won't abort the batch."
 - **RECOMMENDATION:** A (all authed providers) because running as many as possible gives the richest comparison.
 - **Options:**
@@ -592,6 +608,7 @@ If at least one is OK: AskUserQuestion:
 ```
 
 If judge is available, AskUserQuestion:
+
 - **Simplify:** "The quality judge scores each model's output on a 0-10 scale using Anthropic's Claude as a tiebreaker. Adds ~$0.05/run. Recommended if you care about output quality, not just latency and cost."
 - **RECOMMENDATION:** A — the whole point is comparing quality, not just speed.
 - **Options:**
@@ -619,6 +636,7 @@ Stream the output as it arrives. This is slow — each provider runs the prompt 
 ## Step 5: Interpret results
 
 After the table prints, summarize for the user:
+
 - **Fastest** — provider with lowest latency.
 - **Cheapest** — provider with lowest cost.
 - **Highest quality** (if `--judge` ran) — provider with highest score.
@@ -631,6 +649,7 @@ If any provider hit an error (auth/timeout/rate_limit), call it out with the rem
 ## Step 6: Offer to save results
 
 AskUserQuestion:
+
 - **Simplify:** "Save this benchmark as JSON so you can compare future runs against it?"
 - **RECOMMENDATION:** A — skill performance drifts as providers update their models; a saved baseline catches quality regressions.
 - **Options:**

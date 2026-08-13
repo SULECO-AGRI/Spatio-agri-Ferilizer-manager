@@ -1,5 +1,6 @@
 import { CircleCheck, TriangleAlert, Check, X } from "lucide-react";
-import { Reveal, staggerParent, staggerChild } from "./primitives/Reveal";
+import { Reveal } from "./primitives/Reveal";
+import { staggerParent, staggerChild } from "./primitives/variants";
 import { motion } from "framer-motion";
 
 const comparisons = [

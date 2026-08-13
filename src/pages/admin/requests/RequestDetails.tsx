@@ -1,4 +1,4 @@
-import { ArrowLeft, Construction, ChevronRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 interface RequestDetailsProps {
   requestId: string;

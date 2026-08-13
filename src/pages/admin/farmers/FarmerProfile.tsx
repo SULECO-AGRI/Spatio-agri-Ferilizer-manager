@@ -1,5 +1,5 @@
 import { ArrowLeft } from "lucide-react";
-import { mockFarmers } from "./FarmersList";
+import { mockFarmers } from "./mockFarmers";
 
 interface Props {
   farmerId: string;
