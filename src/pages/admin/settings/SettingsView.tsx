@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageHeader, FormField } from "@/components/ui";
 
 const settingsTabs = [
   "Organization Settings",
@@ -28,14 +29,10 @@ export function SettingsView() {
   return (
     <div className="space-y-6 font-sans">
       {/* Title Header */}
-      <div>
-        <h1 className="text-3xl font-medium tracking-tight text-slate-900 font-display">
-          Settings
-        </h1>
-        <p className="text-slate-400 text-xs md:text-sm mt-1 font-normal">
-          Organization configuration, catalogs and access control
-        </p>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Organization configuration, catalogs and access control"
+      />
 
       {/* Main Settings Panel: 2 Columns */}
       <div className="flex flex-col lg:flex-row gap-8 items-start">
@@ -84,80 +81,45 @@ export function SettingsView() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Column 1 Inputs */}
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-xs text-slate-500 font-normal block mb-1.5">
-                      Organization Name
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.orgName}
-                      onChange={(e) => handleInputChange("orgName", e.target.value)}
-                      className="w-full border border-slate-200 rounded-lg p-2.5 text-xs bg-white focus:outline-none focus:border-slate-450 text-slate-800 font-normal"
-                    />
-                  </div>
+                  <FormField
+                    label="Organization Name"
+                    value={formData.orgName}
+                    onChange={(val) => handleInputChange("orgName", val)}
+                  />
 
-                  <div>
-                    <label className="text-xs text-slate-500 font-normal block mb-1.5">
-                      Phone Number
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.phoneNumber}
-                      onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-                      className="w-full border border-slate-200 rounded-lg p-2.5 text-xs bg-white focus:outline-none focus:border-slate-450 text-slate-800 font-normal"
-                    />
-                  </div>
+                  <FormField
+                    label="Phone Number"
+                    value={formData.phoneNumber}
+                    onChange={(val) => handleInputChange("phoneNumber", val)}
+                  />
 
-                  <div>
-                    <label className="text-xs text-slate-500 font-normal block mb-1.5">
-                      Service Region
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.serviceRegion}
-                      onChange={(e) => handleInputChange("serviceRegion", e.target.value)}
-                      className="w-full border border-slate-200 rounded-lg p-2.5 text-xs bg-white focus:outline-none focus:border-slate-450 text-slate-800 font-normal"
-                    />
-                  </div>
+                  <FormField
+                    label="Service Region"
+                    value={formData.serviceRegion}
+                    onChange={(val) => handleInputChange("serviceRegion", val)}
+                  />
                 </div>
 
                 {/* Column 2 Inputs */}
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-xs text-slate-500 font-normal block mb-1.5">
-                      Contact Email
-                    </label>
-                    <input
-                      type="email"
-                      value={formData.contactEmail}
-                      onChange={(e) => handleInputChange("contactEmail", e.target.value)}
-                      className="w-full border border-slate-200 rounded-lg p-2.5 text-xs bg-white focus:outline-none focus:border-slate-450 text-slate-800 font-normal"
-                    />
-                  </div>
+                  <FormField
+                    label="Contact Email"
+                    type="email"
+                    value={formData.contactEmail}
+                    onChange={(val) => handleInputChange("contactEmail", val)}
+                  />
 
-                  <div>
-                    <label className="text-xs text-slate-500 font-normal block mb-1.5">
-                      Address
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.address}
-                      onChange={(e) => handleInputChange("address", e.target.value)}
-                      className="w-full border border-slate-200 rounded-lg p-2.5 text-xs bg-white focus:outline-none focus:border-slate-450 text-slate-800 font-normal"
-                    />
-                  </div>
+                  <FormField
+                    label="Address"
+                    value={formData.address}
+                    onChange={(val) => handleInputChange("address", val)}
+                  />
 
-                  <div>
-                    <label className="text-xs text-slate-500 font-normal block mb-1.5">
-                      Time Zone
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.timeZone}
-                      onChange={(e) => handleInputChange("timeZone", e.target.value)}
-                      className="w-full border border-slate-200 rounded-lg p-2.5 text-xs bg-white focus:outline-none focus:border-slate-450 text-slate-800 font-normal"
-                    />
-                  </div>
+                  <FormField
+                    label="Time Zone"
+                    value={formData.timeZone}
+                    onChange={(val) => handleInputChange("timeZone", val)}
+                  />
                 </div>
               </div>
 

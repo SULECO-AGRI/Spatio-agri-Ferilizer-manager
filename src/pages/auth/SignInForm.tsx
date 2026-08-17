@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function SignInForm() {
+export function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -11,7 +11,7 @@ export default function SignInForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 font-sans">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="signin-email">
           Email
@@ -42,7 +42,7 @@ export default function SignInForm() {
       </div>
       <button
         type="submit"
-        className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-semibold py-2.5 transition-all shadow-sm"
+        className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-semibold py-2.5 transition-all shadow-sm cursor-pointer"
       >
         Sign In
       </button>

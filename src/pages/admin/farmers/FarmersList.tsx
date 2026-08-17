@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Search, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { PageHeader, TableToolbar } from "@/components/ui";
 import { mockFarmers } from "./mockFarmers";
 
 export function FarmersList({ onViewProfile }: { onViewProfile?: (id: string) => void }) {
@@ -16,24 +17,18 @@ export function FarmersList({ onViewProfile }: { onViewProfile?: (id: string) =>
   return (
     <div className="space-y-6 font-sans">
       {/* Header Title */}
-      <div>
-        <h1 className="text-3xl font-medium tracking-tight text-slate-900 font-display">Farmers</h1>
-        <p className="text-slate-400 text-xs md:text-sm mt-1 font-normal">
-          All registered farmers using Fertilizer manager drone services
-        </p>
-      </div>
+      <PageHeader
+        title="Farmers"
+        description="All registered farmers using Fertilizer manager drone services"
+      />
 
       {/* Search Bar */}
-      <div className="relative w-full md:w-80">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-        <input
-          type="text"
-          placeholder="Search farmers by name or NIC..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 text-slate-800 font-normal"
-        />
-      </div>
+      <TableToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search farmers by name or NIC..."
+        widthClassName="w-full md:w-80"
+      />
 
       {/* Farmers Table */}
       <div className="overflow-x-auto bg-white border border-slate-200/80 rounded-2xl shadow-xs">

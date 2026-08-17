@@ -7,7 +7,7 @@ import { DashboardView } from "@/pages/admin/dashboard/DashboardView";
 import { ServiceRequests } from "@/pages/admin/requests/ServiceRequests";
 import { PilotManagement } from "@/pages/admin/pilots/PilotManagement";
 import { FarmersList } from "@/pages/admin/farmers/FarmersList";
-import FarmerProfile from "@/pages/admin/farmers/FarmerProfile";
+import { FarmerProfile } from "@/pages/admin/farmers/FarmerProfile";
 import { ReportsView } from "@/pages/admin/reports/ReportsView";
 import { PaymentsView } from "@/pages/admin/payments/PaymentsView";
 import { SettingsView } from "@/pages/admin/settings/SettingsView";
@@ -40,7 +40,7 @@ function AdminPage() {
           <Topbar />
 
           {activeTab === "dashboard" ? (
-            <DashboardView />
+            <DashboardView onNavigate={setActiveTab} />
           ) : activeTab === "requests" ? (
             <ServiceRequests />
           ) : activeTab === "pilots" ? (

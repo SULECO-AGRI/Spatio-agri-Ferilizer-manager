@@ -9,7 +9,7 @@ import { Footer } from "@/pages/landing/Footer";
 import { ProblemSolution } from "@/pages/landing/ProblemSolution";
 import { VerticalNav } from "@/pages/landing/VerticalNav";
 import { AuthModalProvider } from "@/context/AuthModalContext";
-import AuthModal from "@/pages/auth/AuthModal";
+import { AuthModal } from "@/pages/auth/AuthModal";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,

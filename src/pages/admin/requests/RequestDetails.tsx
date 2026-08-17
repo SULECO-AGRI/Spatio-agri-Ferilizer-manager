@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { StatusBadge } from "@/components/ui";
 
 interface RequestDetailsProps {
   requestId: string;
@@ -132,9 +133,7 @@ export function RequestDetails({ requestId, onBack }: RequestDetailsProps) {
             Request {requestId}
           </h1>
         </div>
-        <span className="inline-flex px-3 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-full text-xs font-normal w-fit">
-          {details.status}
-        </span>
+        <StatusBadge status={details.status} size="md" />
       </div>
 
       {/* Main Layout: 2 Columns */}
@@ -278,9 +277,7 @@ export function RequestDetails({ requestId, onBack }: RequestDetailsProps) {
 
             <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-200/50 rounded-xl text-xs font-normal">
               <span className="text-slate-700">{details.weather}</span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase tracking-wider">
-                {details.risk}
-              </span>
+              <StatusBadge status={details.risk} />
             </div>
           </div>
         </div>

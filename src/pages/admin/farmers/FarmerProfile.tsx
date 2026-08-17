@@ -1,12 +1,12 @@
 import { ArrowLeft } from "lucide-react";
 import { mockFarmers } from "./mockFarmers";
 
-interface Props {
+interface FarmerProfileProps {
   farmerId: string;
   onBack: () => void;
 }
 
-export function FarmerProfile({ farmerId, onBack }: Props) {
+export function FarmerProfile({ farmerId, onBack }: FarmerProfileProps) {
   const farmer = mockFarmers.find((f) => f.id === farmerId);
 
   if (!farmer) {
@@ -31,7 +31,7 @@ export function FarmerProfile({ farmerId, onBack }: Props) {
         <div>
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 text-sm text-slate-600"
+            className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Farmers
           </button>
@@ -45,7 +45,7 @@ export function FarmerProfile({ farmerId, onBack }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left card */}
           <div className="col-span-1 flex flex-col items-center gap-4">
-            <div className="w-32 h-32 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xl text-slate-500">
+            <div className="w-32 h-32 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xl text-slate-500 font-sans">
               {farmer.name
                 .split(" ")
                 .map((n) => n[0])
@@ -79,13 +79,13 @@ export function FarmerProfile({ farmerId, onBack }: Props) {
               <button className="px-3 py-1 rounded-lg bg-slate-100 text-sm text-slate-700">
                 Fields
               </button>
-              <button className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-sm text-slate-700">
+              <button className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
                 Drone History
               </button>
-              <button className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-sm text-slate-700">
+              <button className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
                 Payment History
               </button>
-              <button className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-sm text-slate-700">
+              <button className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
                 Service Notes
               </button>
             </div>
@@ -132,5 +132,3 @@ export function FarmerProfile({ farmerId, onBack }: Props) {
     </div>
   );
 }
-
-export default FarmerProfile;

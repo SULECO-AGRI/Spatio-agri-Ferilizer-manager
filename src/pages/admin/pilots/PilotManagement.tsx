@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Search, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import { PageHeader, FilterPills, TableToolbar, StatusBadge } from "@/components/ui";
 
 type PilotStatus = "Available" | "Busy" | "Offline" | "Online";
 
@@ -98,8 +99,10 @@ const mockPilots: Pilot[] = [
   },
 ];
 
+const tabs = ["All", "Online", "Offline", "Busy", "Available"] as const;
+
 export function PilotManagement() {
-  const [activeFilter, setActiveFilter] = useState<PilotStatus | "All">("All");
+  const [activeFilter, setActiveFilter] = useState<(typeof tabs)[number]>("All");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter pilots based on active tab and search query
@@ -112,53 +115,25 @@ export function PilotManagement() {
     return matchesTab && matchesSearch;
   });
 
-  const tabs: (PilotStatus | "All")[] = ["All", "Online", "Offline", "Busy", "Available"];
-
   return (
     <div className="space-y-6 font-sans">
       {/* Header Info */}
-      <div>
-        <h1 className="text-3xl font-medium tracking-tight text-slate-900 font-display">
-          Pilot Management
-        </h1>
-        <p className="text-slate-400 text-xs md:text-sm mt-1 font-normal">
-          All registered drone pilots and their current status
-        </p>
-      </div>
+      <PageHeader
+        title="Pilot Management"
+        description="All registered drone pilots and their current status"
+      />
 
       {/* Tabs and Search Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Tab Pills */}
-        <div className="flex flex-wrap items-center bg-slate-100 p-1.5 rounded-xl w-fit gap-1">
-          {tabs.map((tab) => {
-            const isActive = activeFilter === tab;
-            return (
-              <button
-                key={tab}
-                onClick={() => setActiveFilter(tab)}
-                className={`px-4 py-2 text-xs font-normal rounded-lg transition-all duration-200 cursor-pointer ${
-                  isActive
-                    ? "bg-white text-slate-800 border border-slate-200/50 shadow-xs"
-                    : "text-slate-400 hover:text-slate-600"
-                }`}
-              >
-                {tab}
-              </button>
-            );
-          })}
-        </div>
+        <FilterPills items={tabs} active={activeFilter} onChange={setActiveFilter} />
 
         {/* Search Input */}
-        <div className="relative w-full md:w-64">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search pilots..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 text-slate-800 font-normal"
-          />
-        </div>
+        <TableToolbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Search pilots..."
+        />
       </div>
 
       {/* Pilots Card Grid */}
@@ -176,19 +151,7 @@ export function PilotManagement() {
                 </div>
                 <div className="space-y-1">
                   <h4 className="text-sm font-medium text-slate-800 leading-none">{pilot.name}</h4>
-                  <span
-                    className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-normal border ${
-                      pilot.status === "Available"
-                        ? "bg-emerald-50 text-emerald-600 border-emerald-100"
-                        : pilot.status === "Busy"
-                          ? "bg-amber-50 text-amber-600 border-amber-100"
-                          : pilot.status === "Online"
-                            ? "bg-blue-50 text-blue-600 border-blue-100"
-                            : "bg-slate-50 text-slate-500 border-slate-200"
-                    }`}
-                  >
-                    {pilot.status}
-                  </span>
+                  <StatusBadge status={pilot.status} />
                 </div>
               </div>
 

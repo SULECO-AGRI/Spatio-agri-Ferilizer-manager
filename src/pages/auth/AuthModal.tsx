@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuthModal } from "../../context/AuthModalContext";
-import SignInForm from "./SignInForm";
-import SignUpForm from "./SignUpForm";
+import { useAuthModal } from "@/context/AuthModalContext";
+import { SignInForm } from "./SignInForm";
+import { SignUpForm } from "./SignUpForm";
 
-export default function AuthModal() {
+export function AuthModal() {
   const { isOpen, mode, close, open } = useAuthModal();
 
   // Close on Escape key
@@ -34,7 +34,7 @@ export default function AuthModal() {
           onClick={close}
         >
           <motion.div
-            className="relative w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl border border-gray-100/50 overflow-hidden"
+            className="relative w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl border border-gray-100/50 overflow-hidden font-sans"
             initial={{ scale: 0.95, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 15 }}
@@ -46,7 +46,8 @@ export default function AuthModal() {
               <div className="relative flex p-1 bg-slate-100 rounded-full">
                 {/* Sign In Tab Button */}
                 <button
-                  className="relative z-10 px-6 py-2 text-sm font-semibold rounded-full transition-colors duration-300 w-28"
+                  type="button"
+                  className="relative z-10 px-6 py-2 text-sm font-semibold rounded-full transition-colors duration-300 w-28 cursor-pointer"
                   onClick={() => switchMode("signin")}
                 >
                   <span
@@ -67,7 +68,8 @@ export default function AuthModal() {
 
                 {/* Sign Up Tab Button */}
                 <button
-                  className="relative z-10 px-6 py-2 text-sm font-semibold rounded-full transition-colors duration-300 w-28"
+                  type="button"
+                  className="relative z-10 px-6 py-2 text-sm font-semibold rounded-full transition-colors duration-300 w-28 cursor-pointer"
                   onClick={() => switchMode("signup")}
                 >
                   <span
@@ -105,7 +107,7 @@ export default function AuthModal() {
             </div>
 
             <button
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors text-lg leading-none"
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors text-lg leading-none cursor-pointer"
               aria-label="Close"
               onClick={close}
             >
@@ -117,3 +119,5 @@ export default function AuthModal() {
     </AnimatePresence>
   );
 }
+
+export default AuthModal;

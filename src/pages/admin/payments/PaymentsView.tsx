@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
+import { PageHeader, MetricCard, FilterPills, StatusBadge } from "@/components/ui";
 
 type TxnType = "Invoice" | "Pilot Payout";
 type TxnStatus = "Paid" | "Pending" | "Overdue";
@@ -60,67 +61,44 @@ const filters = [
   "Completed Payments",
   "Pilot Earnings",
   "Farmer Payments",
-];
+] as const;
 
 export function PaymentsView() {
-  const [activeFilter, setActiveFilter] = useState("Invoices");
+  const [activeFilter, setActiveFilter] = useState<(typeof filters)[number]>("Invoices");
 
-  // Local filter mock logic (for realistic interactive behavior)
+  // Filter mock logic
   const filteredTransactions = mockTransactions.filter((txn) => {
     if (activeFilter === "Invoices") return txn.type === "Invoice";
     if (activeFilter === "Pending Payments") return txn.status === "Pending";
     if (activeFilter === "Completed Payments")
       return txn.status === "Paid" && txn.type === "Invoice";
     if (activeFilter === "Pilot Earnings") return txn.type === "Pilot Payout";
-    return true; // Farmer Payments shows all or invoices
+    return true;
   });
 
   return (
     <div className="space-y-6 font-sans">
       {/* Title Header */}
-      <div>
-        <h1 className="text-3xl font-medium tracking-tight text-slate-900 font-display">
-          Payments
-        </h1>
-        <p className="text-slate-400 text-xs md:text-sm mt-1 font-normal">
-          Invoices, pilot earnings and farmer transaction history
-        </p>
-      </div>
+      <PageHeader
+        title="Payments"
+        description="Invoices, pilot earnings and farmer transaction history"
+      />
 
       {/* Metrics Row (3 columns) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {mockMetrics.map((m) => (
-          <div
-            key={m.title}
-            className="bg-white border border-slate-200/80 rounded-2xl p-5 flex flex-col shadow-xs"
-          >
-            <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wider block">
-              {m.title}
-            </span>
-            <span className="text-2xl font-medium text-slate-900 mt-2 font-display">{m.value}</span>
-            <span className="text-xs text-slate-400 mt-1 font-normal">{m.footer}</span>
-          </div>
+          <MetricCard key={m.title} title={m.title} value={m.value} footer={m.footer} />
         ))}
       </div>
 
       {/* Filter Tabs Row */}
-      <div className="flex flex-wrap gap-2 pt-2">
-        {filters.map((filter) => {
-          const isActive = activeFilter === filter;
-          return (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-2 text-xs font-normal rounded-lg border transition-colors cursor-pointer ${
-                isActive
-                  ? "bg-[#1e293b] text-white border-[#1e293b]"
-                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              {filter}
-            </button>
-          );
-        })}
+      <div className="pt-2">
+        <FilterPills
+          items={filters}
+          active={activeFilter}
+          onChange={setActiveFilter}
+          variant="dark"
+        />
       </div>
 
       {/* Transaction History Table */}
@@ -148,17 +126,7 @@ export function PaymentsView() {
                   <td className="py-4 text-slate-600 font-normal">{txn.party}</td>
                   <td className="py-4 text-slate-850 font-normal">{txn.amount}</td>
                   <td className="py-4">
-                    <span
-                      className={`inline-flex px-2.5 py-0.5 rounded-lg text-[10px] font-normal border ${
-                        txn.status === "Paid"
-                          ? "bg-emerald-50 text-emerald-600 border-emerald-100"
-                          : txn.status === "Pending"
-                            ? "bg-amber-50 text-amber-600 border-amber-100"
-                            : "bg-rose-50 text-rose-600 border-rose-100"
-                      }`}
-                    >
-                      {txn.status}
-                    </span>
+                    <StatusBadge status={txn.status} />
                   </td>
                   <td className="py-4 text-slate-600 font-normal">{txn.date}</td>
                   <td className="py-4 pr-2 text-right">
