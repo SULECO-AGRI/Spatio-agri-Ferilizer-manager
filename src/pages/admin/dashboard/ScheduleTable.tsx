@@ -1,8 +1,4 @@
-const schedules = [
-  { id: "1", time: "08:30", field: "North Paddy Field", service: "Spraying", pilot: "N. Perera" },
-  { id: "2", time: "10:00", field: "South Maize Plot", service: "Mapping", pilot: "S. Fernando" },
-  { id: "3", time: "13:30", field: "East Tea Estate", service: "Fertilizing", pilot: "Unassigned" },
-];
+import { mockSchedules } from "@/data/mockData";
 
 export function ScheduleTable() {
   return (
@@ -20,7 +16,7 @@ export function ScheduleTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100/50 text-sm">
-            {schedules.map(({ id, time, field, service, pilot }) => (
+            {mockSchedules.map(({ id, time, field, service, pilot }) => (
               <tr key={id}>
                 <td className="py-4 font-normal text-slate-800">{time}</td>
                 <td className="py-4 text-slate-600 font-normal">{field}</td>

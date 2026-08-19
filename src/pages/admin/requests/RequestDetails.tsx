@@ -1,96 +1,11 @@
 import { ArrowLeft } from "lucide-react";
 import { StatusBadge } from "@/components/ui";
+import { detailedRequestsInfo } from "@/data/mockData";
 
 interface RequestDetailsProps {
   requestId: string;
   onBack: () => void;
 }
-
-// Extends requests data with additional info for detailed page rendering
-const detailedRequestsInfo: Record<
-  string,
-  {
-    farmerName: string;
-    phone: string;
-    email: string;
-    district: string;
-    memberSince: string;
-    fieldName: string;
-    crop: string;
-    growthStage: string;
-    service: string;
-    prefDate: string;
-    duration: string;
-    drone: string;
-    weather: string;
-    risk: string;
-    area: string;
-    priority: string;
-    status: string;
-    svgPoints: string;
-  }
-> = {
-  "REQ-1042": {
-    farmerName: "Kamal Silva",
-    phone: "+94 77 123 4567",
-    email: "kamal.silva@mail.com",
-    district: "Anuradhapura District",
-    memberSince: "2024",
-    fieldName: "Boundary - North Paddy",
-    crop: "Rice (BG 352)",
-    growthStage: "Tillering",
-    service: "Pesticide Spraying",
-    prefDate: "Jul 21, 2026 - 08:00 AM",
-    duration: "45 minutes",
-    drone: "DJI Agras T40",
-    weather: "Jul 21: 29°C, Wind 10 km/h, Rain 15%",
-    risk: "Low Risk",
-    area: "2.4 ha",
-    priority: "High",
-    status: "Pending Review",
-    svgPoints: "120,60 380,80 340,180 80,160",
-  },
-  "REQ-1041": {
-    farmerName: "W. Bandara",
-    phone: "+94 71 987 6543",
-    email: "w.bandara@mail.com",
-    district: "Kandy District",
-    memberSince: "2023",
-    fieldName: "Boundary - East Tea Estate",
-    crop: "Tea (Fanning)",
-    growthStage: "Mature",
-    service: "Fertilizing",
-    prefDate: "Jul 21, 2026 - 10:30 AM",
-    duration: "1 hr 15 min",
-    drone: "DJI Agras T30",
-    weather: "Jul 21: 24°C, Wind 12 km/h, Rain 40%",
-    risk: "Medium Risk",
-    area: "5.1 ha",
-    priority: "Medium",
-    status: "Pending Review",
-    svgPoints: "100,80 400,60 360,190 140,170",
-  },
-  "REQ-1040": {
-    farmerName: "Nimal Perera",
-    phone: "+94 76 543 2109",
-    email: "nimal.p@mail.com",
-    district: "Polonnaruwa District",
-    memberSince: "2022",
-    fieldName: "Boundary - South Maize Plot",
-    crop: "Maize (Pacific 339)",
-    growthStage: "Vegetative",
-    service: "Mapping",
-    prefDate: "Jul 22, 2026 - 09:00 AM",
-    duration: "30 minutes",
-    drone: "XAG P100",
-    weather: "Jul 22: 31°C, Wind 8 km/h, Rain 10%",
-    risk: "Low Risk",
-    area: "3.2 ha",
-    priority: "Low",
-    status: "Assigned",
-    svgPoints: "140,50 350,90 310,160 110,140",
-  },
-};
 
 export function RequestDetails({ requestId, onBack }: RequestDetailsProps) {
   // Fallback default details if the requestId is not pre-mocked

@@ -2,7 +2,7 @@ import { PageHeader, MetricCard } from "@/components/ui";
 import { RecentActivity } from "@/pages/admin/dashboard/RecentActivity";
 import { ScheduleTable } from "@/pages/admin/dashboard/ScheduleTable";
 import { QuickActions } from "@/pages/admin/components/QuickActions";
-import type { TabId } from "@/pages/admin/components/Sidebar";
+import type { TabId } from "@/types";
 
 interface DashboardViewProps {
   onNavigate?: (tab: TabId) => void;

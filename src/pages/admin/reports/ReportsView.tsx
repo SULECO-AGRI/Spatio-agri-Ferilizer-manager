@@ -1,48 +1,12 @@
 import { Star } from "lucide-react";
 import { PageHeader, MetricCard } from "@/components/ui";
 import { BarChart, LineChart } from "@/components/charts";
-
-interface PilotPerf {
-  pilot: string;
-  missions: number;
-  rating: number;
-  onTime: string;
-  flightHours: string;
-}
-
-const mockMetrics = [
-  { title: "Completed Missions", value: "312" },
-  { title: "Revenue", value: "LKR 2.4M" },
-  { title: "Pilot Performance", value: "4.7 avg" },
-  { title: "Farmer Growth", value: "+18%" },
-  { title: "Drone Utilization", value: "72%" },
-];
-
-const mockPilotPerformance: PilotPerf[] = [
-  { pilot: "Nimal Perera", missions: 312, rating: 4.9, onTime: "98%", flightHours: "1,240 hrs" },
-  { pilot: "Sanduni Fernando", missions: 201, rating: 4.7, onTime: "95%", flightHours: "860 hrs" },
-  { pilot: "Amal Jayasuriya", missions: 154, rating: 4.8, onTime: "97%", flightHours: "610 hrs" },
-];
-
-const barChartData = [
-  { label: "Jan", value: 160 },
-  { label: "Feb", value: 210 },
-  { label: "Mar", value: 170 },
-  { label: "Apr", value: 260 },
-  { label: "May", value: 290 },
-  { label: "Jun", value: 230 },
-  { label: "Jul", value: 312 },
-];
-
-const lineChartPoints = [
-  { label: "Jan", x: 35, y: 115 },
-  { label: "Feb", x: 110, y: 85 },
-  { label: "Mar", x: 185, y: 100 },
-  { label: "Apr", x: 260, y: 70 },
-  { label: "May", x: 335, y: 80 },
-  { label: "Jun", x: 410, y: 50 },
-  { label: "Jul", x: 475, y: 65 },
-];
+import {
+  mockReportsMetrics,
+  mockPilotPerformance,
+  mockBarChartData,
+  mockLineChartPoints,
+} from "@/data/mockData";
 
 export function ReportsView() {
   return (
@@ -55,7 +19,7 @@ export function ReportsView() {
 
       {/* Metrics Row (5 columns) */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {mockMetrics.map((m) => (
+        {mockReportsMetrics.map((m) => (
           <MetricCard key={m.title} title={m.title} value={m.value} />
         ))}
       </div>
@@ -63,10 +27,10 @@ export function ReportsView() {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Missions Completed Bar Chart */}
-        <BarChart title="Monthly Trends — Missions Completed" data={barChartData} />
+        <BarChart title="Monthly Trends — Missions Completed" data={mockBarChartData} />
 
         {/* Revenue Trend SVG Line Chart */}
-        <LineChart title="Revenue Trend" points={lineChartPoints} />
+        <LineChart title="Revenue Trend" points={mockLineChartPoints} />
       </div>
 
       {/* Pilot Performance Table */}

@@ -1,5 +1,5 @@
 import { ArrowLeft } from "lucide-react";
-import { mockFarmers } from "./mockFarmers";
+import { mockFarmers, mockFarmerFields, mockFarmerServiceHistory } from "@/data/mockData";
 
 interface FarmerProfileProps {
   farmerId: string;
@@ -13,17 +13,8 @@ export function FarmerProfile({ farmerId, onBack }: FarmerProfileProps) {
     return <div className="p-8 bg-white border border-slate-200 rounded-2xl">Farmer not found</div>;
   }
 
-  const mockFields = [
-    { id: "f1", name: "North Paddy Field", size: "2.4 ha", notes: "Rice" },
-    { id: "f2", name: "South Maize Plot", size: "1.8 ha", notes: "Maize" },
-    { id: "f3", name: "K11 Vegetable Farm", size: "0.9 ha", notes: "Vegetables" },
-  ];
-
-  const serviceHistory = [
-    { date: "Jul 30", field: "South Maize Plot", service: "Mapping", amount: "LKR 4,200" },
-    { date: "Jul 28", field: "North Paddy Field", service: "Spraying", amount: "LKR 8,200" },
-    { date: "Jun 22", field: "K11 Vegetable Farm", service: "Fertilizing", amount: "LKR 3,800" },
-  ];
+  const mockFields = mockFarmerFields;
+  const serviceHistory = mockFarmerServiceHistory;
 
   return (
     <div className="space-y-6 font-sans">

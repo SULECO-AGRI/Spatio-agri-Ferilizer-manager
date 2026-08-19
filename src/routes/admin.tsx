@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Construction, ArrowRight } from "lucide-react";
-import { Sidebar, TabId } from "@/pages/admin/components/Sidebar";
+import { Sidebar } from "@/pages/admin/components/Sidebar";
+import type { TabId } from "@/types";
 import { Topbar } from "@/pages/admin/components/Topbar";
 import { DashboardView } from "@/pages/admin/dashboard/DashboardView";
 import { ServiceRequests } from "@/pages/admin/requests/ServiceRequests";

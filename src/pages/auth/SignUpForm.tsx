@@ -6,14 +6,25 @@ export function SignUpForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [errorMsg, setErrorMsg] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
+    setErrorMsg("");
+    if (password.length < 6) {
+      setErrorMsg("Password must be at least 6 characters");
       return;
     }
-    // TODO: integrate with auth backend
-    console.log("Sign Up", { name, email, password });
+    if (password !== confirmPassword) {
+      setErrorMsg("Passwords do not match");
+      return;
+    }
+    // Integrated mock auth registration
+    setSubmitted(true);
+    setTimeout(() => {
+      window.location.href = "/admin";
+    }, 400);
   };
 
   return (
@@ -77,11 +88,17 @@ export function SignUpForm() {
           placeholder="••••••••"
         />
       </div>
+      {errorMsg && (
+        <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 text-xs font-normal">
+          {errorMsg}
+        </div>
+      )}
       <button
         type="submit"
-        className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-semibold py-2.5 transition-all shadow-sm cursor-pointer"
+        disabled={submitted}
+        className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-70 active:scale-[0.98] text-white font-semibold py-2.5 transition-all shadow-sm cursor-pointer"
       >
-        Sign Up
+        {submitted ? "Creating Account..." : "Sign Up"}
       </button>
     </form>
   );

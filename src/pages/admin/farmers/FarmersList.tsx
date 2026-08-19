@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { PageHeader, TableToolbar } from "@/components/ui";
-import { mockFarmers } from "./mockFarmers";
+import { mockFarmers } from "@/data/mockData";
 
 export function FarmersList({ onViewProfile }: { onViewProfile?: (id: string) => void }) {
   const [searchQuery, setSearchQuery] = useState("");

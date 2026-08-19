@@ -1,59 +1,7 @@
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { PageHeader, MetricCard, FilterPills, StatusBadge } from "@/components/ui";
-
-type TxnType = "Invoice" | "Pilot Payout";
-type TxnStatus = "Paid" | "Pending" | "Overdue";
-
-interface Transaction {
-  id: string;
-  type: TxnType;
-  party: string;
-  amount: string;
-  status: TxnStatus;
-  date: string;
-}
-
-const mockMetrics = [
-  { title: "Pending Payments", value: "LKR 42,100", footer: "8 invoices" },
-  { title: "Completed Payments", value: "LKR 2.1M", footer: "this year" },
-  { title: "Pilot Earnings (MTD)", value: "LKR 318,000", footer: "14 pilots" },
-];
-
-const mockTransactions: Transaction[] = [
-  {
-    id: "TXN-3312",
-    type: "Invoice",
-    party: "Kamal Silva",
-    amount: "LKR 9,800",
-    status: "Paid",
-    date: "Jul 19",
-  },
-  {
-    id: "TXN-3311",
-    type: "Pilot Payout",
-    party: "Nimal Perera",
-    amount: "LKR 6,200",
-    status: "Pending",
-    date: "Jul 19",
-  },
-  {
-    id: "TXN-3309",
-    type: "Invoice",
-    party: "W. Bandara",
-    amount: "LKR 4,500",
-    status: "Overdue",
-    date: "Jul 12",
-  },
-  {
-    id: "TXN-3305",
-    type: "Pilot Payout",
-    party: "S. Fernando",
-    amount: "LKR 5,100",
-    status: "Paid",
-    date: "Jul 10",
-  },
-];
+import { mockTransactions, mockPaymentMetrics } from "@/data/mockData";
 
 const filters = [
   "Invoices",
@@ -86,7 +34,7 @@ export function PaymentsView() {
 
       {/* Metrics Row (3 columns) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {mockMetrics.map((m) => (
+        {mockPaymentMetrics.map((m) => (
           <MetricCard key={m.title} title={m.title} value={m.value} footer={m.footer} />
         ))}
       </div>

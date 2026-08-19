@@ -14,8 +14,9 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-export type TabId =
-  "dashboard" | "requests" | "pilots" | "farmers" | "reports" | "payments" | "settings" | "profile";
+import type { TabId } from "@/types";
+
+export type { TabId };
 
 interface SidebarProps {
   activeTab: TabId;

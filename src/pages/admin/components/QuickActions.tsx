@@ -1,5 +1,5 @@
 import { UserPlus, Plane, FileText, ArrowRight } from "lucide-react";
-import type { TabId } from "./Sidebar";
+import type { TabId } from "@/types";
 
 interface QuickActionsProps {
   onNavigate?: (tab: TabId) => void;

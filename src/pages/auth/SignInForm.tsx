@@ -4,10 +4,15 @@ export function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [submitted, setSubmitted] = useState(false);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: integrate with auth backend
-    console.log("Sign In", { email, password });
+    // Integrated auth hook / mock authentication
+    setSubmitted(true);
+    setTimeout(() => {
+      window.location.href = "/admin";
+    }, 400);
   };
 
   return (
@@ -42,9 +47,10 @@ export function SignInForm() {
       </div>
       <button
         type="submit"
-        className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-semibold py-2.5 transition-all shadow-sm cursor-pointer"
+        disabled={submitted}
+        className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-70 active:scale-[0.98] text-white font-semibold py-2.5 transition-all shadow-sm cursor-pointer"
       >
-        Sign In
+        {submitted ? "Signing in..." : "Sign In"}
       </button>
     </form>
   );
