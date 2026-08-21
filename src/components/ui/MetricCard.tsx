@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 export interface MetricCardProps {
@@ -13,7 +13,7 @@ export interface MetricCardProps {
   className?: string;
 }
 
-export function MetricCard({
+export const MetricCard = memo(function MetricCard({
   title,
   value,
   footer,
@@ -52,4 +52,4 @@ export function MetricCard({
       )}
     </div>
   );
-}
+});

@@ -125,10 +125,7 @@ export function PilotDetails({ pilotId, onBack }: PilotDetailsProps) {
             rating={details.rating}
             reviewsCount={details.reviewsCount}
           />
-          <CertificatesCard
-            documents={details.documents}
-            onViewDocument={setSelectedDoc}
-          />
+          <CertificatesCard documents={details.documents} onViewDocument={setSelectedDoc} />
         </div>
       </div>
 

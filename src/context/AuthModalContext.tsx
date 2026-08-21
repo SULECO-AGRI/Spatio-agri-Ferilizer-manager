@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
 
 type ModalMode = "signin" | "signup";
 
@@ -15,17 +15,26 @@ export const AuthModalProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<ModalMode>("signin");
 
-  const open = (m: ModalMode) => {
+  const open = useCallback((m: ModalMode) => {
     setMode(m);
     setIsOpen(true);
-  };
-  const close = () => setIsOpen(false);
+  }, []);
 
-  return (
-    <AuthModalContext.Provider value={{ isOpen, mode, open, close }}>
-      {children}
-    </AuthModalContext.Provider>
+  const close = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      isOpen,
+      mode,
+      open,
+      close,
+    }),
+    [isOpen, mode, open, close],
   );
+
+  return <AuthModalContext.Provider value={value}>{children}</AuthModalContext.Provider>;
 };
 
 // eslint-disable-next-line react-refresh/only-export-components

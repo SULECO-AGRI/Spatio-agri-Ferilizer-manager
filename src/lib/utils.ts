@@ -9,7 +9,8 @@ export function formatLKR(amount: number | string): string {
   if (typeof amount === "string" && amount.startsWith("LKR")) {
     return amount;
   }
-  const numericValue = typeof amount === "string" ? parseFloat(amount.replace(/[^0-9.-]+/g, "")) : amount;
+  const numericValue =
+    typeof amount === "string" ? parseFloat(amount.replace(/[^0-9.-]+/g, "")) : amount;
   if (isNaN(numericValue)) return "LKR 0";
   return `LKR ${numericValue.toLocaleString("en-US")}`;
 }

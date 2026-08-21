@@ -1,3 +1,5 @@
+import { memo, useMemo } from "react";
+
 export interface LineChartPoint {
   label: string;
   x: number;
@@ -11,13 +13,15 @@ interface LineChartProps {
   className?: string;
 }
 
-export function LineChart({
+export const LineChart = memo(function LineChart({
   title,
   points,
   viewBox = "0 0 500 150",
   className = "",
 }: LineChartProps) {
-  const polylinePoints = points.map((p) => `${p.x},${p.y}`).join(" ");
+  const polylinePoints = useMemo(() => {
+    return points.map((p) => `${p.x},${p.y}`).join(" ");
+  }, [points]);
 
   return (
     <div
@@ -65,4 +69,4 @@ export function LineChart({
       </div>
     </div>
   );
-}
+});

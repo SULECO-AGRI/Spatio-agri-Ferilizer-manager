@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -34,15 +34,16 @@ const menuItems = [
   { id: "profile" as TabId, label: "User Profile", icon: User },
 ];
 
-export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+export const Sidebar = memo(function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       {/* Mobile Toggle Button */}
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[100] p-2 rounded-lg bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors"
+        className="lg:hidden fixed top-4 left-4 z-[100] p-2 rounded-lg bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors cursor-pointer"
       >
         {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
@@ -58,10 +59,10 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             <path
               d="M9 21c3-1 6-4 8-12"
               stroke="#d1fae5"
-              stroke-opacity="0.7"
-              stroke-width="1"
+              strokeOpacity="0.7"
+              strokeWidth="1"
               fill="none"
-              stroke-linecap="round"
+              strokeLinecap="round"
             />
           </svg>
           <div>
@@ -79,6 +80,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             return (
               <button
                 key={id}
+                type="button"
                 onClick={() => {
                   onTabChange(id);
                   setIsOpen(false);
@@ -109,4 +111,4 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       </aside>
     </>
   );
-}
+});

@@ -7,11 +7,7 @@ interface DocumentViewerModalProps {
   onClose: () => void;
 }
 
-export function DocumentViewerModal({
-  document,
-  pilotName,
-  onClose,
-}: DocumentViewerModalProps) {
+export function DocumentViewerModal({ document, pilotName, onClose }: DocumentViewerModalProps) {
   if (!document) return null;
 
   return (
@@ -27,12 +23,8 @@ export function DocumentViewerModal({
               <FileCheck className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-medium text-slate-900 leading-tight">
-                {document.title}
-              </h3>
-              <p className="text-[11px] text-slate-500 font-normal">
-                Issued to {pilotName}
-              </p>
+              <h3 className="text-sm font-medium text-slate-900 leading-tight">{document.title}</h3>
+              <p className="text-[11px] text-slate-500 font-normal">Issued to {pilotName}</p>
             </div>
           </div>
           <button
@@ -83,17 +75,13 @@ export function DocumentViewerModal({
               <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
                 File Size
               </span>
-              <span className="text-slate-700 mt-0.5 block">
-                {document.fileSize || "1.2 MB"}
-              </span>
+              <span className="text-slate-700 mt-0.5 block">{document.fileSize || "1.2 MB"}</span>
             </div>
             <div>
               <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
                 Status
               </span>
-              <span className="text-emerald-700 font-medium mt-0.5 block">
-                Active & Compliant
-              </span>
+              <span className="text-emerald-700 font-medium mt-0.5 block">Active & Compliant</span>
             </div>
           </div>
         </div>

@@ -6,19 +6,14 @@ interface CertificatesCardProps {
   onViewDocument: (doc: PilotDocument) => void;
 }
 
-export function CertificatesCard({
-  documents,
-  onViewDocument,
-}: CertificatesCardProps) {
+export function CertificatesCard({ documents, onViewDocument }: CertificatesCardProps) {
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs font-sans space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-normal uppercase tracking-wider text-slate-400">
           Certificates & Documents
         </h3>
-        <span className="text-xs text-slate-400 font-normal">
-          {documents.length} verified
-        </span>
+        <span className="text-xs text-slate-400 font-normal">{documents.length} verified</span>
       </div>
 
       <div className="space-y-2.5">

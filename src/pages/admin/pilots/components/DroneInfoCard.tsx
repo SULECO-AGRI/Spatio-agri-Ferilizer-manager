@@ -28,9 +28,7 @@ export function DroneInfoCard({ drone }: DroneInfoCardProps) {
 
         {/* Drone Details */}
         <div className="space-y-1 min-w-0 flex-1">
-          <h4 className="text-sm font-medium text-slate-800 leading-snug">
-            {drone.model}
-          </h4>
+          <h4 className="text-sm font-medium text-slate-800 leading-snug">{drone.model}</h4>
           <div className="text-xs text-slate-500 font-normal">
             <span>Tank: {drone.tankCapacity}</span>
             <span className="text-slate-300 mx-2">|</span>
@@ -38,7 +36,9 @@ export function DroneInfoCard({ drone }: DroneInfoCardProps) {
           </div>
           <div className="flex items-center gap-1.5 text-xs text-slate-500 font-normal pt-0.5">
             <Wrench className="w-3 h-3 text-slate-400" />
-            <span>Last Serviced: <span className="text-slate-700">{drone.lastServiced}</span></span>
+            <span>
+              Last Serviced: <span className="text-slate-700">{drone.lastServiced}</span>
+            </span>
           </div>
         </div>
       </div>

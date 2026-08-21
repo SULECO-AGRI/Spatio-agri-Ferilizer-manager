@@ -11,10 +11,7 @@ export function PilotCard({ pilot, onViewDetails }: PilotCardProps) {
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl p-6 flex flex-col justify-between shadow-xs hover:border-slate-300 transition-all font-sans">
       {/* Card Top: Initials Avatar, Name & Status */}
-      <div
-        className="cursor-pointer"
-        onClick={() => onViewDetails(pilot.id)}
-      >
+      <div className="cursor-pointer" onClick={() => onViewDetails(pilot.id)}>
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-xs font-normal shrink-0 border border-slate-200/50">
             {pilot.initials}
@@ -29,8 +26,12 @@ export function PilotCard({ pilot, onViewDetails }: PilotCardProps) {
 
         {/* Card Mid: Stats Info */}
         <div className="space-y-1 my-4 text-xs text-slate-500 font-normal">
-          <div>License: <span className="text-slate-700">{pilot.license}</span></div>
-          <div>Drone: <span className="text-slate-700">{pilot.drone}</span></div>
+          <div>
+            License: <span className="text-slate-700">{pilot.license}</span>
+          </div>
+          <div>
+            Drone: <span className="text-slate-700">{pilot.drone}</span>
+          </div>
           <div className="flex items-center gap-1">
             <span>
               Experience: {pilot.experience} | Rating: {pilot.rating}

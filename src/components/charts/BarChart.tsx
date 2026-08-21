@@ -1,3 +1,5 @@
+import { memo, useMemo } from "react";
+
 export interface BarChartItem {
   label: string;
   value: number;
@@ -11,8 +13,15 @@ interface BarChartProps {
   className?: string;
 }
 
-export function BarChart({ data, title, maxHeightPx = 160, className = "" }: BarChartProps) {
-  const maxValue = Math.max(...data.map((d) => d.value), 1);
+export const BarChart = memo(function BarChart({
+  data,
+  title,
+  maxHeightPx = 160,
+  className = "",
+}: BarChartProps) {
+  const maxValue = useMemo(() => {
+    return Math.max(...data.map((d) => d.value), 1);
+  }, [data]);
 
   return (
     <div
@@ -62,4 +71,4 @@ export function BarChart({ data, title, maxHeightPx = 160, className = "" }: Bar
       </div>
     </div>
   );
-}
+});

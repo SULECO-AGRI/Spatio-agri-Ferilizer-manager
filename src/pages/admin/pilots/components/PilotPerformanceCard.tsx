@@ -1,3 +1,5 @@
+import { memo, useMemo } from "react";
+
 interface MonthlyPerformanceItem {
   label: string;
   value: number;
@@ -7,16 +9,19 @@ interface PilotPerformanceCardProps {
   data: MonthlyPerformanceItem[];
 }
 
-export function PilotPerformanceCard({ data }: PilotPerformanceCardProps) {
-  const maxValue = Math.max(...data.map((d) => d.value), 1);
+export const PilotPerformanceCard = memo(function PilotPerformanceCard({
+  data,
+}: PilotPerformanceCardProps) {
+  const maxValue = useMemo(() => {
+    return Math.max(...data.map((d) => d.value), 1);
+  }, [data]);
+
   const chartHeightPx = 140;
 
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between font-sans">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xs font-normal uppercase tracking-wider text-slate-400">
-          Performance
-        </h3>
+        <h3 className="text-xs font-normal uppercase tracking-wider text-slate-400">Performance</h3>
         <span className="text-xs text-slate-400 font-normal">Monthly Completed Missions</span>
       </div>
 
@@ -59,4 +64,4 @@ export function PilotPerformanceCard({ data }: PilotPerformanceCardProps) {
       </div>
     </div>
   );
-}
+});

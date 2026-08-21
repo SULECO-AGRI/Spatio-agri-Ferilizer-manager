@@ -21,9 +21,7 @@ export function PilotProfileCard({ pilot }: PilotProfileCardProps) {
         {/* Info Body */}
         <div className="space-y-2 flex-1 min-w-0">
           <div>
-            <h4 className="text-lg font-medium text-slate-900 leading-snug">
-              {pilot.name}
-            </h4>
+            <h4 className="text-lg font-medium text-slate-900 leading-snug">{pilot.name}</h4>
             <div className="text-xs text-slate-500 font-normal mt-0.5">
               <span>License {pilot.license}</span>
               <span className="text-slate-300 mx-2">|</span>
@@ -57,13 +55,15 @@ export function PilotProfileCard({ pilot }: PilotProfileCardProps) {
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-slate-400" />
               <span>
-                Flight Hours: <strong className="font-medium text-slate-700">{pilot.flightHours}</strong>
+                Flight Hours:{" "}
+                <strong className="font-medium text-slate-700">{pilot.flightHours}</strong>
               </span>
             </div>
             <div className="flex items-center gap-1.5">
               <Award className="w-3.5 h-3.5 text-slate-400" />
               <span>
-                Certificates: <span className="text-slate-700">{pilot.certificates.join(", ")}</span>
+                Certificates:{" "}
+                <span className="text-slate-700">{pilot.certificates.join(", ")}</span>
               </span>
             </div>
           </div>
