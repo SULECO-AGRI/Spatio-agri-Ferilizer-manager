@@ -27,3 +27,25 @@ export interface ScheduleItem {
   service: string;
   pilot: string;
 }
+
+export interface ActiveMission {
+  id: string;
+  missionCode: string;
+  field: string;
+  region: string;
+  pilotName: string;
+  droneModel: string;
+  status: "Fertilizing" | "Spraying" | "Surveying" | "Returning";
+  progress: number; // percentage 0 - 100
+  battery: number; // percentage 0 - 100
+  payloadLiters: number;
+  maxPayloadLiters: number;
+  altitudeMeters: number;
+  speedKmh: number;
+  sprayFlowRate: string;
+  coordinates: { x: number; y: number; lat: number; lng: number };
+  flightPath: Array<{ x: number; y: number }>;
+  polygonPoints: string;
+  targetFertilizer: string;
+  estimatedCompletion: string;
+}
