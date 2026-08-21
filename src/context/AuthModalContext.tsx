@@ -1,11 +1,8 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
 
-type ModalMode = "signin" | "signup";
-
 interface AuthModalContextProps {
   isOpen: boolean;
-  mode: ModalMode;
-  open: (mode: ModalMode) => void;
+  open: () => void;
   close: () => void;
 }
 
@@ -13,10 +10,8 @@ const AuthModalContext = createContext<AuthModalContextProps | undefined>(undefi
 
 export const AuthModalProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [mode, setMode] = useState<ModalMode>("signin");
 
-  const open = useCallback((m: ModalMode) => {
-    setMode(m);
+  const open = useCallback(() => {
     setIsOpen(true);
   }, []);
 
@@ -27,11 +22,10 @@ export const AuthModalProvider = ({ children }: { children: ReactNode }) => {
   const value = useMemo(
     () => ({
       isOpen,
-      mode,
       open,
       close,
     }),
-    [isOpen, mode, open, close],
+    [isOpen, open, close],
   );
 
   return <AuthModalContext.Provider value={value}>{children}</AuthModalContext.Provider>;

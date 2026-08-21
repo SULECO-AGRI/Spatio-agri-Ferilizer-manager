@@ -118,7 +118,8 @@ export function Nav() {
             Admin
           </Link>
           <button
-            onClick={() => openAuth("signin")}
+            type="button"
+            onClick={() => openAuth()}
             className={`text-sm font-semibold transition-all duration-300 px-3.5 py-1.5 rounded-full ${
               isScrolled
                 ? "text-slate-500 hover:text-[#062419] hover:bg-slate-900/5"
