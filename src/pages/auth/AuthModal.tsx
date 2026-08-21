@@ -64,11 +64,11 @@ export function AuthModal() {
 
               <div>
                 <h2 className="text-xl font-medium text-slate-900 tracking-tight font-display">
-                  Welcome to SpatioAgri
+                  Welcome to Fertilizer Manager
                 </h2>
                 <p className="text-xs text-slate-500 font-normal mt-1 max-w-xs mx-auto">
-                  Sign in with your administrator or pilot credentials to manage fertilizer
-                  operations
+                  Sign in with your administrator credentials to access the precision fertilizer
+                  management portal
                 </p>
               </div>
             </div>

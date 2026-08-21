@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 
 interface SignInFormProps {
   onSuccess?: () => void;
@@ -33,29 +33,8 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
     }, 600);
   };
 
-  const handleFillDemo = () => {
-    setEmail("admin@spatioagri.lk");
-    setPassword("precision2026");
-    setErrorMsg(null);
-  };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4 font-sans text-left">
-      {/* Demo Credentials Quick Pill */}
-      <div className="flex items-center justify-between p-2.5 bg-emerald-50/80 border border-emerald-200/60 rounded-xl text-xs">
-        <div className="flex items-center gap-2 text-emerald-900">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-          <span className="font-medium text-[11px]">Testing demo?</span>
-        </div>
-        <button
-          type="button"
-          onClick={handleFillDemo}
-          className="text-[11px] font-medium text-emerald-700 hover:text-emerald-900 hover:underline cursor-pointer bg-white px-2 py-0.5 rounded-md border border-emerald-200 shadow-2xs"
-        >
-          Auto-fill Demo
-        </button>
-      </div>
-
       {errorMsg && (
         <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-normal">
           {errorMsg}
@@ -77,7 +56,7 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded-xl bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:bg-white focus:ring-3 focus:ring-emerald-500/15 text-slate-900 placeholder-slate-400 pl-10 pr-4 py-2.5 text-xs outline-none transition-all duration-200"
-            placeholder="admin@spatioagri.lk"
+            placeholder="admin@fertilizermanager.lk"
           />
         </div>
       </div>
@@ -92,7 +71,7 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
             href="#forgot-password"
             onClick={(e) => {
               e.preventDefault();
-              alert("Password reset link sent to registered email address.");
+              alert("Password reset link sent to registered administrator email address.");
             }}
             className="text-[11px] font-normal text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
           >
@@ -144,11 +123,11 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
         {isLoading ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
-            <span>Verifying credentials...</span>
+            <span>Verifying administrator credentials...</span>
           </>
         ) : (
           <>
-            <span>Sign In to Portal</span>
+            <span>Sign In with Administrator Credentials</span>
             <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
           </>
         )}
@@ -157,7 +136,7 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
       {/* Security Footer Note */}
       <div className="pt-2 flex items-center justify-center gap-1.5 text-[11px] text-slate-400 font-normal">
         <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-        <span>256-bit encrypted secure admin authentication</span>
+        <span>256-bit encrypted secure administrator authentication</span>
       </div>
     </form>
   );
