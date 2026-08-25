@@ -1,5 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import {
   Layers,
   Maximize2,
@@ -14,18 +16,112 @@ import {
   Plane,
   Crosshair,
   MapPin,
+  Map as MapIcon,
 } from "lucide-react";
 import { mockActiveMissions } from "@/data/mockData";
 import type { ActiveMission } from "@/types";
 
-type MapStyle = "satellite" | "standard" | "terrain";
+type MapStyle = "osm" | "terrain" | "satellite";
+
+// Geographic field polygon vertices for each Sri Lanka agricultural zone
+const MISSION_GEO_BOUNDS: Record<string, [number, number][]> = {
+  "MSN-401": [
+    [8.3155, 80.3985],
+    [8.3168, 80.4092],
+    [8.3065, 80.4105],
+    [8.3052, 80.3998],
+  ],
+  "MSN-402": [
+    [7.9455, 81.0125],
+    [7.9472, 81.0265],
+    [7.9348, 81.0278],
+    [7.9332, 81.0138],
+  ],
+  "MSN-403": [
+    [7.8778, 80.6455],
+    [7.8792, 80.6575],
+    [7.8682, 80.6588],
+    [7.8668, 80.6468],
+  ],
+  "MSN-404": [
+    [7.4912, 80.3565],
+    [7.4928, 80.3695],
+    [7.4808, 80.3708],
+    [7.4792, 80.3578],
+  ],
+  "MSN-405": [
+    [7.4722, 80.6178],
+    [7.4735, 80.6298],
+    [7.4622, 80.6312],
+    [7.4608, 80.6192],
+  ],
+};
+
+// Flight path geo-waypoints for each active mission
+const MISSION_GEO_FLIGHT_PATHS: Record<string, [number, number][]> = {
+  "MSN-401": [
+    [8.3075, 80.4012],
+    [8.3092, 80.4058],
+    [8.3125, 80.4022],
+    [8.3114, 80.4037],
+  ],
+  "MSN-402": [
+    [7.9358, 81.0155],
+    [7.9388, 81.0228],
+    [7.9425, 81.0168],
+    [7.9403, 81.0188],
+  ],
+  "MSN-403": [
+    [7.8695, 80.6478],
+    [7.8718, 80.6548],
+    [7.8752, 80.6492],
+    [7.8731, 80.6511],
+  ],
+  "MSN-404": [
+    [7.4815, 80.3595],
+    [7.4842, 80.3662],
+    [7.4882, 80.3608],
+    [7.4863, 80.3623],
+  ],
+  "MSN-405": [
+    [7.4635, 80.6202],
+    [7.4658, 80.6268],
+    [7.4695, 80.6218],
+    [7.4675, 80.6234],
+  ],
+};
+
+const TILE_LAYERS: Record<MapStyle, { url: string; attribution: string; maxZoom: number }> = {
+  osm: {
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  },
+  terrain: {
+    url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+    attribution:
+      'Map data: &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>, <a href="https://opentopomap.org" target="_blank">OpenTopoMap</a>',
+    maxZoom: 17,
+  },
+  satellite: {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attribution:
+      "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+    maxZoom: 19,
+  },
+};
 
 export function LiveMissionMap() {
   const [selectedMissionId, setSelectedMissionId] = useState<string | null>("MSN-401");
   const [activeFilter, setActiveFilter] = useState<string>("All");
-  const [mapStyle, setMapStyle] = useState<MapStyle>("satellite");
+  const [mapStyle, setMapStyle] = useState<MapStyle>("osm");
   const [isExpanded, setIsExpanded] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
+
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const layerGroupRef = useRef<L.LayerGroup | null>(null);
 
   const filteredMissions = useMemo(() => {
     return mockActiveMissions.filter((m) => {
@@ -42,44 +138,251 @@ export function LiveMissionMap() {
     switch (status) {
       case "Fertilizing":
         return {
-          bg: "bg-emerald-500",
+          hex: "#10b981",
+          border: "#059669",
           text: "text-emerald-700",
           badgeBg: "bg-emerald-50 border-emerald-200",
-          stroke: "#10b981",
-          fill: "rgba(16, 185, 129, 0.15)",
+          fill: "rgba(16, 185, 129, 0.2)",
         };
       case "Spraying":
         return {
-          bg: "bg-cyan-500",
+          hex: "#06b6d4",
+          border: "#0891b2",
           text: "text-cyan-700",
           badgeBg: "bg-cyan-50 border-cyan-200",
-          stroke: "#06b6d4",
-          fill: "rgba(6, 182, 212, 0.15)",
+          fill: "rgba(6, 182, 212, 0.2)",
         };
       case "Surveying":
         return {
-          bg: "bg-indigo-500",
+          hex: "#6366f1",
+          border: "#4f46e5",
           text: "text-indigo-700",
           badgeBg: "bg-indigo-50 border-indigo-200",
-          stroke: "#6366f1",
-          fill: "rgba(99, 102, 241, 0.15)",
+          fill: "rgba(99, 102, 241, 0.2)",
         };
       case "Returning":
         return {
-          bg: "bg-amber-500",
+          hex: "#f59e0b",
+          border: "#d97706",
           text: "text-amber-700",
           badgeBg: "bg-amber-50 border-amber-200",
-          stroke: "#f59e0b",
-          fill: "rgba(245, 158, 11, 0.15)",
+          fill: "rgba(245, 158, 11, 0.2)",
         };
       default:
         return {
-          bg: "bg-slate-500",
+          hex: "#64748b",
+          border: "#475569",
           text: "text-slate-700",
           badgeBg: "bg-slate-50 border-slate-200",
-          stroke: "#64748b",
-          fill: "rgba(100, 116, 139, 0.15)",
+          fill: "rgba(100, 116, 139, 0.2)",
         };
+    }
+  };
+
+  // Initialize Leaflet Map instance
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    if (!mapInstanceRef.current) {
+      const map = L.map(mapContainerRef.current, {
+        center: [7.8731, 80.6511], // Central Sri Lanka (Dambulla)
+        zoom: 9,
+        zoomControl: false,
+        attributionControl: true,
+      });
+
+      const initialLayer = TILE_LAYERS[mapStyle];
+      const tileLayer = L.tileLayer(initialLayer.url, {
+        attribution: initialLayer.attribution,
+        maxZoom: initialLayer.maxZoom,
+      }).addTo(map);
+
+      tileLayerRef.current = tileLayer;
+
+      const layerGroup = L.layerGroup().addTo(map);
+      layerGroupRef.current = layerGroup;
+
+      mapInstanceRef.current = map;
+    }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        tileLayerRef.current = null;
+        layerGroupRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update base tile layer on style change
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+
+    if (tileLayerRef.current) {
+      mapInstanceRef.current.removeLayer(tileLayerRef.current);
+    }
+
+    const currentLayer = TILE_LAYERS[mapStyle];
+    const newTileLayer = L.tileLayer(currentLayer.url, {
+      attribution: currentLayer.attribution,
+      maxZoom: currentLayer.maxZoom,
+    }).addTo(mapInstanceRef.current);
+
+    tileLayerRef.current = newTileLayer;
+  }, [mapStyle]);
+
+  // Render drone markers, field polygons, and flight trajectories
+  useEffect(() => {
+    if (!mapInstanceRef.current || !layerGroupRef.current) return;
+
+    const layerGroup = layerGroupRef.current;
+    layerGroup.clearLayers();
+
+    filteredMissions.forEach((mission) => {
+      const isSelected = selectedMissionId === mission.id;
+      const colors = getStatusColor(mission.status);
+      const latLng: [number, number] = [mission.coordinates.lat, mission.coordinates.lng];
+
+      // 1. Draw Field Boundary Polygon
+      const polygonCoords = MISSION_GEO_BOUNDS[mission.id];
+      if (polygonCoords) {
+        const polygon = L.polygon(polygonCoords, {
+          color: colors.hex,
+          weight: isSelected ? 2.5 : 1.5,
+          opacity: isSelected ? 0.9 : 0.6,
+          fillColor: colors.hex,
+          fillOpacity: isSelected ? 0.22 : 0.08,
+          dashArray: isSelected ? undefined : "4, 4",
+        });
+
+        polygon.on("click", () => {
+          setSelectedMissionId(mission.id);
+          mapInstanceRef.current?.flyTo(latLng, Math.max(mapInstanceRef.current.getZoom(), 11), {
+            duration: 0.8,
+          });
+        });
+
+        polygon.bindTooltip(
+          `<strong>${mission.field}</strong><br/><span style="color:${colors.hex}">${mission.status}</span>`,
+          { className: "text-xs font-sans rounded-lg shadow-sm", sticky: true },
+        );
+
+        polygon.addTo(layerGroup);
+      }
+
+      // 2. Draw Flight Path Trail
+      const flightCoords = MISSION_GEO_FLIGHT_PATHS[mission.id];
+      if (flightCoords && isSelected) {
+        const polyline = L.polyline(flightCoords, {
+          color: colors.hex,
+          weight: 3,
+          opacity: 0.85,
+          dashArray: "6, 6",
+          lineCap: "round",
+          lineJoin: "round",
+        });
+        polyline.addTo(layerGroup);
+      }
+
+      // 3. Custom HTML Drone Radar Marker
+      const markerHtml = `
+        <div class="drone-radar-marker cursor-pointer" style="width: 48px; height: 48px;">
+          <div class="drone-radar-pulse" style="width: ${isSelected ? "44px" : "32px"}; height: ${isSelected ? "44px" : "32px"}; background-color: ${colors.hex}; opacity: 0.35;"></div>
+          <div style="
+            width: ${isSelected ? "34px" : "28px"};
+            height: ${isSelected ? "34px" : "28px"};
+            background: #062419;
+            border: 2.5px solid ${colors.hex};
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease;
+          ">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${colors.hex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07l14.14-14.14"/>
+            </svg>
+          </div>
+          <div style="
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: ${isSelected ? "#062419" : "rgba(15, 23, 42, 0.9)"};
+            color: #ffffff;
+            font-family: monospace;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid ${isSelected ? colors.hex : "rgba(255,255,255,0.2)"};
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          ">
+            ${mission.missionCode}
+          </div>
+        </div>
+      `;
+
+      const customIcon = L.divIcon({
+        html: markerHtml,
+        className: "custom-drone-icon",
+        iconSize: [48, 48],
+        iconAnchor: [24, 24],
+      });
+
+      const marker = L.marker(latLng, { icon: customIcon });
+
+      marker.on("click", () => {
+        setSelectedMissionId(mission.id);
+        mapInstanceRef.current?.flyTo(latLng, Math.max(mapInstanceRef.current.getZoom(), 11), {
+          duration: 0.8,
+        });
+      });
+
+      marker.bindPopup(`
+        <div style="padding: 12px; font-family: 'Inter', sans-serif; min-width: 190px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px;">
+            <span style="background: #062419; color: #fff; font-size: 11px; font-family: monospace; padding: 2px 6px; border-radius: 4px;">${mission.missionCode}</span>
+            <span style="font-size: 11px; font-weight: 500; color: ${colors.hex};">${mission.status}</span>
+          </div>
+          <div style="font-size: 12px; font-weight: 600; color: #0f172a; margin-bottom: 2px;">${mission.field}</div>
+          <div style="font-size: 11px; color: #64748b; margin-bottom: 8px;">${mission.region}</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; padding-top: 6px; border-top: 1px solid #f1f5f9;">
+            <div><span style="color:#94a3b8;">Pilot:</span> <span style="color:#1e293b; font-weight:500;">${mission.pilotName}</span></div>
+            <div><span style="color:#94a3b8;">Battery:</span> <span style="color:#1e293b; font-weight:500;">${mission.battery}%</span></div>
+            <div><span style="color:#94a3b8;">Rate:</span> <span style="color:#1e293b; font-weight:500;">${mission.sprayFlowRate}</span></div>
+            <div><span style="color:#94a3b8;">Progress:</span> <span style="color:#10b981; font-weight:600;">${mission.progress}%</span></div>
+          </div>
+        </div>
+      `);
+
+      marker.addTo(layerGroup);
+    });
+  }, [filteredMissions, selectedMissionId]);
+
+  // Adjust map size when expanded or resized
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      mapInstanceRef.current?.invalidateSize();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [isExpanded]);
+
+  // Center on selected mission
+  const handleRecenter = () => {
+    if (!mapInstanceRef.current) return;
+    if (selectedMission) {
+      mapInstanceRef.current.flyTo(
+        [selectedMission.coordinates.lat, selectedMission.coordinates.lng],
+        11,
+        { duration: 0.8 },
+      );
+    } else {
+      mapInstanceRef.current.flyTo([7.8731, 80.6511], 9, { duration: 0.8 });
     }
   };
 
@@ -98,12 +401,12 @@ export function LiveMissionMap() {
               Live Active Drone Missions Map
             </h2>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-normal bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />5 Drones
-              Airborne
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+              {filteredMissions.length} Drones Active
             </span>
           </div>
-          <p className="text-xs text-slate-400 font-normal mt-0.5">
-            Real-time GPS telemetry, precision flight paths & live fertilizer spray rates
+          <p className="text-xs text-slate-400 font-normal mt-0.5 flex items-center gap-1.5">
+            <span>OpenStreetMap live GIS telemetry, precision flight paths & spray rates</span>
           </p>
         </div>
 
@@ -127,30 +430,20 @@ export function LiveMissionMap() {
             ))}
           </div>
 
-          {/* Map Layer Mode Buttons */}
+          {/* OpenStreetMap Layer Mode Buttons */}
           <div className="flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 text-xs">
             <button
               type="button"
-              onClick={() => setMapStyle("satellite")}
+              onClick={() => setMapStyle("osm")}
               className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-                mapStyle === "satellite"
+                mapStyle === "osm"
                   ? "bg-[#062419] text-white font-normal shadow-2xs"
                   : "text-slate-500 hover:text-slate-850"
               }`}
+              title="OpenStreetMap Standard Vector Map"
             >
-              <Layers className="w-3 h-3" />
-              <span>Satellite</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMapStyle("standard")}
-              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-                mapStyle === "standard"
-                  ? "bg-[#062419] text-white font-normal shadow-2xs"
-                  : "text-slate-500 hover:text-slate-850"
-              }`}
-            >
-              <span>Vector</span>
+              <MapIcon className="w-3 h-3" />
+              <span>OSM</span>
             </button>
             <button
               type="button"
@@ -160,8 +453,22 @@ export function LiveMissionMap() {
                   ? "bg-[#062419] text-white font-normal shadow-2xs"
                   : "text-slate-500 hover:text-slate-850"
               }`}
+              title="OpenTopoMap Topography & Terrain"
             >
               <span>Terrain</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMapStyle("satellite")}
+              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                mapStyle === "satellite"
+                  ? "bg-[#062419] text-white font-normal shadow-2xs"
+                  : "text-slate-500 hover:text-slate-850"
+              }`}
+              title="Esri World Satellite Imagery"
+            >
+              <Layers className="w-3 h-3" />
+              <span>Satellite</span>
             </button>
           </div>
 
@@ -183,249 +490,28 @@ export function LiveMissionMap() {
 
       {/* Main Map Interactive Viewport & Side Telemetry Card */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-4">
-        {/* Map Canvas (8 Columns) */}
+        {/* OpenStreetMap Container (8 Columns) */}
         <div className="lg:col-span-8 relative w-full h-[380px] sm:h-[430px] rounded-2xl overflow-hidden border border-slate-200/90 shadow-inner group">
-          {/* Base Map Background Styling by Layer Mode */}
-          <div
-            className={`absolute inset-0 transition-colors duration-500 ${
-              mapStyle === "satellite"
-                ? "bg-[#0c1f17]"
-                : mapStyle === "terrain"
-                  ? "bg-[#e8ece5]"
-                  : "bg-[#f1f5f9]"
-            }`}
-          />
+          {/* Leaflet Map DOM Node */}
+          <div ref={mapContainerRef} className="w-full h-full" />
 
-          {/* Map Vector Cartography / Satellite Grid Elements */}
-          <svg
-            className="w-full h-full absolute inset-0 select-none"
-            viewBox="0 0 600 400"
-            preserveAspectRatio="xMidYMid meet"
-            style={{
-              transform: `scale(${zoomLevel})`,
-              transformOrigin: "center center",
-              transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-            }}
-          >
-            <defs>
-              {/* Satellite Terrain Noise & Pattern */}
-              <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path
-                  d="M 40 0 L 0 0 0 40"
-                  fill="none"
-                  stroke={
-                    mapStyle === "satellite"
-                      ? "rgba(255,255,255,0.04)"
-                      : mapStyle === "terrain"
-                        ? "rgba(0,0,0,0.05)"
-                        : "rgba(0,0,0,0.04)"
-                  }
-                  strokeWidth="0.8"
-                />
-              </pattern>
-              {/* Pulse Radial Glow for Drones */}
-              <radialGradient id="droneGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-              </radialGradient>
-            </defs>
-
-            {/* Background Grid */}
-            <rect width="100%" height="100%" fill="url(#gridPattern)" />
-
-            {/* Geographical Contour Topography & River Basins */}
-            {mapStyle === "satellite" ? (
-              <>
-                {/* Dark Satellite Agri Parcels */}
-                <path
-                  d="M0,80 Q150,120 300,70 T600,100 L600,0 L0,0 Z"
-                  fill="rgba(16, 185, 129, 0.04)"
-                />
-                <path
-                  d="M0,280 Q200,240 400,320 T600,290 L600,400 L0,400 Z"
-                  fill="rgba(6, 78, 59, 0.2)"
-                />
-                {/* Mahaweli River Path */}
-                <path
-                  d="M120,0 C160,110 240,160 330,240 S480,330 520,400"
-                  fill="none"
-                  stroke="#0369a1"
-                  strokeWidth="3.5"
-                  strokeOpacity="0.4"
-                  strokeLinecap="round"
-                />
-                {/* Secondary Water Channels */}
-                <path
-                  d="M330,240 C280,290 210,320 180,400"
-                  fill="none"
-                  stroke="#0284c7"
-                  strokeWidth="2"
-                  strokeOpacity="0.3"
-                  strokeLinecap="round"
-                />
-                {/* Road Networks */}
-                <path
-                  d="M0,180 L230,170 L380,240 L600,260"
-                  fill="none"
-                  stroke="#334155"
-                  strokeWidth="1.5"
-                  strokeDasharray="4,2"
-                />
-                <path d="M260,0 L270,160 L320,400" fill="none" stroke="#334155" strokeWidth="1.5" />
-              </>
-            ) : (
-              <>
-                {/* Light Vector & Terrain Background Elements */}
-                <path
-                  d="M120,0 C160,110 240,160 330,240 S480,330 520,400"
-                  fill="none"
-                  stroke="#7dd3fc"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M0,180 L230,170 L380,240 L600,260"
-                  fill="none"
-                  stroke="#cbd5e1"
-                  strokeWidth="2.5"
-                />
-                <path d="M260,0 L270,160 L320,400" fill="none" stroke="#94a3b8" strokeWidth="2" />
-              </>
-            )}
-
-            {/* Sri Lanka Region Zone Labels on Map */}
-            <g
-              className={`text-[10px] font-mono select-none ${
-                mapStyle === "satellite" ? "fill-slate-400" : "fill-slate-500"
-              }`}
-            >
-              <text x="180" y="55" opacity="0.65">
-                ZONE 01 • ANURADHAPURA NORTH
-              </text>
-              <text x="400" y="90" opacity="0.65">
-                ZONE 02 • POLONNARUWA BASIN
-              </text>
-              <text x="320" y="270" opacity="0.65">
-                ZONE 03 • DAMBULLA AGRITECH
-              </text>
-              <text x="70" y="360" opacity="0.65">
-                ZONE 04 • KURUNEGALA PADDY
-              </text>
-            </g>
-
-            {/* Field Boundary Polygons for Active Missions */}
-            {filteredMissions.map((m) => {
-              const colors = getStatusColor(m.status);
-              const isSelected = selectedMissionId === m.id;
-              return (
-                <g key={`poly-${m.id}`}>
-                  {/* Field Polygon Area */}
-                  <polygon
-                    points={m.polygonPoints}
-                    fill={isSelected ? colors.fill : "rgba(255,255,255,0.03)"}
-                    stroke={isSelected ? colors.stroke : "rgba(148, 163, 184, 0.4)"}
-                    strokeWidth={isSelected ? "2" : "1"}
-                    strokeDasharray={isSelected ? "none" : "3,3"}
-                    className="transition-all duration-300 cursor-pointer"
-                    onClick={() => setSelectedMissionId(m.id)}
-                  />
-
-                  {/* Flight Path Breadcrumb Trail with Animated Dash */}
-                  {isSelected && (
-                    <polyline
-                      points={m.flightPath.map((p) => `${p.x},${p.y}`).join(" ")}
-                      fill="none"
-                      stroke={colors.stroke}
-                      strokeWidth="2"
-                      strokeDasharray="4,4"
-                      strokeLinecap="round"
-                      className="animate-[dash_1.5s_linear_infinite]"
-                    />
-                  )}
-                </g>
-              );
-            })}
-
-            {/* Active Drones Radar Halos & Markers */}
-            {filteredMissions.map((m) => {
-              const colors = getStatusColor(m.status);
-              const isSelected = selectedMissionId === m.id;
-              return (
-                <g
-                  key={`marker-${m.id}`}
-                  transform={`translate(${m.coordinates.x}, ${m.coordinates.y})`}
-                  className="cursor-pointer transition-transform duration-300"
-                  onClick={() => setSelectedMissionId(m.id)}
-                >
-                  {/* Pulsing Concentric Radar Halo */}
-                  <circle
-                    r={isSelected ? "22" : "14"}
-                    fill={colors.stroke}
-                    fillOpacity="0.15"
-                    className="animate-ping"
-                  />
-                  <circle r={isSelected ? "14" : "10"} fill={colors.stroke} fillOpacity="0.3" />
-
-                  {/* Drone Pin Core */}
-                  <circle
-                    r="8"
-                    fill={isSelected ? "#062419" : "#ffffff"}
-                    stroke={colors.stroke}
-                    strokeWidth="2.5"
-                    className="shadow-md"
-                  />
-
-                  {/* Drone Mini Icon */}
-                  <g transform="translate(-4, -4) scale(0.65)">
-                    <path d="M6 2L10 6L6 10L2 6Z" fill={isSelected ? "#10b981" : colors.stroke} />
-                  </g>
-
-                  {/* Floating Tag Label Above Drone Pin */}
-                  <g transform="translate(0, -16)">
-                    <rect
-                      x="-36"
-                      y="-12"
-                      width="72"
-                      height="18"
-                      rx="6"
-                      fill={isSelected ? "#062419" : "rgba(15, 23, 42, 0.85)"}
-                      stroke={isSelected ? colors.stroke : "rgba(255,255,255,0.2)"}
-                      strokeWidth="1"
-                    />
-                    <text
-                      x="0"
-                      y="1"
-                      fill="#ffffff"
-                      fontSize="9"
-                      fontWeight="500"
-                      textAnchor="middle"
-                      fontFamily="monospace"
-                    >
-                      {m.missionCode}
-                    </text>
-                  </g>
-                </g>
-              );
-            })}
-          </svg>
-
-          {/* Google Maps Style Bottom-Left Map HUD Badge */}
-          <div className="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-xl px-3 py-1.5 text-white flex items-center gap-2.5 shadow-lg select-none">
+          {/* OpenStreetMap RTK-GPS Fixed Badge */}
+          <div className="absolute bottom-3 left-3 bg-slate-900/85 backdrop-blur-md border border-white/10 rounded-xl px-3 py-1.5 text-white flex items-center gap-2.5 shadow-lg select-none z-[1000]">
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-[11px] font-normal tracking-wide">
               RTK-GPS Fixed • Accuracy ±1.5cm
             </span>
-            <span className="text-[10px] text-slate-400 border-l border-slate-700 pl-2">
-              Sri Lanka Grid (SLD99)
+            <span className="text-[10px] text-emerald-400 border-l border-slate-700 pl-2">
+              OpenStreetMap Active
             </span>
           </div>
 
-          {/* Google Maps Style Bottom-Right Zoom & Recenter Controls */}
-          <div className="absolute bottom-3 right-3 flex flex-col gap-1 select-none">
+          {/* Map Zoom & Recenter Controls */}
+          <div className="absolute bottom-3 right-3 flex flex-col gap-1 select-none z-[1000]">
             <div className="bg-white border border-slate-200 rounded-xl shadow-md overflow-hidden flex flex-col">
               <button
                 type="button"
-                onClick={() => setZoomLevel((z) => Math.min(z + 0.2, 1.8))}
+                onClick={() => mapInstanceRef.current?.zoomIn()}
                 className="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-slate-100 text-sm font-normal border-b border-slate-100 cursor-pointer"
                 title="Zoom In"
               >
@@ -433,7 +519,7 @@ export function LiveMissionMap() {
               </button>
               <button
                 type="button"
-                onClick={() => setZoomLevel((z) => Math.max(z - 0.2, 0.8))}
+                onClick={() => mapInstanceRef.current?.zoomOut()}
                 className="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-slate-100 text-sm font-normal cursor-pointer"
                 title="Zoom Out"
               >
@@ -442,12 +528,9 @@ export function LiveMissionMap() {
             </div>
             <button
               type="button"
-              onClick={() => {
-                setSelectedMissionId("MSN-401");
-                setZoomLevel(1);
-              }}
+              onClick={handleRecenter}
               className="w-8 h-8 bg-white border border-slate-200 rounded-xl shadow-md flex items-center justify-center text-slate-700 hover:bg-slate-100 cursor-pointer"
-              title="Recenter All Missions"
+              title="Recenter Map"
             >
               <Crosshair className="w-4 h-4 text-emerald-600" />
             </button>
@@ -602,7 +685,7 @@ export function LiveMissionMap() {
               <Navigation className="w-8 h-8 text-slate-300 mb-2" />
               <p className="text-xs font-normal text-slate-700">Select a mission marker</p>
               <p className="text-[11px] text-slate-400 font-normal mt-0.5">
-                Click any drone pin on the map to inspect live telemetry
+                Click any drone pin on the OpenStreetMap map to inspect live telemetry
               </p>
             </div>
           )}
@@ -619,7 +702,14 @@ export function LiveMissionMap() {
                   <button
                     key={m.id}
                     type="button"
-                    onClick={() => setSelectedMissionId(m.id)}
+                    onClick={() => {
+                      setSelectedMissionId(m.id);
+                      mapInstanceRef.current?.flyTo(
+                        [m.coordinates.lat, m.coordinates.lng],
+                        Math.max(mapInstanceRef.current.getZoom(), 11),
+                        { duration: 0.8 },
+                      );
+                    }}
                     className={`py-1.5 px-1 rounded-xl text-[11px] font-mono transition-all text-center border cursor-pointer ${
                       isSelected
                         ? "bg-[#062419] text-white border-[#062419] font-normal shadow-2xs"
