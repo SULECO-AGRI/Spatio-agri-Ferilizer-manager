@@ -1,4 +1,4 @@
-import { ChevronRight, Calendar, User, Sprout, Layers, AlertCircle } from "lucide-react";
+import { ChevronRight, Calendar, User, Sprout, Layers, AlertCircle, Loader2 } from "lucide-react";
 import { StatusBadge } from "@/components/ui";
 import type { ApiServiceRequestItem } from "@/types/request";
 
@@ -38,63 +38,8 @@ export function RequestsTable({
 
   if (isLoading) {
     return (
-      <div className="overflow-x-auto bg-white border border-slate-200/80 rounded-2xl shadow-xs font-sans">
-        <table className="w-full text-left border-collapse min-w-[950px]">
-          <thead>
-            <tr className="border-b border-slate-100 text-slate-400 text-xs font-normal">
-              <th className="p-4 pl-6">Request Code</th>
-              <th className="p-4">Farmer</th>
-              <th className="p-4">Field</th>
-              <th className="p-4">Crop</th>
-              <th className="p-4">Area</th>
-              <th className="p-4">Service</th>
-              <th className="p-4">Pref. Date</th>
-              <th className="p-4">Assigned Pilot</th>
-              <th className="p-4">Priority</th>
-              <th className="p-4">Status</th>
-              <th className="p-4 pr-6 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100/50">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <tr key={i} className="animate-pulse">
-                <td className="p-4 pl-6">
-                  <div className="h-4 w-28 bg-slate-200 rounded-md" />
-                </td>
-                <td className="p-4">
-                  <div className="h-4 w-24 bg-slate-200 rounded-md" />
-                </td>
-                <td className="p-4">
-                  <div className="h-4 w-32 bg-slate-200 rounded-md" />
-                </td>
-                <td className="p-4">
-                  <div className="h-4 w-20 bg-slate-200 rounded-md" />
-                </td>
-                <td className="p-4">
-                  <div className="h-4 w-14 bg-slate-200 rounded-md" />
-                </td>
-                <td className="p-4">
-                  <div className="h-4 w-20 bg-slate-200 rounded-md" />
-                </td>
-                <td className="p-4">
-                  <div className="h-4 w-24 bg-slate-200 rounded-md" />
-                </td>
-                <td className="p-4">
-                  <div className="h-4 w-20 bg-slate-200 rounded-md" />
-                </td>
-                <td className="p-4">
-                  <div className="h-5 w-16 bg-slate-200 rounded-full" />
-                </td>
-                <td className="p-4">
-                  <div className="h-5 w-20 bg-slate-200 rounded-full" />
-                </td>
-                <td className="p-4 pr-6 text-right">
-                  <div className="h-4 w-12 bg-slate-200 rounded-md ml-auto" />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs p-16 flex items-center justify-center min-h-[360px]">
+        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
       </div>
     );
   }
@@ -231,3 +176,5 @@ export function RequestsTable({
     </div>
   );
 }
+
+export default RequestsTable;

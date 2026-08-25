@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import type * as LeafletModule from "leaflet";
 import {
   Layers,
   Maximize2,
@@ -117,11 +116,26 @@ export function LiveMissionMap() {
   const [activeFilter, setActiveFilter] = useState<string>("All");
   const [mapStyle, setMapStyle] = useState<MapStyle>("osm");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [L, setL] = useState<typeof LeafletModule | null>(null);
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const tileLayerRef = useRef<L.TileLayer | null>(null);
-  const layerGroupRef = useRef<L.LayerGroup | null>(null);
+  const mapInstanceRef = useRef<LeafletModule.Map | null>(null);
+  const tileLayerRef = useRef<LeafletModule.TileLayer | null>(null);
+  const layerGroupRef = useRef<LeafletModule.LayerGroup | null>(null);
+
+  // Dynamically load Leaflet on the client to avoid SSR "window is not defined"
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([import("leaflet"), import("leaflet/dist/leaflet.css")]).then(([leafletModule]) => {
+      if (isMounted) {
+        setL(leafletModule.default ?? leafletModule);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const filteredMissions = useMemo(() => {
     return mockActiveMissions.filter((m) => {
@@ -181,7 +195,7 @@ export function LiveMissionMap() {
 
   // Initialize Leaflet Map instance
   useEffect(() => {
-    if (!mapContainerRef.current) return;
+    if (!L || !mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
       const map = L.map(mapContainerRef.current, {
@@ -214,11 +228,11 @@ export function LiveMissionMap() {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [L]);
 
   // Update base tile layer on style change
   useEffect(() => {
-    if (!mapInstanceRef.current) return;
+    if (!L || !mapInstanceRef.current) return;
 
     if (tileLayerRef.current) {
       mapInstanceRef.current.removeLayer(tileLayerRef.current);
@@ -231,11 +245,11 @@ export function LiveMissionMap() {
     }).addTo(mapInstanceRef.current);
 
     tileLayerRef.current = newTileLayer;
-  }, [mapStyle]);
+  }, [L, mapStyle]);
 
   // Render drone markers, field polygons, and flight trajectories
   useEffect(() => {
-    if (!mapInstanceRef.current || !layerGroupRef.current) return;
+    if (!L || !mapInstanceRef.current || !layerGroupRef.current) return;
 
     const layerGroup = layerGroupRef.current;
     layerGroup.clearLayers();
@@ -362,7 +376,7 @@ export function LiveMissionMap() {
 
       marker.addTo(layerGroup);
     });
-  }, [filteredMissions, selectedMissionId]);
+  }, [L, filteredMissions, selectedMissionId]);
 
   // Adjust map size when expanded or resized
   useEffect(() => {

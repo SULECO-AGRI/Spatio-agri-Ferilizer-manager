@@ -1,13 +1,13 @@
 import { PageHeader, FilterPills, TableToolbar } from "@/components/ui";
-import { usePilots, pilotFilterTabs } from "@/features/pilots/hooks/usePilots";
+import { usePilots, pilotFilterTabs } from "./hooks/usePilots";
 import { PilotCard } from "./PilotCard";
-import { PilotDetails } from "./PilotDetails";
+import { PilotDetailsView } from "./PilotDetailsView";
 
 interface PilotManagementProps {
   initialPilotId?: string | null;
 }
 
-export function PilotManagement({ initialPilotId = null }: PilotManagementProps) {
+export function PilotManagementView({ initialPilotId = null }: PilotManagementProps) {
   const {
     pilots,
     totalCount,
@@ -20,9 +20,9 @@ export function PilotManagement({ initialPilotId = null }: PilotManagementProps)
     clearSelectedPilot,
   } = usePilots({ initialPilotId });
 
-  // If a pilot is selected, display the detailed Screen 8 view
+  // If a pilot is selected, display the detailed view
   if (selectedPilotId) {
-    return <PilotDetails pilotId={selectedPilotId} onBack={clearSelectedPilot} />;
+    return <PilotDetailsView pilotId={selectedPilotId} onBack={clearSelectedPilot} />;
   }
 
   return (
@@ -70,3 +70,5 @@ export function PilotManagement({ initialPilotId = null }: PilotManagementProps)
     </div>
   );
 }
+
+export default PilotManagementView;

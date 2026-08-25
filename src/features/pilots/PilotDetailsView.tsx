@@ -18,7 +18,7 @@ interface PilotDetailsProps {
   onBack: () => void;
 }
 
-export function PilotDetails({ pilotId, onBack }: PilotDetailsProps) {
+export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
   const [selectedDoc, setSelectedDoc] = useState<PilotDocument | null>(null);
 
   // Retrieve pilot details or build safe fallback from basic mock if needed
@@ -90,6 +90,7 @@ export function PilotDetails({ pilotId, onBack }: PilotDetailsProps) {
       {/* Back Link Breadcrumb */}
       <div>
         <button
+          type="button"
           onClick={onBack}
           className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-700 transition-colors cursor-pointer select-none group"
         >
@@ -108,7 +109,7 @@ export function PilotDetails({ pilotId, onBack }: PilotDetailsProps) {
         <StatusBadge status={details.status} size="md" />
       </div>
 
-      {/* Main Content Layout matching Screen 8 Wireframe */}
+      {/* Main Content Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Left Column: Pilot Profile, Drone Information, Mission History */}
         <div className="space-y-6">
@@ -138,3 +139,5 @@ export function PilotDetails({ pilotId, onBack }: PilotDetailsProps) {
     </div>
   );
 }
+
+export default PilotDetailsView;

@@ -32,12 +32,12 @@ export function PilotProfileCard({ pilot }: PilotProfileCardProps) {
           {/* Contact Row */}
           <div className="flex flex-wrap items-center gap-y-1 gap-x-3 text-xs text-slate-600 font-normal">
             <span className="inline-flex items-center gap-1">
-              <Phone className="w-3 h-3 text-slate-400" />
+              <Phone className="w-3.5 h-3.5 text-slate-400" />
               {pilot.phone}
             </span>
             <span className="text-slate-300 hidden sm:inline">|</span>
             <span className="inline-flex items-center gap-1 text-slate-500">
-              <Mail className="w-3 h-3 text-slate-400" />
+              <Mail className="w-3.5 h-3.5 text-slate-400" />
               {pilot.email}
             </span>
           </div>

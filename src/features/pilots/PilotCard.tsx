@@ -47,23 +47,31 @@ export function PilotCard({ pilot, onViewDetails }: PilotCardProps) {
       {/* Card Bottom: Actions */}
       <div className="flex gap-2 pt-4 border-t border-slate-100 mt-2">
         <button
+          type="button"
           onClick={() => onViewDetails(pilot.id)}
           className="flex-1 py-1.5 px-3 border border-slate-200 hover:bg-slate-50 rounded-lg text-[11px] font-normal text-slate-700 text-center transition-colors cursor-pointer"
         >
           Details
         </button>
-        <button className="flex-1 py-1.5 px-3 border border-slate-200 hover:bg-slate-50 rounded-lg text-[11px] font-normal text-slate-700 text-center transition-colors cursor-pointer">
+        <button
+          type="button"
+          className="flex-1 py-1.5 px-3 border border-slate-200 hover:bg-slate-50 rounded-lg text-[11px] font-normal text-slate-700 text-center transition-colors cursor-pointer"
+        >
           Disable
         </button>
         {pilot.status === "Busy" ? (
           <button
+            type="button"
             disabled
             className="flex-1 py-1.5 px-3 bg-[#8da396]/60 text-white rounded-lg text-[11px] font-normal text-center cursor-not-allowed"
           >
             Assign
           </button>
         ) : (
-          <button className="flex-1 py-1.5 px-3 bg-[#14532d] hover:bg-[#166534] text-white rounded-lg text-[11px] font-normal text-center transition-colors cursor-pointer">
+          <button
+            type="button"
+            className="flex-1 py-1.5 px-3 bg-[#14532d] hover:bg-[#166534] text-white rounded-lg text-[11px] font-normal text-center transition-colors cursor-pointer"
+          >
             Assign
           </button>
         )}

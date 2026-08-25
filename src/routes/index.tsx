@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/pages/landing/Nav";
 import { Hero } from "@/pages/landing/Hero";
 import { VideoSection } from "@/pages/landing/VideoSection";
-import { Workflow } from "@/pages/landing/Workflow";
+import { WorkflowView as Workflow } from "@/features/landing";
 import { Partners } from "@/pages/landing/Partners";
 import { ClosingCta } from "@/pages/landing/ClosingCta";
 import { Footer } from "@/pages/landing/Footer";
