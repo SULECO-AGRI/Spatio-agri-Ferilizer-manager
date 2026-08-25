@@ -144,10 +144,13 @@ export function RequestDetailsView({ request, onBack }: RequestDetailsViewProps)
               Field & Crop Telemetry
             </h3>
 
-            {/* Field Boundary Vector Graphic */}
+            {/* Field Boundary OpenStreetMap */}
             <FieldPolygonMap
               fieldName={request.field?.fieldName || "Field Alpha"}
-              svgPoints="120,60 380,80 340,180 80,160"
+              locationCoordinates={request.field?.locationCoordinates}
+              cropType={request.field?.cropType}
+              area={request.field?.area}
+              district={request.field?.district}
             />
 
             {/* Field Specs Grid */}
