@@ -1,3 +1,5 @@
+import { useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronRight, Calendar, User, Sprout, Layers, AlertCircle, Loader2 } from "lucide-react";
 import { StatusBadge } from "@/components/ui";
 import type { ApiServiceRequestItem } from "@/types/request";
@@ -13,6 +15,15 @@ export function RequestsTable({
   isLoading = false,
   onSelectRequest,
 }: RequestsTableProps) {
+  const parentRef = useRef<HTMLDivElement | null>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: requests.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 58,
+    overscan: 8,
+  });
+
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "N/A";
     try {
@@ -44,11 +55,21 @@ export function RequestsTable({
     );
   }
 
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+
+  const paddingTop = virtualItems.length > 0 ? (virtualItems[0]?.start ?? 0) : 0;
+  const paddingBottom =
+    virtualItems.length > 0 ? totalSize - (virtualItems[virtualItems.length - 1]?.end ?? 0) : 0;
+
   return (
-    <div className="overflow-x-auto bg-white border border-slate-200/80 rounded-2xl shadow-xs font-sans">
+    <div
+      ref={parentRef}
+      className="overflow-auto max-h-[640px] bg-white border border-slate-200/80 rounded-2xl shadow-xs font-sans relative"
+    >
       <table className="w-full text-left border-collapse min-w-[950px]">
-        <thead>
-          <tr className="border-b border-slate-100 text-slate-400 text-xs font-normal">
+        <thead className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
+          <tr className="text-slate-400 text-xs font-normal">
             <th className="p-4 pl-6">Request Code</th>
             <th className="p-4">Farmer</th>
             <th className="p-4">Field</th>
@@ -62,101 +83,120 @@ export function RequestsTable({
             <th className="p-4 pr-6 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100/50 text-sm">
-          {requests.map((req) => (
-            <tr
-              key={req.requestId}
-              onClick={() => onSelectRequest(req.requestId)}
-              className="hover:bg-slate-50/60 transition-colors cursor-pointer group"
-            >
-              {/* Request Code */}
-              <td className="p-4 pl-6 font-mono text-xs font-medium text-slate-900 group-hover:text-emerald-700 transition-colors">
-                {req.requestCode}
-              </td>
-
-              {/* Farmer Name */}
-              <td className="p-4 text-slate-700 font-normal">
-                <div className="flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="truncate max-w-[140px]">
-                    {req.farmer?.fullName || "Unknown"}
-                  </span>
-                </div>
-              </td>
-
-              {/* Field Name */}
-              <td className="p-4 text-slate-600 font-normal">
-                <div className="flex items-center gap-1.5">
-                  <Layers className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="truncate max-w-[150px]">
-                    {req.field?.fieldName || "Field N/A"}
-                  </span>
-                </div>
-              </td>
-
-              {/* Crop */}
-              <td className="p-4 text-slate-800 font-normal">
-                <div className="flex items-center gap-1.5">
-                  <Sprout className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>{req.field?.cropType || "Paddy"}</span>
-                </div>
-              </td>
-
-              {/* Area */}
-              <td className="p-4 text-slate-600 font-normal">
-                {req.field?.area !== undefined ? `${req.field.area} Ha` : "N/A"}
-              </td>
-
-              {/* Service Type */}
-              <td className="p-4 text-slate-700 font-normal">
-                {formatServiceType(req.serviceType)}
-              </td>
-
-              {/* Preferred Date */}
-              <td className="p-4 text-slate-600 font-normal text-xs">
-                <div className="flex items-center gap-1 text-slate-600">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span>{formatDate(req.preferredDate)}</span>
-                </div>
-              </td>
-
-              {/* Assigned Pilot */}
-              <td className="p-4 text-slate-600 font-normal text-xs">
-                {req.assignedPilot ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-medium">
-                    {req.assignedPilot.fullName}
-                  </span>
-                ) : (
-                  <span className="text-slate-400 italic">Unassigned</span>
-                )}
-              </td>
-
-              {/* Priority Badge */}
-              <td className="p-4">
-                <StatusBadge status={req.priority} />
-              </td>
-
-              {/* Status Badge */}
-              <td className="p-4">
-                <StatusBadge status={req.status} />
-              </td>
-
-              {/* Actions */}
-              <td className="p-4 pr-6 text-right">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelectRequest(req.requestId);
-                  }}
-                  className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 text-xs font-medium cursor-pointer"
-                >
-                  <span>View</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                </button>
-              </td>
+        <tbody className="divide-y divide-slate-100/60 text-sm">
+          {paddingTop > 0 && (
+            <tr>
+              <td style={{ height: `${paddingTop}px` }} colSpan={11} />
             </tr>
-          ))}
+          )}
+
+          {virtualItems.map((virtualRow) => {
+            const req = requests[virtualRow.index];
+            if (!req) return null;
+
+            return (
+              <tr
+                key={req.requestId}
+                data-index={virtualRow.index}
+                ref={rowVirtualizer.measureElement}
+                onClick={() => onSelectRequest(req.requestId)}
+                className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
+              >
+                {/* Request Code */}
+                <td className="p-4 pl-6 font-mono text-xs font-medium text-slate-900 group-hover:text-emerald-700 transition-colors">
+                  {req.requestCode}
+                </td>
+
+                {/* Farmer Name */}
+                <td className="p-4 text-slate-700 font-normal">
+                  <div className="flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate max-w-[140px]">
+                      {req.farmer?.fullName || "Unknown"}
+                    </span>
+                  </div>
+                </td>
+
+                {/* Field Name */}
+                <td className="p-4 text-slate-600 font-normal">
+                  <div className="flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate max-w-[150px]">
+                      {req.field?.fieldName || "Field N/A"}
+                    </span>
+                  </div>
+                </td>
+
+                {/* Crop */}
+                <td className="p-4 text-slate-800 font-normal">
+                  <div className="flex items-center gap-1.5">
+                    <Sprout className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>{req.field?.cropType || "Paddy"}</span>
+                  </div>
+                </td>
+
+                {/* Area */}
+                <td className="p-4 text-slate-600 font-normal">
+                  {req.field?.area !== undefined ? `${req.field.area} Ha` : "N/A"}
+                </td>
+
+                {/* Service Type */}
+                <td className="p-4 text-slate-700 font-normal">
+                  {formatServiceType(req.serviceType)}
+                </td>
+
+                {/* Preferred Date */}
+                <td className="p-4 text-slate-600 font-normal text-xs">
+                  <div className="flex items-center gap-1 text-slate-600">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>{formatDate(req.preferredDate)}</span>
+                  </div>
+                </td>
+
+                {/* Assigned Pilot */}
+                <td className="p-4 text-slate-600 font-normal text-xs">
+                  {req.assignedPilot ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-medium">
+                      {req.assignedPilot.fullName}
+                    </span>
+                  ) : (
+                    <span className="text-slate-400 italic">Unassigned</span>
+                  )}
+                </td>
+
+                {/* Priority Badge */}
+                <td className="p-4">
+                  <StatusBadge status={req.priority} />
+                </td>
+
+                {/* Status Badge */}
+                <td className="p-4">
+                  <StatusBadge status={req.status} />
+                </td>
+
+                {/* Actions */}
+                <td className="p-4 pr-6 text-right">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectRequest(req.requestId);
+                    }}
+                    className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 text-xs font-medium cursor-pointer"
+                  >
+                    <span>View</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
+
+          {paddingBottom > 0 && (
+            <tr>
+              <td style={{ height: `${paddingBottom}px` }} colSpan={11} />
+            </tr>
+          )}
 
           {requests.length === 0 && (
             <tr>

@@ -1,6 +1,5 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type * as LeafletModule from "leaflet";
 import {
   Layers,
   Maximize2,
@@ -19,8 +18,7 @@ import {
 } from "lucide-react";
 import { mockActiveMissions } from "@/data/mockData";
 import type { ActiveMission } from "@/types";
-
-type MapStyle = "osm" | "terrain" | "satellite";
+import { useLeaflet, type LeafletTileStyle } from "@/hooks/useLeaflet";
 
 // Geographic field polygon vertices for each Sri Lanka agricultural zone
 const MISSION_GEO_BOUNDS: Record<string, [number, number][]> = {
@@ -90,52 +88,17 @@ const MISSION_GEO_FLIGHT_PATHS: Record<string, [number, number][]> = {
   ],
 };
 
-const TILE_LAYERS: Record<MapStyle, { url: string; attribution: string; maxZoom: number }> = {
-  osm: {
-    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
-    maxZoom: 19,
-  },
-  terrain: {
-    url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-    attribution:
-      'Map data: &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>, <a href="https://opentopomap.org" target="_blank">OpenTopoMap</a>',
-    maxZoom: 17,
-  },
-  satellite: {
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attribution:
-      "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
-    maxZoom: 19,
-  },
-};
-
 export function LiveMissionMap() {
   const [selectedMissionId, setSelectedMissionId] = useState<string | null>("MSN-401");
   const [activeFilter, setActiveFilter] = useState<string>("All");
-  const [mapStyle, setMapStyle] = useState<MapStyle>("osm");
+  const [mapStyle, setMapStyle] = useState<LeafletTileStyle>("osm");
   const [isExpanded, setIsExpanded] = useState(false);
-  const [L, setL] = useState<typeof LeafletModule | null>(null);
 
-  const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const mapInstanceRef = useRef<LeafletModule.Map | null>(null);
-  const tileLayerRef = useRef<LeafletModule.TileLayer | null>(null);
-  const layerGroupRef = useRef<LeafletModule.LayerGroup | null>(null);
-
-  // Dynamically load Leaflet on the client to avoid SSR "window is not defined"
-  useEffect(() => {
-    let isMounted = true;
-    Promise.all([import("leaflet"), import("leaflet/dist/leaflet.css")]).then(([leafletModule]) => {
-      if (isMounted) {
-        setL(leafletModule.default ?? leafletModule);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const { L, mapContainerRef, mapInstanceRef, layerGroupRef, invalidateSize } = useLeaflet({
+    center: [7.8731, 80.6511],
+    zoom: 9,
+    tileStyle: mapStyle,
+  });
 
   const filteredMissions = useMemo(() => {
     return mockActiveMissions.filter((m) => {
@@ -192,60 +155,6 @@ export function LiveMissionMap() {
         };
     }
   };
-
-  // Initialize Leaflet Map instance
-  useEffect(() => {
-    if (!L || !mapContainerRef.current) return;
-
-    if (!mapInstanceRef.current) {
-      const map = L.map(mapContainerRef.current, {
-        center: [7.8731, 80.6511], // Central Sri Lanka (Dambulla)
-        zoom: 9,
-        zoomControl: false,
-        attributionControl: true,
-      });
-
-      const initialLayer = TILE_LAYERS[mapStyle];
-      const tileLayer = L.tileLayer(initialLayer.url, {
-        attribution: initialLayer.attribution,
-        maxZoom: initialLayer.maxZoom,
-      }).addTo(map);
-
-      tileLayerRef.current = tileLayer;
-
-      const layerGroup = L.layerGroup().addTo(map);
-      layerGroupRef.current = layerGroup;
-
-      mapInstanceRef.current = map;
-    }
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-        tileLayerRef.current = null;
-        layerGroupRef.current = null;
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [L]);
-
-  // Update base tile layer on style change
-  useEffect(() => {
-    if (!L || !mapInstanceRef.current) return;
-
-    if (tileLayerRef.current) {
-      mapInstanceRef.current.removeLayer(tileLayerRef.current);
-    }
-
-    const currentLayer = TILE_LAYERS[mapStyle];
-    const newTileLayer = L.tileLayer(currentLayer.url, {
-      attribution: currentLayer.attribution,
-      maxZoom: currentLayer.maxZoom,
-    }).addTo(mapInstanceRef.current);
-
-    tileLayerRef.current = newTileLayer;
-  }, [L, mapStyle]);
 
   // Render drone markers, field polygons, and flight trajectories
   useEffect(() => {
@@ -376,15 +285,15 @@ export function LiveMissionMap() {
 
       marker.addTo(layerGroup);
     });
-  }, [L, filteredMissions, selectedMissionId]);
+  }, [L, filteredMissions, selectedMissionId, layerGroupRef, mapInstanceRef]);
 
   // Adjust map size when expanded or resized
   useEffect(() => {
     const timer = setTimeout(() => {
-      mapInstanceRef.current?.invalidateSize();
+      invalidateSize();
     }, 300);
     return () => clearTimeout(timer);
-  }, [isExpanded]);
+  }, [isExpanded, invalidateSize]);
 
   // Center on selected mission
   const handleRecenter = () => {

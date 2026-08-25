@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
-import type * as LeafletModule from "leaflet";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { MapPin, Maximize2, Minimize2, Navigation } from "lucide-react";
+import { useLeaflet, type LeafletTileStyle } from "@/hooks/useLeaflet";
 
 interface FieldPolygonMapProps {
   fieldName: string;
@@ -17,27 +17,6 @@ const DEFAULT_COORDS: [number, number][] = [
   [8.5348, 80.4952],
 ];
 
-type MapStyle = "osm" | "satellite" | "terrain";
-
-const TILE_LAYERS: Record<MapStyle, { url: string; attribution: string; maxZoom: number }> = {
-  osm: {
-    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 19,
-  },
-  satellite: {
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye",
-    maxZoom: 19,
-  },
-  terrain: {
-    url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-    attribution:
-      'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 17,
-  },
-};
-
 export function FieldPolygonMap({
   fieldName,
   locationCoordinates,
@@ -45,110 +24,62 @@ export function FieldPolygonMap({
   area,
   district,
 }: FieldPolygonMapProps) {
-  const [mapStyle, setMapStyle] = useState<MapStyle>("osm");
+  const [mapStyle, setMapStyle] = useState<LeafletTileStyle>("osm");
   const [isExpanded, setIsExpanded] = useState(false);
-  const [L, setL] = useState<typeof LeafletModule | null>(null);
 
-  const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const mapInstanceRef = useRef<LeafletModule.Map | null>(null);
-  const tileLayerRef = useRef<LeafletModule.TileLayer | null>(null);
-  const polygonRef = useRef<LeafletModule.Polygon | null>(null);
+  const polygonRef = useRef<ReturnType<typeof import("leaflet").polygon> | null>(null);
 
-  const coordinates: [number, number][] =
-    locationCoordinates && locationCoordinates.length >= 3 ? locationCoordinates : DEFAULT_COORDS;
+  const coordinates: [number, number][] = useMemo(() => {
+    return locationCoordinates && locationCoordinates.length >= 3
+      ? locationCoordinates
+      : DEFAULT_COORDS;
+  }, [locationCoordinates]);
 
-  // Dynamically load Leaflet on the client to avoid SSR issues
+  const center: [number, number] = useMemo(() => {
+    const centerLat = coordinates.reduce((sum, c) => sum + c[0], 0) / coordinates.length;
+    const centerLng = coordinates.reduce((sum, c) => sum + c[1], 0) / coordinates.length;
+    return [centerLat, centerLng];
+  }, [coordinates]);
+
+  const { L, mapContainerRef, mapInstanceRef, layerGroupRef, invalidateSize } = useLeaflet({
+    center,
+    zoom: 15,
+    tileStyle: mapStyle,
+  });
+
+  // Render polygon boundary on map
   useEffect(() => {
-    let isMounted = true;
-    Promise.all([import("leaflet"), import("leaflet/dist/leaflet.css")]).then(([leafletModule]) => {
-      if (isMounted) {
-        setL(leafletModule.default ?? leafletModule);
-      }
+    if (!L || !mapInstanceRef.current || !layerGroupRef.current) return;
+
+    const layerGroup = layerGroupRef.current;
+    layerGroup.clearLayers();
+
+    // Draw agricultural field polygon
+    const polygon = L.polygon(coordinates, {
+      color: "#10b981",
+      weight: 3,
+      opacity: 0.9,
+      fillColor: "#10b981",
+      fillOpacity: 0.25,
     });
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // Initialize Leaflet Map
-  useEffect(() => {
-    if (!L || !mapContainerRef.current) return;
-
-    if (!mapInstanceRef.current) {
-      const centerLat = coordinates.reduce((sum, c) => sum + c[0], 0) / coordinates.length;
-      const centerLng = coordinates.reduce((sum, c) => sum + c[1], 0) / coordinates.length;
-
-      const map = L.map(mapContainerRef.current, {
-        center: [centerLat, centerLng],
-        zoom: 15,
-        zoomControl: false,
-        attributionControl: true,
-      });
-
-      const initialLayer = TILE_LAYERS[mapStyle];
-      const tileLayer = L.tileLayer(initialLayer.url, {
-        attribution: initialLayer.attribution,
-        maxZoom: initialLayer.maxZoom,
-      }).addTo(map);
-
-      tileLayerRef.current = tileLayer;
-
-      // Draw agricultural field polygon
-      const polygon = L.polygon(coordinates, {
-        color: "#10b981",
-        weight: 3,
-        opacity: 0.9,
-        fillColor: "#10b981",
-        fillOpacity: 0.25,
-      }).addTo(map);
-
-      polygonRef.current = polygon;
-
-      polygon.bindPopup(`
-        <div style="padding: 8px; font-family: 'Inter', sans-serif;">
-          <div style="font-size: 13px; font-weight: 600; color: #064e3b; margin-bottom: 2px;">${fieldName}</div>
-          <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">${district || "Field Location"}</div>
-          <div style="font-size: 11px; color: #334155;">
-            <strong>Crop:</strong> ${cropType}<br/>
-            ${area !== undefined ? `<strong>Area:</strong> ${area} Hectares` : ""}
-          </div>
+    polygon.bindPopup(`
+      <div style="padding: 8px; font-family: 'Inter', sans-serif;">
+        <div style="font-size: 13px; font-weight: 600; color: #064e3b; margin-bottom: 2px;">${fieldName}</div>
+        <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">${district || "Field Location"}</div>
+        <div style="font-size: 11px; color: #334155;">
+          <strong>Crop:</strong> ${cropType}<br/>
+          ${area !== undefined ? `<strong>Area:</strong> ${area} Hectares` : ""}
         </div>
-      `);
+      </div>
+    `);
 
-      // Fit map bounds to field polygon with smooth padding
-      map.fitBounds(polygon.getBounds(), { padding: [30, 30] });
+    polygon.addTo(layerGroup);
+    polygonRef.current = polygon;
 
-      mapInstanceRef.current = map;
-    }
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-        tileLayerRef.current = null;
-        polygonRef.current = null;
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [L]);
-
-  // Update base tile layer on style toggle
-  useEffect(() => {
-    if (!L || !mapInstanceRef.current) return;
-
-    if (tileLayerRef.current) {
-      mapInstanceRef.current.removeLayer(tileLayerRef.current);
-    }
-
-    const currentLayer = TILE_LAYERS[mapStyle];
-    const newTileLayer = L.tileLayer(currentLayer.url, {
-      attribution: currentLayer.attribution,
-      maxZoom: currentLayer.maxZoom,
-    }).addTo(mapInstanceRef.current);
-
-    tileLayerRef.current = newTileLayer;
-  }, [L, mapStyle]);
+    // Fit map bounds to field polygon
+    mapInstanceRef.current.fitBounds(polygon.getBounds(), { padding: [30, 30] });
+  }, [L, coordinates, fieldName, cropType, area, district, mapInstanceRef, layerGroupRef]);
 
   // Center / Recenter on field
   const handleRecenter = () => {
@@ -163,10 +94,10 @@ export function FieldPolygonMap({
   // Resize invalidation on expand
   useEffect(() => {
     const timer = setTimeout(() => {
-      mapInstanceRef.current?.invalidateSize();
+      invalidateSize();
     }, 250);
     return () => clearTimeout(timer);
-  }, [isExpanded]);
+  }, [isExpanded, invalidateSize]);
 
   return (
     <div

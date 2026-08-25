@@ -21,12 +21,26 @@ export function Nav() {
   const [activeSection, setActiveSection] = useState("hero");
 
   useEffect(() => {
+    let rafId: number | null = null;
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 40);
+        rafId = null;
+      });
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Initial check
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
   }, []);
 
   useEffect(() => {
