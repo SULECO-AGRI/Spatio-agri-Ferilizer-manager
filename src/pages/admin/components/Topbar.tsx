@@ -1,6 +1,23 @@
-import { Search, Columns, CloudSun, Radio, PlayCircle } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { Search, Columns, CloudSun, Radio, PlayCircle, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export function Topbar() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "Admin User";
+  const initials = user
+    ? `${user.firstName?.[0] || "A"}${user.lastName?.[0] || "U"}`.toUpperCase()
+    : "AU";
+  const roleDisplay =
+    user?.profile?.accessLevel || user?.profile?.department || user?.role || "Operations";
+
+  const handleLogout = async () => {
+    logout();
+    await navigate({ to: "/" });
+  };
+
   return (
     <header className="w-full flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-100 font-sans">
       {/* Left Search Bar & Sidebar Toggle */}
@@ -41,17 +58,25 @@ export function Topbar() {
           </div>
         </div>
 
-        {/* User Block */}
+        {/* User Block & Logout */}
         <div className="flex items-center gap-3 pl-2 py-1 select-none">
           <div className="text-right leading-none">
-            <p className="text-xs font-normal text-slate-800">Admin User</p>
+            <p className="text-xs font-medium text-slate-800">{fullName}</p>
             <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wide mt-1 block">
-              Operations
+              {roleDisplay}
             </span>
           </div>
-          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-normal text-xs flex items-center justify-center shadow-xs">
-            AU
+          <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-medium text-xs flex items-center justify-center shadow-xs">
+            {initials}
           </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Sign out of Admin Dashboard"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-colors cursor-pointer ml-1"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </header>
