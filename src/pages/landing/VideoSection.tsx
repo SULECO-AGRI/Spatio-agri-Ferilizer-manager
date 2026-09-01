@@ -18,9 +18,8 @@ export function VideoSection() {
     if (!video) return;
 
     if (isInView && isPlaying) {
-      video.play().catch((err) => {
-        // Handle autoplay blockages gracefully
-        console.log("Autoplay was prevented: ", err);
+      video.play().catch(() => {
+        // Handle browser autoplay policy restrictions silently
       });
     } else {
       video.pause();
@@ -35,7 +34,9 @@ export function VideoSection() {
       video
         .play()
         .then(() => setIsPlaying(true))
-        .catch((err) => console.log("Failed to play: ", err));
+        .catch(() => {
+          // Playback blocked or interrupted
+        });
     } else {
       video.pause();
       setIsPlaying(false);
