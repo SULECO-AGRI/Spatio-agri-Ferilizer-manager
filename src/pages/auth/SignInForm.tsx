@@ -1,15 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  ArrowRight,
-  Loader2,
-  ShieldCheck,
-  AlertCircle,
-} from "lucide-react";
+import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/apiClient";
 
@@ -24,7 +15,6 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -32,23 +22,11 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
 
   const validate = (): string | null => {
     const trimmedEmail = email.trim();
-    if (!trimmedEmail) {
-      return "Please enter your administrator email address.";
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(trimmedEmail)) {
+    if (!trimmedEmail) return "Please enter your email address.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail))
       return "Please enter a valid email address.";
-    }
-
-    if (!password) {
-      return "Please enter your password.";
-    }
-
-    if (password.length < 8) {
-      return "Password must be at least 8 characters long.";
-    }
-
+    if (!password) return "Please enter your password.";
+    if (password.length < 8) return "Password must be at least 8 characters long.";
     return null;
   };
 
@@ -63,17 +41,9 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
     }
 
     setIsSubmitting(true);
-
     try {
-      await login({
-        email: email.trim(),
-        password,
-      });
-
-      if (onSuccess) {
-        onSuccess();
-      }
-
+      await login({ email: email.trim(), password });
+      if (onSuccess) onSuccess();
       await navigate({ to: "/admin" });
     } catch (err: unknown) {
       if (err instanceof ApiError) {
@@ -81,35 +51,47 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
       } else if (err instanceof Error) {
         setErrorMsg(err.message);
       } else {
-        setErrorMsg("Failed to sign in. Please verify your credentials and try again.");
+        setErrorMsg("Sign in failed. Please verify your credentials and try again.");
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const inputClass =
+    "w-full rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 px-4 py-3 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 font-sans text-left" noValidate>
+    <div className="w-full font-sans">
+      {/* ── Heading ── */}
+      <div className="mb-6 text-center">
+        <h2 className="text-[1.6rem] font-bold text-slate-900 tracking-tight leading-snug">
+          Welcome back
+        </h2>
+        <p className="mt-1.5 text-sm text-slate-500">Sign in to your administrator account</p>
+      </div>
+
+      {/* ── Error Banner ── */}
       {errorMsg && (
         <div
           role="alert"
           aria-live="assertive"
-          className="p-3 bg-rose-50 border border-rose-200/80 rounded-xl text-xs text-rose-700 font-normal flex items-start gap-2 animate-in fade-in slide-in-from-top-1 duration-200"
+          className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg text-sm text-rose-700 flex items-start gap-2"
         >
-          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-          <span className="leading-relaxed">{errorMsg}</span>
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>{errorMsg}</span>
         </div>
       )}
 
-      {/* Email Field */}
-      <div className="space-y-1.5">
-        <label className="block text-xs font-medium text-slate-700" htmlFor="signin-email">
-          Email Address
-        </label>
-        <div className="relative">
-          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+      {/* ── Form ── */}
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        {/* Email */}
+        <div className="space-y-1.5">
+          <label htmlFor="auth-email" className="block text-sm font-semibold text-slate-800">
+            Email address
+          </label>
           <input
-            id="signin-email"
+            id="auth-email"
             type="email"
             required
             autoComplete="email"
@@ -119,97 +101,99 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
               setEmail(e.target.value);
               if (errorMsg) setErrorMsg(null);
             }}
-            className="w-full rounded-xl bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:bg-white focus:ring-3 focus:ring-emerald-500/15 text-slate-900 placeholder-slate-400 pl-10 pr-4 py-2.5 text-xs outline-none transition-all duration-200 disabled:opacity-60"
-            placeholder="admin@fertilizer.com"
+            className={inputClass}
+            placeholder="Enter your email address"
           />
         </div>
-      </div>
 
-      {/* Password Field */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <label className="block text-xs font-medium text-slate-700" htmlFor="signin-password">
-            Password
-          </label>
-          <a
-            href="#forgot-password"
-            onClick={(e) => {
-              e.preventDefault();
-              alert(
-                "Password reset instructions have been sent to the registered administrator email address.",
-              );
-            }}
-            className="text-[11px] font-normal text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
-          >
-            Forgot password?
-          </a>
+        {/* Password */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label htmlFor="auth-password" className="block text-sm font-semibold text-slate-800">
+              Password
+            </label>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                alert("Password reset instructions will be sent to your email.");
+              }}
+              className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer transition-colors"
+            >
+              Forgot password?
+            </button>
+          </div>
+          <div className="relative">
+            <input
+              id="auth-password"
+              type={showPassword ? "text" : "password"}
+              required
+              autoComplete="current-password"
+              disabled={isLoading}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errorMsg) setErrorMsg(null);
+              }}
+              className={`${inputClass} pr-11`}
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((p) => !p)}
+              disabled={isLoading}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
-        <div className="relative">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-          <input
-            id="signin-password"
-            type={showPassword ? "text" : "password"}
-            required
-            autoComplete="current-password"
-            disabled={isLoading}
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              if (errorMsg) setErrorMsg(null);
-            }}
-            className="w-full rounded-xl bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:bg-white focus:ring-3 focus:ring-emerald-500/15 text-slate-900 placeholder-slate-400 pl-10 pr-10 py-2.5 text-xs outline-none transition-all duration-200 disabled:opacity-60"
-            placeholder="••••••••••••"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            disabled={isLoading}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-md cursor-pointer transition-colors disabled:opacity-50"
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-          </button>
-        </div>
-      </div>
 
-      {/* Remember Me Checkbox */}
-      <div className="flex items-center justify-between pt-1">
-        <label className="flex items-center gap-2 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            disabled={isLoading}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 accent-emerald-600 cursor-pointer disabled:opacity-60"
-          />
-          <span className="text-xs text-slate-600 font-normal">Remember this device</span>
-        </label>
-      </div>
+        {/* ── Sign In Button ── */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-70 disabled:pointer-events-none text-white font-semibold text-sm py-3.5 transition-all duration-200 shadow-sm cursor-pointer mt-1"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Signing in...</span>
+            </>
+          ) : (
+            <span>Sign in</span>
+          )}
+        </button>
 
-      {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#062419] hover:bg-[#0a3526] active:scale-[0.99] disabled:opacity-75 disabled:pointer-events-none text-white font-medium text-xs py-3 transition-all duration-200 shadow-sm cursor-pointer mt-2"
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
-            <span>Verifying administrator credentials...</span>
-          </>
-        ) : (
-          <>
-            <span>Sign In with Administrator Credentials</span>
-            <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
-          </>
-        )}
-      </button>
-
-      {/* Security Footer Note */}
-      <div className="pt-2 flex items-center justify-center gap-1.5 text-[11px] text-slate-400 font-normal">
-        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-        <span>256-bit encrypted secure administrator authentication</span>
-      </div>
-    </form>
+        {/* ── Google Sign-In ── */}
+        <button
+          type="button"
+          disabled={isLoading}
+          onClick={() => alert("Google sign-in is not yet configured.")}
+          className="w-full flex items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.99] disabled:opacity-70 disabled:pointer-events-none text-slate-800 font-medium text-sm py-3 transition-all duration-200 cursor-pointer shadow-sm"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <path
+              fill="#4285F4"
+              d="M17.64 9.2a10.3 10.3 0 0 0-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91A8.77 8.77 0 0 0 17.64 9.2Z"
+            />
+            <path
+              fill="#34A853"
+              d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26a5.52 5.52 0 0 1-3.05.86 5.5 5.5 0 0 1-5.18-3.8H.77v2.33A9 9 0 0 0 9 18Z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M3.82 10.62A5.4 5.4 0 0 1 3.53 9c0-.57.1-1.12.29-1.62V5.05H.77A9 9 0 0 0 0 9c0 1.45.35 2.82.77 4.05l3.05-2.43Z"
+            />
+            <path
+              fill="#EA4335"
+              d="M9 3.58a4.86 4.86 0 0 1 3.44 1.35L15.52 1.9A8.65 8.65 0 0 0 9 0a9 9 0 0 0-8.23 5.05l3.05 2.33A5.5 5.5 0 0 1 9 3.58Z"
+            />
+          </svg>
+          <span>Sign in with Google</span>
+        </button>
+      </form>
+    </div>
   );
 }

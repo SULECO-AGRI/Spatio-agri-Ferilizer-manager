@@ -44,7 +44,10 @@ function inferVariant(status: string): BadgeVariant {
     s === "busy" ||
     s === "medium" ||
     s === "medium risk" ||
-    s === "in progress"
+    s === "in progress" ||
+    s === "in_progress" ||
+    s === "on_mission" ||
+    s === "on mission"
   ) {
     return "amber";
   }
@@ -54,14 +57,28 @@ function inferVariant(status: string): BadgeVariant {
     s === "overdue" ||
     s === "cancelled" ||
     s === "rejected" ||
-    s === "error"
+    s === "error" ||
+    s === "suspended" ||
+    s === "failed"
   ) {
     return "rose";
   }
-  if (s === "assigned" || s === "online") {
+  if (s === "assigned" || s === "online" || s === "scheduled") {
     return "blue";
   }
+  if (s === "inactive" || s === "offline") {
+    return "slate";
+  }
   return "slate";
+}
+
+function formatStatusText(status: string): string {
+  if (status === "ACTIVE") return "Active";
+  if (status === "INACTIVE") return "Inactive";
+  if (status === "ON_MISSION") return "On Mission";
+  if (status === "SUSPENDED") return "Suspended";
+  if (status === "IN_PROGRESS") return "In Progress";
+  return status;
 }
 
 export function StatusBadge({
@@ -80,7 +97,7 @@ export function StatusBadge({
       className={`inline-flex items-center gap-1.5 rounded-full font-normal border transition-colors ${style} ${sizeStyle} ${className}`}
     >
       {dot && <span className={`w-1.5 h-1.5 rounded-full ${dotStyles[resolvedVariant]}`} />}
-      <span>{status}</span>
+      <span>{formatStatusText(status)}</span>
     </span>
   );
 }

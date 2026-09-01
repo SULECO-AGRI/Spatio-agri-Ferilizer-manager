@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { LogOut, LayoutDashboard } from "lucide-react";
+import { LogOut, LayoutDashboard, User, ChevronDown } from "lucide-react";
 import { Logo } from "./primitives/Logo";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { useAuth } from "@/context/AuthContext";
@@ -19,6 +19,31 @@ export function Nav() {
   const { user, isAuthenticated, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isDropdownOpen]);
 
   useEffect(() => {
     let rafId: number | null = null;
@@ -77,9 +102,9 @@ export function Nav() {
 
   const adminDisplayName = user
     ? user.firstName
-      ? `Hi! Admin, ${user.firstName}`
-      : "Hi! Admin"
-    : "Hi! Admin";
+      ? `Hi Admin, ${user.firstName}`
+      : "Hi Admin"
+    : "Hi Admin";
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-4 md:px-0 transition-all duration-300">
@@ -132,37 +157,144 @@ export function Nav() {
         {/* Right Auth & Navigation Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
           {isAuthenticated && user ? (
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              {/* "Hi! Admin, {firstName}" Badge Linking Directly to /admin */}
-              <Link
-                to="/admin"
-                className={`group flex items-center gap-2 text-xs font-semibold transition-all duration-300 px-3.5 py-1.5 rounded-full border ${
-                  isScrolled
-                    ? "bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100/90 shadow-2xs"
-                    : "bg-emerald-950/80 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/90 shadow-2xs"
-                }`}
-                title="Go to Admin Dashboard"
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="truncate max-w-[150px] sm:max-w-none">{adminDisplayName}</span>
-                <LayoutDashboard className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 transition-opacity ml-0.5" />
-              </Link>
-
-              {/* Sign Out Button */}
+            <div className="relative" ref={dropdownRef}>
+              {/* Admin Button (Dropdown Trigger) */}
               <button
                 type="button"
-                onClick={() => logout()}
-                className={`flex items-center gap-1.5 text-xs font-medium transition-all duration-200 px-3 py-1.5 rounded-full border cursor-pointer ${
+                onClick={() => setIsDropdownOpen((prev) => !prev)}
+                aria-expanded={isDropdownOpen}
+                aria-haspopup="true"
+                className={`group flex items-center gap-2 text-xs font-semibold transition-all duration-300 px-3.5 py-1.5 rounded-full border cursor-pointer select-none ${
                   isScrolled
-                    ? "text-slate-600 hover:text-rose-700 bg-slate-50 hover:bg-rose-50 border-slate-200 hover:border-rose-200"
-                    : "text-zinc-300 hover:text-rose-300 bg-white/10 hover:bg-rose-950/40 border-white/15 hover:border-rose-500/40"
+                    ? "bg-slate-100/80 hover:bg-slate-200/70 text-slate-800 border-slate-200/80 shadow-2xs"
+                    : "bg-white/10 hover:bg-white/15 text-zinc-200 hover:text-white border-white/15 shadow-2xs"
                 }`}
-                title="Sign Out"
-                aria-label="Sign Out"
+                title="Account menu"
               >
-                <LogOut className="w-3.5 h-3.5 text-rose-500" />
-                <span className="hidden sm:inline-block">Sign Out</span>
+                {/* Proper User Icon */}
+                <div
+                  className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                    isScrolled ? "bg-slate-200/80 text-slate-700" : "bg-white/15 text-zinc-200"
+                  }`}
+                >
+                  <User className="w-3 h-3" />
+                </div>
+
+                <span className="truncate max-w-[140px] sm:max-w-none">{adminDisplayName}</span>
+
+                <ChevronDown
+                  className={`w-3.5 h-3.5 transition-transform duration-200 shrink-0 ${
+                    isDropdownOpen ? "rotate-180" : ""
+                  } ${isScrolled ? "text-slate-500 group-hover:text-slate-800" : "text-zinc-400 group-hover:text-zinc-200"}`}
+                />
               </button>
+
+              {/* Dropdown Menu */}
+              <AnimatePresence>
+                {isDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                    className={`absolute right-0 top-full mt-2 w-56 sm:w-60 rounded-2xl p-1.5 shadow-xl border backdrop-blur-xl z-50 overflow-hidden ${
+                      isScrolled
+                        ? "bg-white/95 border-slate-200/80 text-slate-800 shadow-[0_12px_40px_rgba(0,0,0,0.12)]"
+                        : "bg-zinc-900/95 border-white/15 text-zinc-100 shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
+                    }`}
+                    role="menu"
+                  >
+                    {/* User Profile Header */}
+                    <div
+                      className={`px-3 py-2.5 rounded-xl mb-1 ${
+                        isScrolled
+                          ? "bg-slate-50/80 border border-slate-100"
+                          : "bg-white/5 border border-white/5"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-xs shrink-0 ${
+                            isScrolled
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-emerald-500/20 text-emerald-300"
+                          }`}
+                        >
+                          {user.firstName ? (
+                            user.firstName[0].toUpperCase()
+                          ) : (
+                            <User className="w-4 h-4" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-semibold truncate leading-snug">
+                            {user.firstName
+                              ? `${user.firstName} ${user.lastName || ""}`.trim()
+                              : "Administrator"}
+                          </p>
+                          <p
+                            className={`text-[11px] truncate leading-tight ${
+                              isScrolled ? "text-slate-500" : "text-zinc-400"
+                            }`}
+                          >
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center gap-1.5">
+                        <span
+                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
+                            isScrolled
+                              ? "bg-emerald-100/80 text-emerald-800"
+                              : "bg-emerald-500/20 text-emerald-300"
+                          }`}
+                        >
+                          {user.role || "Admin"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Admin Dashboard Link */}
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsDropdownOpen(false)}
+                      role="menuitem"
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                        isScrolled
+                          ? "text-slate-700 hover:text-emerald-700 hover:bg-emerald-50/80"
+                          : "text-zinc-200 hover:text-emerald-300 hover:bg-white/10"
+                      }`}
+                    >
+                      <LayoutDashboard className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <span>Admin Dashboard</span>
+                    </Link>
+
+                    <div
+                      className={`my-1 border-t ${
+                        isScrolled ? "border-slate-100" : "border-white/10"
+                      }`}
+                    />
+
+                    {/* Sign Out Action */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        logout();
+                      }}
+                      role="menuitem"
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer ${
+                        isScrolled
+                          ? "text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                          : "text-rose-400 hover:text-rose-300 hover:bg-rose-950/30"
+                      }`}
+                    >
+                      <LogOut className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                      <span>Sign Out</span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           ) : (
             <div className="flex items-center gap-2">

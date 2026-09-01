@@ -1,18 +1,90 @@
-export type PilotStatus = "Available" | "Busy" | "Offline" | "Online";
-export type MissionResult = "Active" | "Completed" | "Pending" | "Cancelled";
+export type PilotStatus = "ACTIVE" | "INACTIVE" | "ON_MISSION" | "SUSPENDED" | string;
+export type MissionResult =
+  "Active" | "Completed" | "Pending" | "Cancelled" | "Scheduled" | "Failed";
 
-export interface Pilot {
-  id: string;
-  name: string;
-  initials: string;
+/**
+ * Backend Live Pilot Item shape matching GET /pilots
+ */
+export interface ApiPilotItem {
+  userId: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  mobile: string;
+  licenceNumber: string;
   status: PilotStatus;
-  license: string;
-  drone: string;
-  experience: string;
-  rating: number;
-  missions: number;
-  flightHours: string;
-  batteryLevel: number;
+  ratings: number | null;
+  completedMissions: number;
+  totalFlightHours: number;
+  activeMissionsCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Alias Pilot to ApiPilotItem for consistent live data modeling
+ */
+export type Pilot = ApiPilotItem;
+
+export interface PilotsPagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface PilotsListResponse {
+  status: string;
+  data: {
+    pilots: ApiPilotItem[];
+    pagination: PilotsPagination;
+  };
+}
+
+export interface PilotQueryParams {
+  page?: number;
+  limit?: number;
+  status?: string;
+  search?: string;
+  sortBy?: "createdAt" | "name" | "ratings" | "completedMissions" | "totalFlightHours" | string;
+  sortOrder?: "asc" | "desc";
+}
+
+export interface PilotStatsDTO {
+  ratings: number | null;
+  completedMissions: number;
+  totalFlightHours: number;
+  scheduledMissions: number;
+  inProgressMissions: number;
+  failedMissions: number;
+  totalEarnings: number;
+  pendingPayouts: number;
+  totalReviews: number;
+}
+
+export interface PilotProfileDetailDTO {
+  userId: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  mobile: string;
+  licenceNumber: string;
+  status: string;
+  role: string;
+  stats: PilotStatsDTO;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PilotDetailsResponse {
+  status: string;
+  data: {
+    pilot: PilotProfileDetailDTO;
+  };
 }
 
 export interface PilotPerformance {
@@ -48,10 +120,10 @@ export interface PilotDocument {
 }
 
 export interface DetailedPilotInfo {
-  pilotId: string;
+  pilotId: string | number;
   name: string;
   initials: string;
-  status: PilotStatus;
+  status: string;
   license: string;
   experience: string;
   phone: string;
@@ -60,6 +132,7 @@ export interface DetailedPilotInfo {
   reviewsCount: number;
   missionsCount: number;
   flightHours: string;
+  activeMissionsCount?: number;
   certificates: string[];
   droneDetails: PilotDroneDetails;
   performanceData: { label: string; value: number }[];
