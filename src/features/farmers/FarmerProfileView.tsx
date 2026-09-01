@@ -34,7 +34,7 @@ export function FarmerProfileView({
           <span>Back to Farmers</span>
         </button>
         <h1 className="text-3xl font-medium tracking-tight text-slate-900 mt-3 font-display">
-          {farmer.name}
+          {farmer.fullName}
         </h1>
       </div>
 
