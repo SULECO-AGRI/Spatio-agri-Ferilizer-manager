@@ -1,7 +1,14 @@
-export function Logo({ className = "" }: { className?: string }) {
+export function Logo({
+  className = "",
+  showIcon = true,
+}: {
+  className?: string;
+  showIcon?: boolean;
+}) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden>
+      {showIcon && (
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden>
         <circle
           cx="16"
           cy="16"
@@ -29,7 +36,8 @@ export function Logo({ className = "" }: { className?: string }) {
           strokeWidth="1"
           strokeLinecap="round"
         />
-      </svg>
+        </svg>
+      )}
       <span className="font-display text-[15px] font-semibold tracking-tight">
         Fertilizer <span className="text-primary">manager</span>
       </span>
