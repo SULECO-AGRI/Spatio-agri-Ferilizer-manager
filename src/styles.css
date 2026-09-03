@@ -282,23 +282,16 @@
   display: none !important;
 }
 
-.drone-radar-marker {
+.mission-point-marker {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.15s ease-out;
 }
 
-.drone-radar-pulse {
-  position: absolute;
-  border-radius: 9999px;
-  animation: radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+.mission-point-marker:hover {
+  transform: translateY(-2px) scale(1.06);
+  z-index: 1000 !important;
 }
 
-@keyframes radar-ping {
-  75%,
-  100% {
-    transform: scale(2.2);
-    opacity: 0;
-  }
-}

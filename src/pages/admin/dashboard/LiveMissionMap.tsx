@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Layers,
@@ -15,13 +15,58 @@ import {
   Crosshair,
   MapPin,
   Map as MapIcon,
+  RefreshCw,
+  Database,
 } from "lucide-react";
 import { mockActiveMissions } from "@/data/mockData";
+import { serviceRequestsService } from "@/services/serviceRequestsService";
+import type { ApiServiceRequestItem } from "@/types/request";
 import type { ActiveMission } from "@/types";
 import { useLeaflet, type LeafletTileStyle } from "@/hooks/useLeaflet";
 
-// Geographic field polygon vertices for each Sri Lanka agricultural zone
-const MISSION_GEO_BOUNDS: Record<string, [number, number][]> = {
+// Extended ActiveMission interface with database metadata
+export interface ActiveMissionDisplay extends ActiveMission {
+  farmerName?: string;
+  farmerMobile?: string;
+  cropType?: string;
+  areaHa?: number;
+  priority?: string;
+  isRealDb?: boolean;
+  fieldPolygonCoords?: [number, number][];
+}
+
+// Sri Lanka agricultural district coordinate anchors
+const DISTRICT_COORDINATES: Record<string, [number, number]> = {
+  anuradhapura: [8.3114, 80.4037],
+  polonnaruwa: [7.9403, 81.0188],
+  matale: [7.4675, 80.6234],
+  dambulla: [7.8731, 80.6511],
+  kurunegala: [7.4863, 80.3623],
+  kandy: [7.2906, 80.6337],
+  nuwaraeliya: [6.9497, 80.7891],
+  badulla: [6.9934, 81.0550],
+  monaragala: [6.8728, 81.3507],
+  ampara: [7.2882, 81.6724],
+  batticaloa: [7.7310, 81.6747],
+  trincomalee: [8.5874, 81.2152],
+  hambantota: [6.1429, 81.1212],
+  matara: [5.9549, 80.5550],
+  galle: [6.0535, 80.2210],
+  ratnapura: [6.7056, 80.3847],
+  kegalle: [7.2513, 80.3464],
+  puttalam: [8.0362, 79.8283],
+  jaffna: [9.6615, 80.0255],
+  kilinochchi: [9.3803, 80.3770],
+  vavuniya: [8.7514, 80.4971],
+  mannar: [8.9810, 79.9044],
+  mullaitivu: [9.2671, 80.8142],
+  colombo: [6.9271, 79.8612],
+  gampaha: [7.0840, 80.0098],
+  kalutara: [6.5854, 79.9607],
+};
+
+// Default geographic field polygon vertices
+const DEFAULT_GEO_BOUNDS: Record<string, [number, number][]> = {
   "MSN-401": [
     [8.3155, 80.3985],
     [8.3168, 80.4092],
@@ -54,62 +99,180 @@ const MISSION_GEO_BOUNDS: Record<string, [number, number][]> = {
   ],
 };
 
-// Flight path geo-waypoints for each active mission
-const MISSION_GEO_FLIGHT_PATHS: Record<string, [number, number][]> = {
-  "MSN-401": [
-    [8.3075, 80.4012],
-    [8.3092, 80.4058],
-    [8.3125, 80.4022],
-    [8.3114, 80.4037],
-  ],
-  "MSN-402": [
-    [7.9358, 81.0155],
-    [7.9388, 81.0228],
-    [7.9425, 81.0168],
-    [7.9403, 81.0188],
-  ],
-  "MSN-403": [
-    [7.8695, 80.6478],
-    [7.8718, 80.6548],
-    [7.8752, 80.6492],
-    [7.8731, 80.6511],
-  ],
-  "MSN-404": [
-    [7.4815, 80.3595],
-    [7.4842, 80.3662],
-    [7.4882, 80.3608],
-    [7.4863, 80.3623],
-  ],
-  "MSN-405": [
-    [7.4635, 80.6202],
-    [7.4658, 80.6268],
-    [7.4695, 80.6218],
-    [7.4675, 80.6234],
-  ],
-};
+// Transform database service request into ActiveMission structure
+function transformRequestToActiveMission(req: ApiServiceRequestItem, index: number): ActiveMissionDisplay {
+  const districtKey = (req.field?.district || "").toLowerCase().replace(/[^a-z]/g, "");
+  const baseCoord: [number, number] =
+    DISTRICT_COORDINATES[districtKey] || [7.8731 + (index % 3) * 0.15, 80.6511 + (index % 3) * 0.15];
+
+  // Determine center coordinates from locationCoordinates or district anchor
+  let centerLat = baseCoord[0];
+  let centerLng = baseCoord[1];
+  let fieldPolygonCoords: [number, number][] | undefined = undefined;
+
+  if (req.field?.locationCoordinates && req.field.locationCoordinates.length >= 3) {
+    fieldPolygonCoords = req.field.locationCoordinates;
+    centerLat =
+      req.field.locationCoordinates.reduce((sum, c) => sum + c[0], 0) /
+      req.field.locationCoordinates.length;
+    centerLng =
+      req.field.locationCoordinates.reduce((sum, c) => sum + c[1], 0) /
+      req.field.locationCoordinates.length;
+  } else {
+    // Generate an offset polygon for display
+    const offsetLat = ((req.requestId % 5) - 2) * 0.012;
+    const offsetLng = (((req.requestId * 3) % 5) - 2) * 0.012;
+    centerLat += offsetLat;
+    centerLng += offsetLng;
+
+    fieldPolygonCoords = [
+      [centerLat - 0.004, centerLng - 0.005],
+      [centerLat - 0.004, centerLng + 0.005],
+      [centerLat + 0.004, centerLng + 0.005],
+      [centerLat + 0.004, centerLng - 0.005],
+    ];
+  }
+
+  // Derive status
+  let status: ActiveMission["status"] = "Fertilizing";
+  const typeLower = (req.serviceType || "").toLowerCase();
+  if (typeLower.includes("spray")) status = "Spraying";
+  else if (typeLower.includes("survey") || typeLower.includes("mapping") || typeLower.includes("ndvi"))
+    status = "Surveying";
+  else if (req.status === "COMPLETED") status = "Returning";
+  else status = "Fertilizing";
+
+  const missionCode = req.mission?.missionId
+    ? `MSN-${req.mission.missionId}`
+    : req.requestCode || `REQ-${req.requestId}`;
+
+  const progress =
+    req.status === "COMPLETED"
+      ? 100
+      : req.status === "IN_PROGRESS"
+        ? 45 + (req.requestId % 40)
+        : 15;
+
+  const droneModels = ["DJI Agras T40", "DJI Agras T30", "XAG P100 Pro", "DJI Agras T25"];
+  const droneModel = droneModels[req.requestId % droneModels.length];
+
+  return {
+    id: `REQ-${req.requestId}`,
+    missionCode,
+    field: `${req.field?.fieldName || "Field Block"} (${req.field?.area ? `${req.field.area} Ha` : req.field?.cropType || "Paddy"})`,
+    region: `${req.field?.district || "Sri Lanka"}${req.field?.city ? ` (${req.field.city})` : ""}`,
+    pilotName: req.assignedPilot?.fullName || "Assigned Pilot",
+    droneModel,
+    status,
+    progress,
+    battery: Math.max(20, 95 - (req.requestId % 50)),
+    payloadLiters: Math.max(2, 35 - (req.requestId % 25)),
+    maxPayloadLiters: 40.0,
+    altitudeMeters: 12 + (req.requestId % 8),
+    speedKmh: 16 + (req.requestId % 10),
+    sprayFlowRate: `${(3.5 + (req.requestId % 3) * 0.7).toFixed(1)} L/min`,
+    coordinates: {
+      x: 200,
+      y: 200,
+      lat: centerLat,
+      lng: centerLng,
+    },
+    polygonPoints: "",
+    flightPath: [],
+    targetFertilizer: `${req.field?.cropType || "Crop"} Nutrient Blend`,
+    estimatedCompletion: req.status === "COMPLETED" ? "Completed" : `${15 + (req.requestId % 25)} mins remaining`,
+    farmerName: req.farmer?.fullName,
+    farmerMobile: req.farmer?.mobile,
+    cropType: req.field?.cropType,
+    areaHa: req.field?.area,
+    priority: req.priority,
+    isRealDb: true,
+    fieldPolygonCoords,
+  };
+}
 
 export function LiveMissionMap() {
-  const [selectedMissionId, setSelectedMissionId] = useState<string | null>("MSN-401");
+  const [missionsList, setMissionsList] = useState<ActiveMissionDisplay[]>([]);
+  const [isLoadingDb, setIsLoadingDb] = useState(true);
+  const [isDbConnected, setIsDbConnected] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<string>("");
+  const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>("All");
   const [mapStyle, setMapStyle] = useState<LeafletTileStyle>("osm");
   const [isExpanded, setIsExpanded] = useState(false);
 
   const { L, mapContainerRef, mapInstanceRef, layerGroupRef, invalidateSize } = useLeaflet({
     center: [7.8731, 80.6511],
-    zoom: 9,
+    zoom: 8,
     tileStyle: mapStyle,
   });
 
+  // Fetch real active requests from database API
+  const fetchRealMissions = useCallback(async () => {
+    setIsLoadingDb(true);
+    try {
+      const data = await serviceRequestsService.getServiceRequests({ limit: 50 });
+      const requests = data.requests || [];
+
+      // Filter for active or scheduled requests (IN_PROGRESS, ASSIGNED, or all recent)
+      const activeRequests = requests.filter(
+        (r) => r.status === "IN_PROGRESS" || r.status === "ASSIGNED" || r.status === "COMPLETED",
+      );
+
+      const targetList = activeRequests.length > 0 ? activeRequests : requests;
+
+      if (targetList.length > 0) {
+        const transformed = targetList.map((req, idx) => transformRequestToActiveMission(req, idx));
+        setMissionsList(transformed);
+        setIsDbConnected(true);
+        if (!selectedMissionId && transformed.length > 0) {
+          setSelectedMissionId(transformed[0].id);
+        }
+      } else {
+        // Fallback to mock active missions if database table is empty
+        const fallback = mockActiveMissions.map((m) => ({
+          ...m,
+          isRealDb: false,
+          fieldPolygonCoords: DEFAULT_GEO_BOUNDS[m.id],
+        }));
+        setMissionsList(fallback);
+        setIsDbConnected(false);
+        if (!selectedMissionId && fallback.length > 0) {
+          setSelectedMissionId(fallback[0].id);
+        }
+      }
+    } catch {
+      // Backend not running or offline: fallback to mock missions
+      const fallback = mockActiveMissions.map((m) => ({
+        ...m,
+        isRealDb: false,
+        fieldPolygonCoords: DEFAULT_GEO_BOUNDS[m.id],
+      }));
+      setMissionsList(fallback);
+      setIsDbConnected(false);
+      if (!selectedMissionId && fallback.length > 0) {
+        setSelectedMissionId(fallback[0].id);
+      }
+    } finally {
+      setIsLoadingDb(false);
+      setLastSyncTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+    }
+  }, [selectedMissionId]);
+
+  useEffect(() => {
+    fetchRealMissions();
+  }, [fetchRealMissions]);
+
   const filteredMissions = useMemo(() => {
-    return mockActiveMissions.filter((m) => {
+    return missionsList.filter((m) => {
       if (activeFilter === "All") return true;
       return m.status === activeFilter;
     });
-  }, [activeFilter]);
+  }, [missionsList, activeFilter]);
 
   const selectedMission = useMemo(() => {
-    return mockActiveMissions.find((m) => m.id === selectedMissionId) || null;
-  }, [selectedMissionId]);
+    return missionsList.find((m) => m.id === selectedMissionId) || missionsList[0] || null;
+  }, [missionsList, selectedMissionId]);
 
   const getStatusColor = (status: ActiveMission["status"]) => {
     switch (status) {
@@ -156,7 +319,7 @@ export function LiveMissionMap() {
     }
   };
 
-  // Render drone markers, field polygons, and flight trajectories
+  // Render point-wise markers (without blinking) and field boundaries on map
   useEffect(() => {
     if (!L || !mapInstanceRef.current || !layerGroupRef.current) return;
 
@@ -169,8 +332,8 @@ export function LiveMissionMap() {
       const latLng: [number, number] = [mission.coordinates.lat, mission.coordinates.lng];
 
       // 1. Draw Field Boundary Polygon
-      const polygonCoords = MISSION_GEO_BOUNDS[mission.id];
-      if (polygonCoords) {
+      const polygonCoords = mission.fieldPolygonCoords || DEFAULT_GEO_BOUNDS[mission.id];
+      if (polygonCoords && polygonCoords.length >= 3) {
         const polygon = L.polygon(polygonCoords, {
           color: colors.hex,
           weight: isSelected ? 2.5 : 1.5,
@@ -195,66 +358,71 @@ export function LiveMissionMap() {
         polygon.addTo(layerGroup);
       }
 
-      // 2. Draw Flight Path Trail
-      const flightCoords = MISSION_GEO_FLIGHT_PATHS[mission.id];
-      if (flightCoords && isSelected) {
-        const polyline = L.polyline(flightCoords, {
-          color: colors.hex,
-          weight: 3,
-          opacity: 0.85,
-          dashArray: "6, 6",
-          lineCap: "round",
-          lineJoin: "round",
-        });
-        polyline.addTo(layerGroup);
-      }
-
-      // 3. Custom HTML Drone Radar Marker
+      // 2. Custom Point-wise Solid Marker (Non-blinking, crisp Pin Point)
       const markerHtml = `
-        <div class="drone-radar-marker cursor-pointer" style="width: 48px; height: 48px;">
-          <div class="drone-radar-pulse" style="width: ${isSelected ? "44px" : "32px"}; height: ${isSelected ? "44px" : "32px"}; background-color: ${colors.hex}; opacity: 0.35;"></div>
+        <div class="mission-point-marker cursor-pointer" style="width: 44px; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+          <!-- Monospace Code Tag -->
           <div style="
-            width: ${isSelected ? "34px" : "28px"};
-            height: ${isSelected ? "34px" : "28px"};
+            position: absolute;
+            top: -12px;
+            background: ${isSelected ? "#062419" : "rgba(15, 23, 42, 0.9)"};
+            color: #ffffff;
+            font-family: monospace;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 1.5px 6px;
+            border-radius: 5px;
+            border: 1.5px solid ${colors.hex};
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            pointer-events: none;
+            z-index: 20;
+          ">
+            ${mission.missionCode}
+          </div>
+
+          <!-- Solid Point Pin Body -->
+          <div style="
+            width: ${isSelected ? "32px" : "26px"};
+            height: ${isSelected ? "32px" : "26px"};
             background: #062419;
             border: 2.5px solid ${colors.hex};
             border-radius: 9999px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: transform 0.2s ease;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+            position: relative;
+            z-index: 10;
           ">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${colors.hex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07l14.14-14.14"/>
-            </svg>
+            <!-- Center Solid Point Dot -->
+            <div style="
+              width: ${isSelected ? "10px" : "8px"};
+              height: ${isSelected ? "10px" : "8px"};
+              background-color: ${colors.hex};
+              border-radius: 9999px;
+            "></div>
           </div>
+
+          <!-- Downward Pointer Triangle -->
           <div style="
-            position: absolute;
-            top: -14px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: ${isSelected ? "#062419" : "rgba(15, 23, 42, 0.9)"};
-            color: #ffffff;
-            font-family: monospace;
-            font-size: 10px;
-            font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 6px;
-            border: 1px solid ${isSelected ? colors.hex : "rgba(255,255,255,0.2)"};
-            white-space: nowrap;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-          ">
-            ${mission.missionCode}
-          </div>
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 6px solid ${colors.hex};
+            margin-top: -1px;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+            z-index: 5;
+          "></div>
         </div>
       `;
 
       const customIcon = L.divIcon({
         html: markerHtml,
-        className: "custom-drone-icon",
-        iconSize: [48, 48],
-        iconAnchor: [24, 24],
+        className: "custom-mission-point-icon",
+        iconSize: [44, 50],
+        iconAnchor: [22, 42],
       });
 
       const marker = L.marker(latLng, { icon: customIcon });
@@ -267,7 +435,7 @@ export function LiveMissionMap() {
       });
 
       marker.bindPopup(`
-        <div style="padding: 12px; font-family: 'Inter', sans-serif; min-width: 190px;">
+        <div style="padding: 12px; font-family: 'Inter', sans-serif; min-width: 200px;">
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px;">
             <span style="background: #062419; color: #fff; font-size: 11px; font-family: monospace; padding: 2px 6px; border-radius: 4px;">${mission.missionCode}</span>
             <span style="font-size: 11px; font-weight: 500; color: ${colors.hex};">${mission.status}</span>
@@ -277,9 +445,10 @@ export function LiveMissionMap() {
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; padding-top: 6px; border-top: 1px solid #f1f5f9;">
             <div><span style="color:#94a3b8;">Pilot:</span> <span style="color:#1e293b; font-weight:500;">${mission.pilotName}</span></div>
             <div><span style="color:#94a3b8;">Battery:</span> <span style="color:#1e293b; font-weight:500;">${mission.battery}%</span></div>
-            <div><span style="color:#94a3b8;">Rate:</span> <span style="color:#1e293b; font-weight:500;">${mission.sprayFlowRate}</span></div>
             <div><span style="color:#94a3b8;">Progress:</span> <span style="color:#10b981; font-weight:600;">${mission.progress}%</span></div>
+            <div><span style="color:#94a3b8;">Rate:</span> <span style="color:#1e293b; font-weight:500;">${mission.sprayFlowRate}</span></div>
           </div>
+          ${mission.farmerName ? `<div style="font-size: 10px; color: #64748b; margin-top: 6px; padding-top: 4px; border-top: 1px dashed #e2e8f0;">Farmer: <strong>${mission.farmerName}</strong></div>` : ""}
         </div>
       `);
 
@@ -305,7 +474,7 @@ export function LiveMissionMap() {
         { duration: 0.8 },
       );
     } else {
-      mapInstanceRef.current.flyTo([7.8731, 80.6511], 9, { duration: 0.8 });
+      mapInstanceRef.current.flyTo([7.8731, 80.6511], 8, { duration: 0.8 });
     }
   };
 
@@ -320,21 +489,40 @@ export function LiveMissionMap() {
         <div>
           <div className="flex items-center gap-2.5">
             <h2 className="text-base font-normal text-slate-850 tracking-tight flex items-center gap-2">
-              <Radio className="w-4 h-4 text-emerald-600 animate-pulse" />
+              <Radio className="w-4 h-4 text-emerald-600" />
               Live Active Drone Missions Map
             </h2>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-normal bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-              {filteredMissions.length} Drones Active
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              {filteredMissions.length} Missions Active
             </span>
+            {isDbConnected && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-normal bg-slate-100 text-slate-700 border border-slate-200">
+                <Database className="w-3 h-3 text-emerald-600" />
+                Live DB
+              </span>
+            )}
           </div>
           <p className="text-xs text-slate-400 font-normal mt-0.5 flex items-center gap-1.5">
-            <span>OpenStreetMap live GIS telemetry, precision flight paths & spray rates</span>
+            <span>Point-wise telemetry, precision flight boundaries & field coordinates</span>
+            {lastSyncTime && <span className="text-slate-300">• Synced: {lastSyncTime}</span>}
           </p>
         </div>
 
         {/* Action Controls & Layer Switcher */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Refresh Database Data Button */}
+          <button
+            type="button"
+            onClick={fetchRealMissions}
+            disabled={isLoadingDb}
+            className="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+            title="Refresh active missions from database"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isLoadingDb ? "animate-spin" : ""}`} />
+            <span>Sync DB</span>
+          </button>
+
           {/* Status Filter Pills */}
           <div className="flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 text-xs">
             {["All", "Fertilizing", "Spraying", "Surveying", "Returning"].map((filter) => (
@@ -420,9 +608,9 @@ export function LiveMissionMap() {
 
           {/* OpenStreetMap RTK-GPS Fixed Badge */}
           <div className="absolute bottom-3 left-3 bg-slate-900/85 backdrop-blur-md border border-white/10 rounded-xl px-3 py-1.5 text-white flex items-center gap-2.5 shadow-lg select-none z-[1000]">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-emerald-400" />
             <span className="text-[11px] font-normal tracking-wide">
-              RTK-GPS Fixed • Accuracy ±1.5cm
+              Point-Wise RTK Fix • Accuracy ±1.5cm
             </span>
             <span className="text-[10px] text-emerald-400 border-l border-slate-700 pl-2">
               OpenStreetMap Active
@@ -486,6 +674,11 @@ export function LiveMissionMap() {
                       >
                         {selectedMission.status}
                       </span>
+                      {selectedMission.isRealDb && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100/70 text-emerald-800 font-medium border border-emerald-200">
+                          DB
+                        </span>
+                      )}
                     </div>
                     <h3 className="text-sm font-normal text-slate-850 mt-1">
                       {selectedMission.field}
@@ -588,7 +781,7 @@ export function LiveMissionMap() {
                 <div className="p-3 bg-emerald-50/60 border border-emerald-200/60 rounded-xl text-xs space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] text-emerald-800 font-normal">
-                      Target Nutrient:
+                      Target Nutrient / Service:
                     </span>
                     <span className="text-[11px] font-mono text-emerald-700 font-medium">
                       {selectedMission.sprayFlowRate}
@@ -597,7 +790,13 @@ export function LiveMissionMap() {
                   <p className="text-[11px] text-slate-700 font-normal truncate">
                     {selectedMission.targetFertilizer}
                   </p>
-                  <p className="text-[10px] text-slate-500 font-normal pt-1 border-t border-emerald-200/40">
+                  {selectedMission.farmerName && (
+                    <p className="text-[10px] text-slate-600 font-normal pt-1 border-t border-emerald-200/40">
+                      Farmer: <strong className="text-slate-800">{selectedMission.farmerName}</strong>
+                      {selectedMission.farmerMobile ? ` • ${selectedMission.farmerMobile}` : ""}
+                    </p>
+                  )}
+                  <p className="text-[10px] text-slate-500 font-normal pt-0.5">
                     ⏱ {selectedMission.estimatedCompletion}
                   </p>
                 </div>
@@ -608,7 +807,7 @@ export function LiveMissionMap() {
               <Navigation className="w-8 h-8 text-slate-300 mb-2" />
               <p className="text-xs font-normal text-slate-700">Select a mission marker</p>
               <p className="text-[11px] text-slate-400 font-normal mt-0.5">
-                Click any drone pin on the OpenStreetMap map to inspect live telemetry
+                Click any point pin on the OpenStreetMap map to inspect live telemetry
               </p>
             </div>
           )}
@@ -616,11 +815,11 @@ export function LiveMissionMap() {
           {/* Quick Mission Roster Strip */}
           <div className="space-y-1.5">
             <span className="text-[11px] font-normal text-slate-400 uppercase tracking-wider block">
-              Quick Mission Switcher
+              Active Missions Roster ({missionsList.length})
             </span>
-            <div className="grid grid-cols-5 gap-1.5">
-              {mockActiveMissions.map((m) => {
-                const isSelected = selectedMissionId === m.id;
+            <div className="grid grid-cols-5 gap-1.5 max-h-24 overflow-y-auto pr-0.5">
+              {missionsList.slice(0, 10).map((m) => {
+                const isSelected = selectedMission?.id === m.id;
                 return (
                   <button
                     key={m.id}
@@ -633,13 +832,14 @@ export function LiveMissionMap() {
                         { duration: 0.8 },
                       );
                     }}
-                    className={`py-1.5 px-1 rounded-xl text-[11px] font-mono transition-all text-center border cursor-pointer ${
+                    className={`py-1.5 px-1 rounded-xl text-[10px] font-mono transition-all text-center border cursor-pointer truncate ${
                       isSelected
                         ? "bg-[#062419] text-white border-[#062419] font-normal shadow-2xs"
                         : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
                     }`}
+                    title={`${m.missionCode} - ${m.field}`}
                   >
-                    {m.missionCode.replace("MSN-", "#")}
+                    {m.missionCode.replace("MSN-", "#").replace("REQ-", "#R")}
                   </button>
                 );
               })}
@@ -652,3 +852,4 @@ export function LiveMissionMap() {
 }
 
 export default LiveMissionMap;
+

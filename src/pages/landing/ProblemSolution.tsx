@@ -1,7 +1,6 @@
 import { CircleCheck, TriangleAlert, Check, X } from "lucide-react";
 import { Reveal } from "./primitives/Reveal";
-import { staggerParent, staggerChild } from "./primitives/variants";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
 const comparisons = [
   {
@@ -40,9 +39,35 @@ const comparisons = [
   },
 ];
 
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const cardVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 50,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.7,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
 export function ProblemSolution() {
   return (
-    <section id="roi" className="mx-auto max-w-6xl px-6 py-24 md:py-32 relative">
+    <section id="roi" className="mx-auto max-w-6xl px-6 py-24 md:py-32 relative overflow-hidden">
       {/* Decorative blurred background elements for the section */}
       <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/10 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -58,17 +83,21 @@ export function ProblemSolution() {
       </Reveal>
 
       <motion.div
-        variants={staggerParent}
+        variants={containerVariants}
         initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-80px" }}
+        whileInView="visible"
+        viewport={{ once: false, amount: 0.2 }}
         className="grid gap-8 md:grid-cols-2 lg:gap-10"
       >
         {comparisons.map((item) => (
           <motion.article
             key={item.title}
-            variants={staggerChild}
-            className={`relative min-h-[480px] rounded-3xl border overflow-hidden flex flex-col justify-between transition-all duration-500 shadow-md hover:shadow-2xl group ${item.accent} ${item.cardClass}`}
+            variants={cardVariants}
+            style={{
+              willChange: "transform, opacity",
+              transform: "translate3d(0, 0, 0)",
+            }}
+            className={`relative min-h-[480px] rounded-3xl border overflow-hidden flex flex-col justify-between transition-[border-color,box-shadow] duration-500 shadow-md hover:shadow-2xl group ${item.accent} ${item.cardClass}`}
           >
             {/* Background Image Container */}
             <div className="absolute inset-0 z-0 overflow-hidden">
