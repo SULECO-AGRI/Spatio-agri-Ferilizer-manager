@@ -1,15 +1,6 @@
 import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  ChevronRight,
-  Calendar,
-  User,
-  Sprout,
-  Layers,
-  AlertCircle,
-  Loader2,
-  UserPlus,
-} from "lucide-react";
+import { ChevronRight, Calendar, User, AlertCircle, Loader2, UserPlus } from "lucide-react";
 import { StatusBadge } from "@/components/ui";
 import { formatDate, formatServiceType } from "@/lib/utils";
 import type { ApiServiceRequestItem } from "@/types/request";
@@ -56,13 +47,11 @@ export function RequestsTable({
       ref={parentRef}
       className="overflow-auto max-h-[640px] bg-white border border-slate-200/80 rounded-2xl shadow-xs font-sans relative"
     >
-      <table className="w-full text-left border-collapse min-w-[950px]">
+      <table className="w-full text-left border-collapse min-w-[800px]">
         <thead className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
           <tr className="text-slate-400 text-xs font-normal">
             <th className="p-4 pl-6">Request Code</th>
             <th className="p-4">Farmer</th>
-            <th className="p-4">Field</th>
-            <th className="p-4">Crop</th>
             <th className="p-4">Area</th>
             <th className="p-4">Service</th>
             <th className="p-4">Pref. Date</th>
@@ -75,7 +64,7 @@ export function RequestsTable({
         <tbody className="divide-y divide-slate-100/60 text-sm">
           {paddingTop > 0 && (
             <tr>
-              <td style={{ height: `${paddingTop}px` }} colSpan={11} />
+              <td style={{ height: `${paddingTop}px` }} colSpan={9} />
             </tr>
           )}
 
@@ -103,24 +92,6 @@ export function RequestsTable({
                     <span className="truncate max-w-[140px]">
                       {req.farmer?.fullName || "Unknown"}
                     </span>
-                  </div>
-                </td>
-
-                {/* Field Name */}
-                <td className="p-4 text-slate-600 font-normal">
-                  <div className="flex items-center gap-1.5">
-                    <Layers className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate max-w-[150px]">
-                      {req.field?.fieldName || "Field N/A"}
-                    </span>
-                  </div>
-                </td>
-
-                {/* Crop */}
-                <td className="p-4 text-slate-800 font-normal">
-                  <div className="flex items-center gap-1.5">
-                    <Sprout className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>{req.field?.cropType || "Paddy"}</span>
                   </div>
                 </td>
 
@@ -200,13 +171,13 @@ export function RequestsTable({
 
           {paddingBottom > 0 && (
             <tr>
-              <td style={{ height: `${paddingBottom}px` }} colSpan={11} />
+              <td style={{ height: `${paddingBottom}px` }} colSpan={9} />
             </tr>
           )}
 
           {requests.length === 0 && (
             <tr>
-              <td colSpan={11} className="p-12 text-center text-slate-400 font-normal">
+              <td colSpan={9} className="p-12 text-center text-slate-400 font-normal">
                 <div className="flex flex-col items-center justify-center gap-2">
                   <AlertCircle className="w-6 h-6 text-slate-300" />
                   <p className="text-sm text-slate-600 font-medium">No service requests found</p>

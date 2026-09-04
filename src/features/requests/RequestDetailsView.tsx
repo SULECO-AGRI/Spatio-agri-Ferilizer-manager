@@ -65,19 +65,26 @@ export function RequestDetailsView({ request, onBack, onAssignPilot }: RequestDe
         <div className="lg:col-span-2 space-y-6">
           {/* Card 1: Farmer Information */}
           <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-4">
-            <h3 className="text-xs font-normal uppercase tracking-wider text-slate-400">
-              Farmer Information
-            </h3>
-
-            <div className="bg-slate-50/70 border border-slate-200/60 p-5 rounded-2xl space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-200/40 pb-3">
-                <div>
-                  <h4 className="text-base font-semibold text-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 font-display">
+                  Farmer Information
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  NIC:{" "}
+                  <span className="font-mono text-slate-600 font-medium">
+                    {request.farmer?.nic || "N/A"}
+                  </span>
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <h4 className="text-sm font-semibold text-slate-900">
                     {request.farmer?.fullName || "Farmer"}
                   </h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    NIC: <span className="font-mono">{request.farmer?.nic || "N/A"}</span>
-                  </p>
+                  <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 font-medium">
+                    Verified Farmer
+                  </span>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-xs flex items-center justify-center shadow-2xs">
                   {request.farmer?.fullName
@@ -89,37 +96,41 @@ export function RequestDetailsView({ request, onBack, onAssignPilot }: RequestDe
                     : "FM"}
                 </div>
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-600 pt-1">
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase tracking-wider">
-                    Mobile Phone
-                  </span>
-                  <span className="font-mono text-slate-800 font-medium">
-                    {request.farmer?.mobile || "N/A"}
-                  </span>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-600 pt-1">
+              <div className="p-3 bg-slate-50/70 border border-slate-200/50 rounded-xl">
+                <span className="text-[10px] text-slate-400 block uppercase tracking-wider">
+                  Mobile Phone
+                </span>
+                <span className="font-mono text-slate-800 font-medium mt-0.5 block">
+                  {request.farmer?.mobile || "N/A"}
+                </span>
+              </div>
 
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase tracking-wider">
-                    Email Address
-                  </span>
-                  <span className="text-slate-800">{request.farmer?.email || "N/A"}</span>
-                </div>
+              <div className="p-3 bg-slate-50/70 border border-slate-200/50 rounded-xl">
+                <span className="text-[10px] text-slate-400 block uppercase tracking-wider">
+                  Email Address
+                </span>
+                <span className="text-slate-800 font-medium mt-0.5 block truncate">
+                  {request.farmer?.email || "N/A"}
+                </span>
+              </div>
 
-                <div className="sm:col-span-2">
-                  <span className="text-[10px] text-slate-400 block uppercase tracking-wider">
-                    Residential Address
-                  </span>
-                  <span className="text-slate-800">{request.farmer?.address || "N/A"}</span>
-                </div>
+              <div className="sm:col-span-2 p-3 bg-slate-50/70 border border-slate-200/50 rounded-xl">
+                <span className="text-[10px] text-slate-400 block uppercase tracking-wider">
+                  Residential Address
+                </span>
+                <span className="text-slate-800 font-medium mt-0.5 block">
+                  {request.farmer?.address || "N/A"}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Card 2: Field Information & Telemetry Boundary */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-6">
-            <h3 className="text-xs font-normal uppercase tracking-wider text-slate-400">
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-5">
+            <h3 className="text-sm font-semibold text-slate-900 font-display">
               Field & Crop Telemetry
             </h3>
 
@@ -133,7 +144,7 @@ export function RequestDetailsView({ request, onBack, onAssignPilot }: RequestDe
             />
 
             {/* Field Specs Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs font-normal pt-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-normal pt-1">
               <div className="p-3 bg-slate-50/70 border border-slate-200/50 rounded-xl">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider flex items-center gap-1">
                   <Sprout className="w-3 h-3 text-emerald-600" /> Crop Type
@@ -194,7 +205,7 @@ export function RequestDetailsView({ request, onBack, onAssignPilot }: RequestDe
 
           {/* Card 3: Pilot Assignment & Mission Status */}
           <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-4">
-            <h3 className="text-xs font-normal uppercase tracking-wider text-slate-400">
+            <h3 className="text-sm font-semibold text-slate-900 font-display">
               Pilot & Mission Allocation
             </h3>
 
@@ -243,23 +254,23 @@ export function RequestDetailsView({ request, onBack, onAssignPilot }: RequestDe
             <h3 className="text-sm font-semibold text-slate-900 font-display">Request Metadata</h3>
 
             <div className="divide-y divide-slate-100">
-              <div className="flex justify-between py-2.5">
+              <div className="flex justify-between items-center py-2.5">
                 <span className="text-slate-400">Request Code</span>
                 <span className="font-mono text-slate-800 font-medium">{request.requestCode}</span>
               </div>
-              <div className="flex justify-between py-2.5">
+              <div className="flex justify-between items-center py-2.5">
                 <span className="text-slate-400">Submission Date</span>
                 <span className="text-slate-700">{formatDate(request.createdAt)}</span>
               </div>
-              <div className="flex justify-between py-2.5">
+              <div className="flex justify-between items-center py-2.5">
                 <span className="text-slate-400">Field Size</span>
-                <span className="text-slate-700">{request.field?.area} Hectares</span>
+                <span className="text-slate-700 font-medium">{request.field?.area} Hectares</span>
               </div>
-              <div className="flex justify-between py-2.5">
+              <div className="flex justify-between items-center py-2.5">
                 <span className="text-slate-400">Priority Level</span>
                 <StatusBadge status={request.priority} />
               </div>
-              <div className="flex justify-between py-2.5">
+              <div className="flex justify-between items-center py-2.5">
                 <span className="text-slate-400">Status</span>
                 <StatusBadge status={request.status} />
               </div>
@@ -269,10 +280,8 @@ export function RequestDetailsView({ request, onBack, onAssignPilot }: RequestDe
           {/* Action Control Buttons */}
           <RequestActionsPanel
             status={request.status}
-            onApprove={() => alert(`Approved request ${request.requestCode}`)}
             onReject={() => alert(`Rejected request ${request.requestCode}`)}
             onAssignPilot={onAssignPilot ? () => onAssignPilot(request) : undefined}
-            onReschedule={() => alert(`Rescheduling request ${request.requestCode}`)}
             onContactFarmer={() =>
               alert(`Calling farmer ${request.farmer?.fullName} at ${request.farmer?.mobile}`)
             }
