@@ -50,7 +50,8 @@ export function Hero() {
           </h1>
 
           <p className="hero-desc text-white text-base leading-relaxed max-w-xl font-sans">
-            Precision fertilizing powered by drone images. Apply only what your crops need, exactly where they need it.
+            Precision fertilizing powered by drone images. Apply only what your crops need, exactly
+            where they need it.
           </p>
 
           <form

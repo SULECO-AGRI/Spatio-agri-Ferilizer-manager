@@ -6,6 +6,7 @@ import {
   MapPin,
   RefreshCw,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui";
 import { useFarmers } from "./hooks/useFarmers";
@@ -92,7 +93,7 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
             title="Refresh farmers directory"
             className="p-2 bg-white border border-slate-200/80 hover:bg-slate-50 rounded-xl text-slate-500 hover:text-slate-700 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-emerald-600" : ""}`} />
           </button>
         </div>
       </div>
@@ -130,38 +131,13 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
           </thead>
           <tbody className="divide-y divide-slate-100/60 text-sm">
             {isLoading ? (
-              // 5-Row Skeleton Loading State
-              Array.from({ length: 5 }).map((_, i) => (
-                <tr key={`skeleton-${i}`} className="animate-pulse">
-                  <td className="p-4 pl-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-200 shrink-0" />
-                      <div className="space-y-1.5">
-                        <div className="w-32 h-3.5 bg-slate-200 rounded" />
-                        <div className="w-44 h-3 bg-slate-100 rounded" />
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="w-24 h-3.5 bg-slate-200 rounded" />
-                  </td>
-                  <td className="p-4">
-                    <div className="w-24 h-3.5 bg-slate-200 rounded" />
-                  </td>
-                  <td className="p-4 text-center">
-                    <div className="w-16 h-3.5 bg-slate-200 rounded mx-auto" />
-                  </td>
-                  <td className="p-4 text-center">
-                    <div className="w-10 h-5 bg-slate-200 rounded-full mx-auto" />
-                  </td>
-                  <td className="p-4 text-center">
-                    <div className="w-12 h-3.5 bg-slate-200 rounded mx-auto" />
-                  </td>
-                  <td className="p-4 pr-6 text-right">
-                    <div className="w-16 h-6 bg-slate-200 rounded-lg ml-auto" />
-                  </td>
-                </tr>
-              ))
+              <tr>
+                <td colSpan={7} className="p-16 text-center">
+                  <div className="flex items-center justify-center min-h-[300px]">
+                    <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+                  </div>
+                </td>
+              </tr>
             ) : farmers.length > 0 ? (
               farmers.map((farmer) => {
                 const initials =

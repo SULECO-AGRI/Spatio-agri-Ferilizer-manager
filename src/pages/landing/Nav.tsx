@@ -16,7 +16,7 @@ const navLinks = [
 
 export function Nav() {
   const { open: openAuth } = useAuthModal();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -100,26 +100,32 @@ export function Nav() {
     };
   }, []);
 
-  const adminDisplayName = user
+  const userDisplayName = user
     ? user.firstName
-      ? user.firstName.toLowerCase() === "admin"
+      ? isAdmin
+        ? user.firstName.toLowerCase() === "admin"
+          ? "Admin"
+          : `Admin: ${user.firstName}`
+        : user.firstName
+      : isAdmin
         ? "Admin"
-        : `Admin: ${user.firstName}`
-      : "Admin"
-    : "Admin";
+        : user.email.split("@")[0] || "User"
+    : "User";
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-4 md:px-0 transition-all duration-300">
       <div
-        className={`mx-auto mt-3 flex max-w-6xl items-center justify-between rounded-full px-5 py-2.5 transition-all duration-300 ${isScrolled
-          ? "bg-white/80 border border-slate-200/60 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
-          : "bg-zinc-950/30 border border-white/15 backdrop-blur-lg shadow-none"
-          }`}
+        className={`mx-auto mt-3 flex max-w-6xl items-center justify-between rounded-full px-5 py-2.5 transition-all duration-300 ${
+          isScrolled
+            ? "bg-white/80 border border-slate-200/60 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
+            : "bg-zinc-950/30 border border-white/15 backdrop-blur-lg shadow-none"
+        }`}
       >
         <Logo
           showIcon={false}
-          className={`shrink-0 transition-colors duration-300 ${isScrolled ? "text-[#062419]" : "text-white"
-            }`}
+          className={`shrink-0 transition-colors duration-300 ${
+            isScrolled ? "text-[#062419]" : "text-white"
+          }`}
         />
 
         {/* Navigation links with active sliding indicator */}
@@ -130,14 +136,15 @@ export function Nav() {
               <a
                 key={link.href}
                 href={link.href}
-                className={`relative py-1 transition-all duration-300 ${isActive
-                  ? isScrolled
-                    ? "text-emerald-600 font-semibold"
-                    : "text-emerald-400 font-semibold"
-                  : isScrolled
-                    ? "text-slate-500 hover:text-[#062419]"
-                    : "text-zinc-300 hover:text-white"
-                  }`}
+                className={`relative py-1 transition-all duration-300 ${
+                  isActive
+                    ? isScrolled
+                      ? "text-emerald-600 font-semibold"
+                      : "text-emerald-400 font-semibold"
+                    : isScrolled
+                      ? "text-slate-500 hover:text-[#062419]"
+                      : "text-zinc-300 hover:text-white"
+                }`}
               >
                 <span>{link.label}</span>
 
@@ -158,23 +165,29 @@ export function Nav() {
         <div className="flex items-center gap-2 sm:gap-3">
           {isAuthenticated && user ? (
             <div className="relative" ref={dropdownRef}>
-              {/* Admin Button (Dropdown Trigger) */}
+              {/* Profile / Admin Button (Dropdown Trigger) */}
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
                 aria-expanded={isDropdownOpen}
                 aria-haspopup="true"
-                className={`group flex items-center gap-1.5 text-xs font-semibold transition-all duration-300 px-3.5 py-1.5 rounded-full border cursor-pointer select-none ${isScrolled
-                  ? "bg-slate-100/80 hover:bg-slate-200/70 text-slate-800 border-slate-200/80 shadow-2xs"
-                  : "bg-white/10 hover:bg-white/15 text-white border-white/20 shadow-2xs"
-                  }`}
+                className={`group flex items-center gap-1.5 text-xs font-semibold transition-all duration-300 px-3.5 py-1.5 rounded-full border cursor-pointer select-none ${
+                  isScrolled
+                    ? "bg-slate-100/80 hover:bg-slate-200/70 text-slate-800 border-slate-200/80 shadow-2xs"
+                    : "bg-white/10 hover:bg-white/15 text-white border-white/20 shadow-2xs"
+                }`}
                 title="Account menu"
               >
-                <span className="truncate max-w-[140px] sm:max-w-none">{adminDisplayName}</span>
+                <span className="truncate max-w-[140px] sm:max-w-none">{userDisplayName}</span>
 
                 <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform duration-200 shrink-0 ${isDropdownOpen ? "rotate-180" : ""
-                    } ${isScrolled ? "text-slate-500 group-hover:text-slate-800" : "text-zinc-300 group-hover:text-white"}`}
+                  className={`w-3.5 h-3.5 transition-transform duration-200 shrink-0 ${
+                    isDropdownOpen ? "rotate-180" : ""
+                  } ${
+                    isScrolled
+                      ? "text-slate-500 group-hover:text-slate-800"
+                      : "text-zinc-300 group-hover:text-white"
+                  }`}
                 />
               </button>
 
@@ -194,29 +207,33 @@ export function Nav() {
                       <p className="text-xs font-semibold truncate text-slate-900 leading-snug">
                         {user.firstName
                           ? `${user.firstName} ${user.lastName || ""}`.trim()
-                          : "Administrator"}
+                          : isAdmin
+                            ? "Administrator"
+                            : "User"}
                       </p>
                       <p className="text-[11px] truncate text-slate-500 leading-tight mt-0.5">
                         {user.email}
                       </p>
                       <div className="mt-2">
                         <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 uppercase tracking-wider">
-                          {user.role || "Admin"}
+                          {user.role || (isAdmin ? "Admin" : "User")}
                         </span>
                       </div>
                     </div>
 
-                    {/* Admin Dashboard Link */}
-                    <Link
-                      to="/admin"
-                      onClick={() => setIsDropdownOpen(false)}
-                      role="menuitem"
-                      className="w-full flex items-center px-3 py-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-                    >
-                      <span>Admin Dashboard</span>
-                    </Link>
+                    {/* Admin Dashboard Link (Strictly rendered for authenticated admin users only) */}
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setIsDropdownOpen(false)}
+                        role="menuitem"
+                        className="w-full flex items-center px-3 py-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                      >
+                        <span>Admin Dashboard</span>
+                      </Link>
+                    )}
 
-                    <div className="my-1 border-t border-slate-100" />
+                    {isAdmin && <div className="my-1 border-t border-slate-100" />}
 
                     {/* Red Sign Out Action */}
                     <button
@@ -236,22 +253,14 @@ export function Nav() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Link
-                to="/admin"
-                className={`text-xs sm:text-sm font-semibold transition-all duration-300 px-3.5 py-1.5 rounded-full ${isScrolled
-                  ? "text-slate-600 hover:text-[#062419] hover:bg-slate-100/70"
-                  : "text-zinc-300 hover:text-white hover:bg-white/10"
-                  }`}
-              >
-                Admin
-              </Link>
               <button
                 type="button"
                 onClick={() => openAuth()}
-                className={`text-xs sm:text-sm font-semibold transition-all duration-300 px-4 py-1.5 rounded-full shadow-xs cursor-pointer ${isScrolled
-                  ? "bg-[#062419] hover:bg-[#0a3526] text-white"
-                  : "bg-white hover:bg-slate-100 text-slate-950"
-                  }`}
+                className={`text-xs sm:text-sm font-semibold transition-all duration-300 px-4 py-1.5 rounded-full shadow-xs cursor-pointer ${
+                  isScrolled
+                    ? "bg-[#062419] hover:bg-[#0a3526] text-white"
+                    : "bg-white hover:bg-slate-100 text-slate-950"
+                }`}
               >
                 Login
               </button>

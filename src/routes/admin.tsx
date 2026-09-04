@@ -1,10 +1,13 @@
-import { useState, lazy, Suspense, useCallback } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useState, lazy, Suspense, useCallback, useEffect } from "react";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { Construction, ArrowRight } from "lucide-react";
 import type { TabId } from "@/types";
 import { Sidebar } from "@/pages/admin/components/Sidebar";
 import { Topbar } from "@/pages/admin/components/Topbar";
 import { AdminTabSkeleton } from "@/pages/admin/components/AdminTabSkeleton";
+import { authService } from "@/services/authService";
+import { isAdminUser } from "@/types/auth";
+import { useAuth } from "@/context/AuthContext";
 
 // Dynamic Code-Splitting for Heavy Admin Views
 const DashboardView = lazy(() =>
@@ -33,15 +36,42 @@ const UserProfileView = lazy(() =>
 );
 
 export const Route = createFileRoute("/admin")({
+  beforeLoad: () => {
+    if (typeof window !== "undefined") {
+      const token = authService.getStoredToken();
+      const user = authService.getStoredUser();
+      if (!token || !user || !isAdminUser(user)) {
+        throw redirect({
+          to: "/",
+        });
+      }
+    }
+  },
   component: AdminPage,
 });
 
 function AdminPage() {
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
+
+  useEffect(() => {
+    if (!isLoading && (!isAuthenticated || !isAdmin)) {
+      navigate({ to: "/" });
+    }
+  }, [isAuthenticated, isAdmin, isLoading, navigate]);
 
   const handleTabChange = useCallback((tab: TabId) => {
     setActiveTab(tab);
   }, []);
+
+  if (!isAuthenticated || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <AdminTabSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex relative overflow-hidden">

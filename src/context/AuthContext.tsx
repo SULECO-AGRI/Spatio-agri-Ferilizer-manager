@@ -1,12 +1,13 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
 import { authService } from "@/services/authService";
-import type { LoginRequest, User } from "@/types/auth";
+import { type LoginRequest, type User, isAdminUser } from "@/types/auth";
 import { ApiError } from "@/lib/apiClient";
 
 interface AuthContextValue {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   isLoading: boolean;
   error: string | null;
   login: (credentials: LoginRequest) => Promise<User>;
@@ -63,18 +64,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
   }, []);
 
+  const isAuthenticated = Boolean(token && user);
+  const isAdmin = Boolean(isAuthenticated && isAdminUser(user));
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       token,
-      isAuthenticated: Boolean(token && user),
+      isAuthenticated,
+      isAdmin,
       isLoading,
       error,
       login,
       logout,
       clearError,
     }),
-    [user, token, isLoading, error, login, logout, clearError],
+    [user, token, isAuthenticated, isAdmin, isLoading, error, login, logout, clearError],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

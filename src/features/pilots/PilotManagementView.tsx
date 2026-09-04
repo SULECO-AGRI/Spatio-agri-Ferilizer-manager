@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, RefreshCw, AlertCircle, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCw, AlertCircle, Users, Loader2 } from "lucide-react";
 import { PageHeader, FilterPills, TableToolbar } from "@/components/ui";
 import { usePilots, pilotFilterTabs } from "./hooks/usePilots";
 import { PilotCard } from "./PilotCard";
@@ -53,7 +53,9 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
             className="flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 rounded-xl bg-white text-slate-700 text-xs font-normal hover:bg-slate-50 disabled:opacity-50 transition-all cursor-pointer shadow-2xs"
             title="Refresh list"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-emerald-600" : ""}`}
+            />
             <span>Refresh</span>
           </button>
         }
@@ -92,32 +94,10 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
         />
       </div>
 
-      {/* Pilots Card Grid & Skeletons */}
+      {/* Pilots Card Grid & Loading State */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, idx) => (
-            <div
-              key={idx}
-              className="bg-white border border-slate-200/70 rounded-2xl p-6 space-y-4 animate-pulse"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full bg-slate-200" />
-                <div className="space-y-2 flex-1">
-                  <div className="h-4 bg-slate-200 rounded-md w-3/4" />
-                  <div className="h-3 bg-slate-200 rounded-md w-1/3" />
-                </div>
-              </div>
-              <div className="space-y-2 pt-3 border-t border-slate-100">
-                <div className="h-3 bg-slate-200 rounded-md w-1/2" />
-                <div className="h-3 bg-slate-200 rounded-md w-2/3" />
-              </div>
-              <div className="h-16 bg-slate-100 rounded-xl" />
-              <div className="flex gap-2 pt-2">
-                <div className="h-7 bg-slate-200 rounded-lg flex-1" />
-                <div className="h-7 bg-slate-200 rounded-lg flex-1" />
-              </div>
-            </div>
-          ))}
+        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs p-16 flex items-center justify-center min-h-[360px]">
+          <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -44,24 +44,24 @@ const DISTRICT_COORDINATES: Record<string, [number, number]> = {
   kurunegala: [7.4863, 80.3623],
   kandy: [7.2906, 80.6337],
   nuwaraeliya: [6.9497, 80.7891],
-  badulla: [6.9934, 81.0550],
+  badulla: [6.9934, 81.055],
   monaragala: [6.8728, 81.3507],
   ampara: [7.2882, 81.6724],
-  batticaloa: [7.7310, 81.6747],
+  batticaloa: [7.731, 81.6747],
   trincomalee: [8.5874, 81.2152],
   hambantota: [6.1429, 81.1212],
-  matara: [5.9549, 80.5550],
-  galle: [6.0535, 80.2210],
+  matara: [5.9549, 80.555],
+  galle: [6.0535, 80.221],
   ratnapura: [6.7056, 80.3847],
   kegalle: [7.2513, 80.3464],
   puttalam: [8.0362, 79.8283],
   jaffna: [9.6615, 80.0255],
-  kilinochchi: [9.3803, 80.3770],
+  kilinochchi: [9.3803, 80.377],
   vavuniya: [8.7514, 80.4971],
-  mannar: [8.9810, 79.9044],
+  mannar: [8.981, 79.9044],
   mullaitivu: [9.2671, 80.8142],
   colombo: [6.9271, 79.8612],
-  gampaha: [7.0840, 80.0098],
+  gampaha: [7.084, 80.0098],
   kalutara: [6.5854, 79.9607],
 };
 
@@ -100,10 +100,15 @@ const DEFAULT_GEO_BOUNDS: Record<string, [number, number][]> = {
 };
 
 // Transform database service request into ActiveMission structure
-function transformRequestToActiveMission(req: ApiServiceRequestItem, index: number): ActiveMissionDisplay {
+function transformRequestToActiveMission(
+  req: ApiServiceRequestItem,
+  index: number,
+): ActiveMissionDisplay {
   const districtKey = (req.field?.district || "").toLowerCase().replace(/[^a-z]/g, "");
-  const baseCoord: [number, number] =
-    DISTRICT_COORDINATES[districtKey] || [7.8731 + (index % 3) * 0.15, 80.6511 + (index % 3) * 0.15];
+  const baseCoord: [number, number] = DISTRICT_COORDINATES[districtKey] || [
+    7.8731 + (index % 3) * 0.15,
+    80.6511 + (index % 3) * 0.15,
+  ];
 
   // Determine center coordinates from locationCoordinates or district anchor
   let centerLat = baseCoord[0];
@@ -137,7 +142,11 @@ function transformRequestToActiveMission(req: ApiServiceRequestItem, index: numb
   let status: ActiveMission["status"] = "Fertilizing";
   const typeLower = (req.serviceType || "").toLowerCase();
   if (typeLower.includes("spray")) status = "Spraying";
-  else if (typeLower.includes("survey") || typeLower.includes("mapping") || typeLower.includes("ndvi"))
+  else if (
+    typeLower.includes("survey") ||
+    typeLower.includes("mapping") ||
+    typeLower.includes("ndvi")
+  )
     status = "Surveying";
   else if (req.status === "COMPLETED") status = "Returning";
   else status = "Fertilizing";
@@ -180,7 +189,8 @@ function transformRequestToActiveMission(req: ApiServiceRequestItem, index: numb
     polygonPoints: "",
     flightPath: [],
     targetFertilizer: `${req.field?.cropType || "Crop"} Nutrient Blend`,
-    estimatedCompletion: req.status === "COMPLETED" ? "Completed" : `${15 + (req.requestId % 25)} mins remaining`,
+    estimatedCompletion:
+      req.status === "COMPLETED" ? "Completed" : `${15 + (req.requestId % 25)} mins remaining`,
     farmerName: req.farmer?.fullName,
     farmerMobile: req.farmer?.mobile,
     cropType: req.field?.cropType,
@@ -255,7 +265,13 @@ export function LiveMissionMap() {
       }
     } finally {
       setIsLoadingDb(false);
-      setLastSyncTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+      setLastSyncTime(
+        new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }),
+      );
     }
   }, [selectedMissionId]);
 
@@ -519,7 +535,9 @@ export function LiveMissionMap() {
             className="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
             title="Refresh active missions from database"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isLoadingDb ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 text-slate-500 ${isLoadingDb ? "animate-spin" : ""}`}
+            />
             <span>Sync DB</span>
           </button>
 
@@ -792,7 +810,8 @@ export function LiveMissionMap() {
                   </p>
                   {selectedMission.farmerName && (
                     <p className="text-[10px] text-slate-600 font-normal pt-1 border-t border-emerald-200/40">
-                      Farmer: <strong className="text-slate-800">{selectedMission.farmerName}</strong>
+                      Farmer:{" "}
+                      <strong className="text-slate-800">{selectedMission.farmerName}</strong>
                       {selectedMission.farmerMobile ? ` • ${selectedMission.farmerMobile}` : ""}
                     </p>
                   )}
@@ -852,4 +871,3 @@ export function LiveMissionMap() {
 }
 
 export default LiveMissionMap;
-
