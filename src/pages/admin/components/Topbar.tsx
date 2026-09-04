@@ -1,10 +1,12 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Search, Columns, CloudSun, Radio, PlayCircle, LogOut } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useDashboardStats } from "@/pages/admin/dashboard/hooks/useDashboardStats";
 
 export function Topbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { metrics, isLoading } = useDashboardStats();
 
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "Admin User";
   const initials = user
@@ -47,14 +49,14 @@ export function Topbar() {
 
           {/* Online Pilots */}
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-normal border border-slate-200 bg-white text-slate-600">
-            <Radio className="w-3.5 h-3.5 text-slate-400" />
-            <span>12 Online</span>
+            <Radio className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{isLoading ? "..." : metrics.onlinePilots} Online</span>
           </div>
 
           {/* Active Missions */}
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-normal border border-slate-200 bg-white text-slate-600">
-            <PlayCircle className="w-3.5 h-3.5 text-slate-400" />
-            <span>5 Active</span>
+            <PlayCircle className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{isLoading ? "..." : metrics.activeMissions} Active</span>
           </div>
         </div>
 

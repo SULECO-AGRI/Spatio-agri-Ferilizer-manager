@@ -16,7 +16,6 @@ import {
   MapPin,
   Map as MapIcon,
   RefreshCw,
-  Database,
 } from "lucide-react";
 import { mockActiveMissions } from "@/data/mockData";
 import { serviceRequestsService } from "@/services/serviceRequestsService";
@@ -204,10 +203,8 @@ function transformRequestToActiveMission(
 export function LiveMissionMap() {
   const [missionsList, setMissionsList] = useState<ActiveMissionDisplay[]>([]);
   const [isLoadingDb, setIsLoadingDb] = useState(true);
-  const [isDbConnected, setIsDbConnected] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<string>("");
   const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState<string>("All");
   const [mapStyle, setMapStyle] = useState<LeafletTileStyle>("osm");
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -234,7 +231,6 @@ export function LiveMissionMap() {
       if (targetList.length > 0) {
         const transformed = targetList.map((req, idx) => transformRequestToActiveMission(req, idx));
         setMissionsList(transformed);
-        setIsDbConnected(true);
         if (!selectedMissionId && transformed.length > 0) {
           setSelectedMissionId(transformed[0].id);
         }
@@ -246,7 +242,6 @@ export function LiveMissionMap() {
           fieldPolygonCoords: DEFAULT_GEO_BOUNDS[m.id],
         }));
         setMissionsList(fallback);
-        setIsDbConnected(false);
         if (!selectedMissionId && fallback.length > 0) {
           setSelectedMissionId(fallback[0].id);
         }
@@ -259,7 +254,6 @@ export function LiveMissionMap() {
         fieldPolygonCoords: DEFAULT_GEO_BOUNDS[m.id],
       }));
       setMissionsList(fallback);
-      setIsDbConnected(false);
       if (!selectedMissionId && fallback.length > 0) {
         setSelectedMissionId(fallback[0].id);
       }
@@ -279,12 +273,7 @@ export function LiveMissionMap() {
     fetchRealMissions();
   }, [fetchRealMissions]);
 
-  const filteredMissions = useMemo(() => {
-    return missionsList.filter((m) => {
-      if (activeFilter === "All") return true;
-      return m.status === activeFilter;
-    });
-  }, [missionsList, activeFilter]);
+  const filteredMissions = missionsList;
 
   const selectedMission = useMemo(() => {
     return missionsList.find((m) => m.id === selectedMissionId) || missionsList[0] || null;
@@ -512,12 +501,6 @@ export function LiveMissionMap() {
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               {filteredMissions.length} Missions Active
             </span>
-            {isDbConnected && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-normal bg-slate-100 text-slate-700 border border-slate-200">
-                <Database className="w-3 h-3 text-emerald-600" />
-                Live DB
-              </span>
-            )}
           </div>
           <p className="text-xs text-slate-400 font-normal mt-0.5 flex items-center gap-1.5">
             <span>Point-wise telemetry, precision flight boundaries & field coordinates</span>
@@ -527,37 +510,19 @@ export function LiveMissionMap() {
 
         {/* Action Controls & Layer Switcher */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Refresh Database Data Button */}
+          {/* Refresh Data Button */}
           <button
             type="button"
             onClick={fetchRealMissions}
             disabled={isLoadingDb}
             className="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-            title="Refresh active missions from database"
+            title="Refresh active missions"
           >
             <RefreshCw
               className={`w-3.5 h-3.5 text-slate-500 ${isLoadingDb ? "animate-spin" : ""}`}
             />
-            <span>Sync DB</span>
+            <span>Refresh</span>
           </button>
-
-          {/* Status Filter Pills */}
-          <div className="flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 text-xs">
-            {["All", "Fertilizing", "Spraying", "Surveying", "Returning"].map((filter) => (
-              <button
-                key={filter}
-                type="button"
-                onClick={() => setActiveFilter(filter)}
-                className={`px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer ${
-                  activeFilter === filter
-                    ? "bg-white text-slate-850 font-normal shadow-2xs"
-                    : "text-slate-500 hover:text-slate-850"
-                }`}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
 
           {/* OpenStreetMap Layer Mode Buttons */}
           <div className="flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 text-xs">

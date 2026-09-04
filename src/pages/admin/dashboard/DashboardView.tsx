@@ -3,6 +3,7 @@ import { RecentActivity } from "@/pages/admin/dashboard/RecentActivity";
 import { ScheduleTable } from "@/pages/admin/dashboard/ScheduleTable";
 import { LiveMissionMap } from "@/pages/admin/dashboard/LiveMissionMap";
 import { QuickActions } from "@/pages/admin/components/QuickActions";
+import { useDashboardStats } from "@/pages/admin/dashboard/hooks/useDashboardStats";
 import type { TabId } from "@/types";
 
 interface DashboardViewProps {
@@ -10,6 +11,8 @@ interface DashboardViewProps {
 }
 
 export function DashboardView({ onNavigate }: DashboardViewProps) {
+  const { metrics, isLoading } = useDashboardStats();
+
   const todayStr = new Date().toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -24,17 +27,33 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
         description={`Overview of drone service operations — Today, ${todayStr}`}
       />
 
-      {/* Metrics Row: 5 Key Performance Indicators */}
+      {/* Metrics Row: 5 Key Performance Indicators with Real Backend Data */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
-        <MetricCard title="Pending Requests" value={14} footer="Need review" />
-        <MetricCard title="Active Missions" value={5} footer="Live in flight" />
-        <MetricCard title="Available Pilots" value={9} footer="of 32 registered" />
+        <MetricCard
+          title="Pending Requests"
+          value={isLoading ? "..." : metrics.pendingRequests}
+          footer="Need review"
+        />
+        <MetricCard
+          title="Active Missions"
+          value={isLoading ? "..." : metrics.activeMissions}
+          footer="Live in flight"
+        />
+        <MetricCard
+          title="Available Pilots"
+          value={isLoading ? "..." : metrics.availablePilots}
+          footer={`of ${metrics.totalPilots} registered`}
+        />
         <MetricCard
           title="Today's Revenue"
-          value="LKR 128,400"
-          trend={{ value: "+12% vs yesterday", isPositive: true }}
+          value={isLoading ? "..." : metrics.todayRevenueFormatted}
+          trend={metrics.revenueTrend}
         />
-        <MetricCard title="Mission Success Rate" value="96%" footer="Last 90 days" />
+        <MetricCard
+          title="Mission Success Rate"
+          value={isLoading ? "..." : `${metrics.successRate}%`}
+          footer="Last 90 days"
+        />
       </div>
 
       {/* Live Geospatial Active Drone Missions Map */}
@@ -42,8 +61,8 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
 
       {/* Activity and Schedule Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8 items-start">
-        <RecentActivity />
-        <ScheduleTable />
+        <RecentActivity recentRequests={metrics.recentRequests} />
+        <ScheduleTable recentRequests={metrics.recentRequests} />
       </div>
 
       {/* Quick Actions Panel */}
