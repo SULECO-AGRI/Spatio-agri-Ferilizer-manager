@@ -9,6 +9,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { StatusBadge } from "@/components/ui";
+import { formatFullDate as formatDate, formatServiceType } from "@/lib/utils";
 import type { ApiServiceRequestItem } from "@/types/request";
 import { FieldPolygonMap } from "./components/FieldPolygonMap";
 import { RequestActionsPanel } from "./components/RequestActionsPanel";
@@ -20,29 +21,6 @@ interface RequestDetailsViewProps {
 }
 
 export function RequestDetailsView({ request, onBack, onAssignPilot }: RequestDetailsViewProps) {
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "N/A";
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const formatServiceType = (service?: string) => {
-    if (!service) return "General";
-    return service
-      .toLowerCase()
-      .split("_")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
-  };
-
   return (
     <div className="space-y-6 font-sans animate-in fade-in duration-200">
       {/* Back Link */}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import { StatusBadge } from "@/components/ui";
+import { formatDate } from "@/lib/utils";
 import { pilotService } from "@/services/pilotService";
 import type { PilotDocument, DetailedPilotInfo } from "@/types/pilot";
 import {
@@ -73,10 +74,7 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
               {
                 id: `MSN-${data.userId}01`,
                 field: "Precision Agri Zone",
-                date: new Date(data.updatedAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                }),
+                date: formatDate(data.updatedAt),
                 result: "Completed",
               },
             ],
@@ -85,7 +83,7 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
                 id: "doc-1",
                 title: "CAASL Drone Pilot License",
                 docNumber: data.licenceNumber || "CAA-UAV-001",
-                issueDate: new Date(data.createdAt).toLocaleDateString(),
+                issueDate: formatDate(data.createdAt),
                 expiryDate: "Valid 3 Years",
                 fileSize: "1.4 MB",
               },
@@ -93,7 +91,7 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
                 id: "doc-2",
                 title: "Safety & First Aid Certificate",
                 docNumber: `SLRC-FA-${data.userId}`,
-                issueDate: new Date(data.createdAt).toLocaleDateString(),
+                issueDate: formatDate(data.createdAt),
                 expiryDate: "Valid",
                 fileSize: "820 KB",
               },

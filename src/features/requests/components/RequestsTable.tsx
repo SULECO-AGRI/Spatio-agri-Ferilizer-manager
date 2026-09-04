@@ -11,6 +11,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { StatusBadge } from "@/components/ui";
+import { formatDate, formatServiceType } from "@/lib/utils";
 import type { ApiServiceRequestItem } from "@/types/request";
 
 interface RequestsTableProps {
@@ -26,7 +27,7 @@ export function RequestsTable({
   onSelectRequest,
   onAssignPilot,
 }: RequestsTableProps) {
-  const parentRef = useRef<HTMLDivElement | null>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
     count: requests.length,
@@ -34,29 +35,6 @@ export function RequestsTable({
     estimateSize: () => 58,
     overscan: 8,
   });
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "N/A";
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const formatServiceType = (service?: string) => {
-    if (!service) return "General";
-    return service
-      .toLowerCase()
-      .split("_")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
-  };
 
   if (isLoading) {
     return (

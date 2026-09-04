@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useTransition } from "react";
 import { pilotService } from "@/services/pilotService";
+import { formatDate } from "@/lib/utils";
 import type {
   ApiPilotItem,
   PilotsPagination,
@@ -147,10 +148,7 @@ export function usePilots(options: UsePilotsOptions = {}) {
         {
           id: `MSN-${detail.userId}01`,
           field: "Central Agri Zone",
-          date: new Date(detail.updatedAt).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-          }),
+          date: formatDate(detail.updatedAt),
           result: "Completed",
         },
       ],
@@ -159,7 +157,7 @@ export function usePilots(options: UsePilotsOptions = {}) {
           id: `doc-${detail.userId}-1`,
           title: "CAASL Pilot License",
           docNumber: detail.licenceNumber,
-          issueDate: new Date(detail.createdAt).toLocaleDateString(),
+          issueDate: formatDate(detail.createdAt),
           expiryDate: "Valid 3 Years",
           fileSize: "1.2 MB",
         },
@@ -167,7 +165,7 @@ export function usePilots(options: UsePilotsOptions = {}) {
           id: `doc-${detail.userId}-2`,
           title: "Medical & Safety Certificate",
           docNumber: `MED-${detail.userId}`,
-          issueDate: new Date(detail.createdAt).toLocaleDateString(),
+          issueDate: formatDate(detail.createdAt),
           fileSize: "850 KB",
         },
       ],
