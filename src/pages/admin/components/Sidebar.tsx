@@ -51,9 +51,16 @@ export const Sidebar = memo(function Sidebar({ activeTab, onTabChange }: Sidebar
       <aside
         className={`fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-white border-r border-slate-200 transition-transform duration-300 lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        {/* Header / Logo */}
-        <div className="p-6 flex items-center gap-3 border-b border-slate-100 font-sans">
-          <svg className="w-9 h-9 shrink-0 shadow-xs rounded-lg" viewBox="0 0 32 32">
+        {/* Header / Logo (Redirect to Landing Page) */}
+        <Link
+          to="/"
+          className="p-6 flex items-center gap-3 border-b border-slate-100 font-sans cursor-pointer hover:bg-slate-50/80 transition-all group select-none"
+          title="Return to Landing Page"
+        >
+          <svg
+            className="w-9 h-9 shrink-0 shadow-xs rounded-lg group-hover:scale-105 transition-transform"
+            viewBox="0 0 32 32"
+          >
             <rect width="32" height="32" rx="8" fill="#062419" />
             <path d="M9 21c4-1 7-4 8-12 5 4 5 12-1 14-3 1-6-.5-7-2Z" fill="#10b981" />
             <path
@@ -66,12 +73,12 @@ export const Sidebar = memo(function Sidebar({ activeTab, onTabChange }: Sidebar
             />
           </svg>
           <div>
-            <h2 className="font-medium text-base text-slate-800 leading-none">
+            <h2 className="font-medium text-base text-slate-800 leading-none group-hover:text-emerald-700 transition-colors">
               Fertilizer manager
             </h2>
             <span className="text-[11px] font-normal text-slate-400 mt-1 block">Admin</span>
           </div>
-        </div>
+        </Link>
 
         {/* Menu Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto font-sans">

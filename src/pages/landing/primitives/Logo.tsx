@@ -1,12 +1,20 @@
+import { Link } from "@tanstack/react-router";
+
 export function Logo({
   className = "",
   showIcon = true,
+  to = "/",
 }: {
   className?: string;
   showIcon?: boolean;
+  to?: string;
 }) {
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
+    <Link
+      to={to}
+      className={`inline-flex items-center gap-2 cursor-pointer transition-opacity hover:opacity-90 select-none ${className}`}
+      aria-label="Fertilizer manager Home"
+    >
       {showIcon && (
         <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden>
           <circle
@@ -41,6 +49,6 @@ export function Logo({
       <span className="font-display text-[15px] font-semibold tracking-tight">
         Fertilizer <span className="text-primary">manager</span>
       </span>
-    </span>
+    </Link>
   );
 }
