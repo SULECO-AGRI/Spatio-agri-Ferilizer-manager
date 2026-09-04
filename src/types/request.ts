@@ -90,6 +90,42 @@ export interface ServiceRequestDetailsResponse {
   };
 }
 
+export interface CandidatePilot {
+  pilotId: number;
+  fullName: string;
+  email?: string;
+  mobile?: string;
+  licenceNumber?: string;
+  rating: number;
+  totalMissions: number;
+  distanceKm: number;
+  matchScore: number;
+  status?: string;
+  droneModel?: string;
+  availabilityStatus?: string;
+}
+
+export interface CandidatePilotsResponse {
+  status: "success" | string;
+  data:
+    | {
+        candidates?: CandidatePilot[];
+        candidatePilots?: CandidatePilot[];
+        pilots?: CandidatePilot[];
+        serviceRequest?: ApiServiceRequestItem;
+      }
+    | CandidatePilot[];
+}
+
+export interface AssignPilotResponse {
+  status: "success" | string;
+  message?: string;
+  data?: {
+    serviceRequest?: ApiServiceRequestItem;
+    request?: ApiServiceRequestItem;
+  };
+}
+
 export interface ServiceRequestQueryParams {
   page?: number;
   limit?: number;

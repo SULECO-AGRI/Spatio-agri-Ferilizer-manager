@@ -1,6 +1,15 @@
 import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ChevronRight, Calendar, User, Sprout, Layers, AlertCircle, Loader2 } from "lucide-react";
+import {
+  ChevronRight,
+  Calendar,
+  User,
+  Sprout,
+  Layers,
+  AlertCircle,
+  Loader2,
+  UserPlus,
+} from "lucide-react";
 import { StatusBadge } from "@/components/ui";
 import type { ApiServiceRequestItem } from "@/types/request";
 
@@ -8,12 +17,14 @@ interface RequestsTableProps {
   requests: ApiServiceRequestItem[];
   isLoading?: boolean;
   onSelectRequest: (id: number) => void;
+  onAssignPilot?: (request: ApiServiceRequestItem) => void;
 }
 
 export function RequestsTable({
   requests,
   isLoading = false,
   onSelectRequest,
+  onAssignPilot,
 }: RequestsTableProps) {
   const parentRef = useRef<HTMLDivElement | null>(null);
 
@@ -175,18 +186,35 @@ export function RequestsTable({
                 </td>
 
                 {/* Actions */}
-                <td className="p-4 pr-6 text-right">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectRequest(req.requestId);
-                    }}
-                    className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 text-xs font-medium cursor-pointer"
-                  >
-                    <span>View</span>
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
+                <td className="p-4 pr-6 text-right whitespace-nowrap">
+                  <div className="flex items-center justify-end gap-2">
+                    {req.status === "PENDING" && onAssignPilot && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAssignPilot(req);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-all shadow-2xs hover:shadow-xs cursor-pointer"
+                        title="Assign candidate pilot"
+                      >
+                        <UserPlus className="w-3.5 h-3.5" />
+                        <span>Assign Pilot</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectRequest(req.requestId);
+                      }}
+                      className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 text-xs font-medium cursor-pointer py-1 px-1.5 rounded-lg hover:bg-emerald-50 transition-colors"
+                    >
+                      <span>View</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             );

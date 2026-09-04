@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from "react";
 import {
   ArrowUpDown,
   RefreshCw,
@@ -9,14 +10,24 @@ import {
   XCircle,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
 import { PageHeader, FilterPills, TableToolbar } from "@/components/ui";
 import { useServiceRequests, requestFilterTabs } from "./hooks/useServiceRequests";
 import { RequestsTable } from "./components/RequestsTable";
 import { RequestDetailsView } from "./RequestDetailsView";
+import { AssignPilotModal } from "./components/AssignPilotModal";
+import type { ApiServiceRequestItem, CandidatePilot } from "@/types/request";
 
 interface ServiceRequestsViewProps {
   initialRequestId?: string | number | null;
+}
+
+interface ToastNotification {
+  id: number;
+  title: string;
+  message: string;
+  type: "success" | "error";
 }
 
 export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewProps) {
@@ -46,8 +57,70 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
     clearSelectedRequest,
   } = useServiceRequests({ initialRequestId });
 
+  const [assigningRequest, setAssigningRequest] = useState<ApiServiceRequestItem | null>(null);
+  const [toast, setToast] = useState<ToastNotification | null>(null);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  const handleAssignSuccess = useCallback(
+    (updatedRequest: ApiServiceRequestItem, candidate: CandidatePilot) => {
+      setToast({
+        id: Date.now(),
+        title: "Pilot Assigned Successfully",
+        message: `${candidate.fullName} has been assigned to request ${updatedRequest.requestCode}. Status updated to ASSIGNED.`,
+        type: "success",
+      });
+
+      // Refetch live list & counters
+      refetch();
+    },
+    [refetch],
+  );
+
   if (selectedRequestId && selectedRequestDetails) {
-    return <RequestDetailsView request={selectedRequestDetails} onBack={clearSelectedRequest} />;
+    return (
+      <>
+        <RequestDetailsView
+          request={selectedRequestDetails}
+          onBack={clearSelectedRequest}
+          onAssignPilot={(req) => setAssigningRequest(req)}
+        />
+
+        {/* Candidate Pilot Assignment Modal */}
+        <AssignPilotModal
+          isOpen={assigningRequest !== null}
+          request={assigningRequest}
+          onClose={() => setAssigningRequest(null)}
+          onAssignSuccess={handleAssignSuccess}
+        />
+
+        {/* Toast Notification */}
+        {toast && (
+          <div className="fixed bottom-6 right-6 z-50 max-w-md bg-white border border-emerald-200 rounded-2xl p-4 shadow-xl flex items-start gap-3 animate-in slide-in-from-bottom-5 duration-200">
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs font-semibold text-slate-900">{toast.title}</h4>
+              <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{toast.message}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setToast(null)}
+              className="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </>
+    );
   }
 
   // Calculate showing range for pagination
@@ -206,6 +279,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
         requests={requests}
         isLoading={isLoading}
         onSelectRequest={(id) => selectRequest(id)}
+        onAssignPilot={(req) => setAssigningRequest(req)}
       />
 
       {/* Pagination & Counter Footer */}
@@ -273,6 +347,34 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
           </select>
         </div>
       </div>
+
+      {/* Candidate Pilot Assignment Modal */}
+      <AssignPilotModal
+        isOpen={assigningRequest !== null}
+        request={assigningRequest}
+        onClose={() => setAssigningRequest(null)}
+        onAssignSuccess={handleAssignSuccess}
+      />
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-md bg-white border border-emerald-200 rounded-2xl p-4 shadow-xl flex items-start gap-3 animate-in slide-in-from-bottom-5 duration-200">
+          <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-xs font-semibold text-slate-900">{toast.title}</h4>
+            <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{toast.message}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

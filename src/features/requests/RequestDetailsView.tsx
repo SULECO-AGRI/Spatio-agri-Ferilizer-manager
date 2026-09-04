@@ -16,9 +16,10 @@ import { RequestActionsPanel } from "./components/RequestActionsPanel";
 interface RequestDetailsViewProps {
   request: ApiServiceRequestItem;
   onBack: () => void;
+  onAssignPilot?: (request: ApiServiceRequestItem) => void;
 }
 
-export function RequestDetailsView({ request, onBack }: RequestDetailsViewProps) {
+export function RequestDetailsView({ request, onBack, onAssignPilot }: RequestDetailsViewProps) {
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "N/A";
     try {
@@ -243,13 +244,15 @@ export function RequestDetailsView({ request, onBack }: RequestDetailsViewProps)
             ) : (
               <div className="p-4 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center justify-between text-xs text-slate-500">
                 <span>No pilot has been allocated to this service request yet.</span>
-                <button
-                  type="button"
-                  onClick={() => alert("Open pilot allocation modal")}
-                  className="px-3 py-1.5 bg-[#062419] hover:bg-[#0a3526] text-white rounded-lg font-medium cursor-pointer transition-colors"
-                >
-                  Assign Pilot
-                </button>
+                {onAssignPilot && (
+                  <button
+                    type="button"
+                    onClick={() => onAssignPilot(request)}
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium cursor-pointer transition-colors shadow-2xs"
+                  >
+                    Assign Pilot
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -287,9 +290,10 @@ export function RequestDetailsView({ request, onBack }: RequestDetailsViewProps)
 
           {/* Action Control Buttons */}
           <RequestActionsPanel
+            status={request.status}
             onApprove={() => alert(`Approved request ${request.requestCode}`)}
             onReject={() => alert(`Rejected request ${request.requestCode}`)}
-            onAssignPilot={() => alert(`Assigning pilot for ${request.requestCode}`)}
+            onAssignPilot={onAssignPilot ? () => onAssignPilot(request) : undefined}
             onReschedule={() => alert(`Rescheduling request ${request.requestCode}`)}
             onContactFarmer={() =>
               alert(`Calling farmer ${request.farmer?.fullName} at ${request.farmer?.mobile}`)

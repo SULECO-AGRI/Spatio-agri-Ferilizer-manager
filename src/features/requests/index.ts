@@ -6,4 +6,5 @@ export * from "./components/RequestFieldMetrics";
 export * from "./components/RequestSummaryCard";
 export * from "./components/RequestActionsPanel";
 export * from "./components/RequestsTable";
+export * from "./components/AssignPilotModal";
 export * from "./hooks/useServiceRequests";
