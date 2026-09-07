@@ -1,6 +1,5 @@
-export { PageHeader } from "./PageHeader";
-export { MetricCard } from "./MetricCard";
-export { StatusBadge } from "./StatusBadge";
-export { FilterPills } from "./FilterPills";
-export { TableToolbar } from "./TableToolbar";
-export { FormField } from "./FormField";
+/**
+ * UI Primitives bridge
+ * All components now live in @/components/common with full backwards compatibility.
+ */
+export * from "@/components/common";

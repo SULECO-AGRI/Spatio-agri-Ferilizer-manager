@@ -1,8 +1,8 @@
-import { PageHeader, MetricCard } from "@/components/ui";
+import { PageHeader, MetricCard } from "@/components/common";
+import { QuickActions } from "@/components/layout";
 import { RecentActivity } from "@/pages/admin/dashboard/RecentActivity";
 import { ScheduleTable } from "@/pages/admin/dashboard/ScheduleTable";
 import { LiveMissionMap } from "@/pages/admin/dashboard/LiveMissionMap";
-import { QuickActions } from "@/pages/admin/components/QuickActions";
 import { useDashboardStats } from "@/pages/admin/dashboard/hooks/useDashboardStats";
 import type { TabId } from "@/types";
 

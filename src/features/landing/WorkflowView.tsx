@@ -2,12 +2,9 @@ import { useRef } from "react";
 import { useScroll, useSpring } from "framer-motion";
 import { Reveal } from "@/pages/landing/primitives/Reveal";
 import { workflowSteps } from "./data/workflowSteps";
-import { useWorkflowCurve } from "./hooks/useWorkflowCurve";
-import { WorkflowCurveSpine } from "./components/WorkflowCurveSpine";
+import { WorkflowLinearSpine } from "./components/WorkflowLinearSpine";
 import { WorkflowStepDesktop } from "./components/WorkflowStepDesktop";
 import { WorkflowStepMobile } from "./components/WorkflowStepMobile";
-
-const WORKFLOW_CURVE_HEIGHT = workflowSteps.length * 160;
 
 export function WorkflowView() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -17,53 +14,48 @@ export function WorkflowView() {
     offset: ["start center", "end center"],
   });
 
-  const pathLength = useSpring(scrollYProgress, {
-    stiffness: 80,
-    damping: 20,
-  });
-
-  const workflowCurvePath = useWorkflowCurve({
-    stepCount: workflowSteps.length,
-    viewHeight: WORKFLOW_CURVE_HEIGHT,
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 90,
+    damping: 24,
+    restDelta: 0.001,
   });
 
   return (
     <section
       ref={containerRef}
       id="how-it-works"
-      className="relative w-full py-28 md:py-36 bg-slate-50/50 border-y border-slate-100 overflow-hidden font-sans"
+      className="relative w-full py-28 md:py-36 bg-slate-50/60 border-y border-slate-100 overflow-hidden font-sans"
     >
       {/* Sleek Grid Background */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.05] grid-bg" />
+      <div className="absolute inset-0 pointer-events-none opacity-[0.04] grid-bg" />
 
-      {/* Decorative gradients */}
+      {/* Decorative ambient gradients */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none">
-        <div className="absolute top-1/3 left-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-10 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl" />
       </div>
 
       <div className="relative max-w-6xl mx-auto px-6 z-10">
         {/* Section Header */}
         <Reveal className="mb-20 text-center max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 mb-4">
+            <span>PRECISION WORKFLOW</span>
+          </div>
           <h2 className="font-display text-4xl font-bold tracking-tight text-slate-900 md:text-5xl leading-tight">
-            From Sky to Soil in 5 Steps
+            From Sky to Soil in 5 Simple Steps
           </h2>
           <p className="mt-4 text-slate-500 max-w-xl mx-auto text-base md:text-lg">
-            A streamlined digital pipeline built for speed, accuracy, and maximum efficiency.
+            A seamless digital pipeline designed for speed, sub-inch accuracy, and automated crop analytics.
           </p>
         </Reveal>
 
         {/* Timeline Container */}
         <div className="relative max-w-5xl mx-auto mt-16">
-          {/* Animated Curved Spine for Desktop */}
-          <WorkflowCurveSpine
-            path={workflowCurvePath}
-            height={WORKFLOW_CURVE_HEIGHT}
-            pathLength={pathLength}
-          />
+          {/* Animated Central Linear Spine (Desktop) */}
+          <WorkflowLinearSpine progress={smoothProgress} />
 
-          {/* Vertical dashed line for mobile */}
-          <div className="absolute left-6 top-8 bottom-8 w-px border-l-2 border-dashed border-slate-200 md:hidden z-0" />
+          {/* Left Vertical Track for Mobile */}
+          <div className="absolute left-[23px] top-6 bottom-6 w-[2px] bg-slate-200 md:hidden z-0" />
 
           {/* Timeline Items */}
           <div className="space-y-16 md:space-y-24 relative z-10">
@@ -79,3 +71,5 @@ export function WorkflowView() {
     </section>
   );
 }
+
+export default WorkflowView;

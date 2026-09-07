@@ -2,16 +2,14 @@ import { useState, lazy, Suspense, useCallback, useEffect } from "react";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { Construction, ArrowRight } from "lucide-react";
 import type { TabId } from "@/types";
-import { Sidebar } from "@/pages/admin/components/Sidebar";
-import { Topbar } from "@/pages/admin/components/Topbar";
-import { AdminTabSkeleton } from "@/pages/admin/components/AdminTabSkeleton";
+import { Sidebar, Topbar, AdminTabSkeleton } from "@/components/layout";
 import { authService } from "@/services/authService";
 import { isAdminUser } from "@/types/auth";
 import { useAuth } from "@/context/AuthContext";
 
-// Dynamic Code-Splitting for Heavy Admin Views
+// Dynamic Code-Splitting for Feature Views
 const DashboardView = lazy(() =>
-  import("@/pages/admin/dashboard/DashboardView").then((m) => ({ default: m.DashboardView })),
+  import("@/features/dashboard").then((m) => ({ default: m.DashboardView })),
 );
 const ServiceRequestsView = lazy(() =>
   import("@/features/requests").then((m) => ({ default: m.ServiceRequestsView })),
@@ -23,16 +21,16 @@ const FarmersListView = lazy(() =>
   import("@/features/farmers").then((m) => ({ default: m.FarmersListView })),
 );
 const ReportsView = lazy(() =>
-  import("@/pages/admin/reports/ReportsView").then((m) => ({ default: m.ReportsView })),
+  import("@/features/reports").then((m) => ({ default: m.ReportsView })),
 );
 const PaymentsView = lazy(() =>
   import("@/features/payments").then((m) => ({ default: m.PaymentsView })),
 );
 const SettingsView = lazy(() =>
-  import("@/pages/admin/settings/SettingsView").then((m) => ({ default: m.SettingsView })),
+  import("@/features/settings").then((m) => ({ default: m.SettingsView })),
 );
 const UserProfileView = lazy(() =>
-  import("@/pages/admin/profile/UserProfileView").then((m) => ({ default: m.UserProfileView })),
+  import("@/features/profile").then((m) => ({ default: m.UserProfileView })),
 );
 
 export const Route = createFileRoute("/admin")({
@@ -140,3 +138,5 @@ function AdminPage() {
     </div>
   );
 }
+
+export default AdminPage;
