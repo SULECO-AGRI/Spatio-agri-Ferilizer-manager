@@ -3,15 +3,12 @@ import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import { StatusBadge } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
 import { pilotService } from "@/services/pilotService";
-import type { PilotDocument, DetailedPilotInfo } from "@/types/pilot";
+import type { DetailedPilotInfo, PilotMission, MissionResult } from "@/types/pilot";
 import {
   PilotProfileCard,
-  DroneInfoCard,
   MissionHistoryCard,
   PilotPerformanceCard,
   PilotMetricsRow,
-  CertificatesCard,
-  DocumentViewerModal,
 } from "./components";
 
 interface PilotDetailsProps {
@@ -20,7 +17,6 @@ interface PilotDetailsProps {
 }
 
 export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
-  const [selectedDoc, setSelectedDoc] = useState<PilotDocument | null>(null);
   const [details, setDetails] = useState<DetailedPilotInfo | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +32,45 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
         if (isMounted) {
           const initials =
             `${data.firstName?.[0] || ""}${data.lastName?.[0] || ""}`.toUpperCase() || "PL";
-          const ratingVal = data.stats?.ratings ?? 5.0;
+          const rawRating =
+            data.stats?.ratings ??
+            data.stats?.rating ??
+            data.stats?.averageRatings ??
+            (data as any)?.ratings ??
+            (data as any)?.rating ??
+            (data as any)?.profile?.rating ??
+            (data as any)?.profile?.ratings;
+
+          const ratingVal =
+            rawRating !== null && rawRating !== undefined && !isNaN(Number(rawRating)) && Number(rawRating) > 0
+              ? Number(rawRating)
+              : 0;
+
           const completedMissions = data.stats?.completedMissions ?? 0;
           const totalFlightHours = data.stats?.totalFlightHours ?? 0;
+
+          const rawMissions =
+            (data as any)?.missions ||
+            (data as any)?.serviceRequests ||
+            (data as any)?.recentMissions ||
+            [];
+
+          const missionHistory: PilotMission[] = Array.isArray(rawMissions)
+            ? rawMissions.map((m: any) => ({
+                id: m.missionCode || m.requestCode || `MSN-${m.id || m.missionId || m.serviceRequestId || data.userId}`,
+                field: m.fieldName || m.fieldLocation || m.farmName || m.cropType || "Agri Field",
+                date: formatDate(m.completedAt || m.scheduledDate || m.createdAt || m.date),
+                result: (m.status === "COMPLETED" || m.status === "Completed"
+                  ? "Completed"
+                  : m.status === "IN_PROGRESS" || m.status === "On Mission"
+                  ? "Active"
+                  : m.status === "FAILED" || m.status === "Failed"
+                  ? "Failed"
+                  : m.status === "CANCELLED" || m.status === "Cancelled"
+                  ? "Cancelled"
+                  : "Completed") as MissionResult,
+              }))
+            : [];
 
           setDetails({
             pilotId: data.userId,
@@ -49,53 +81,20 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
             experience: `${Math.max(1, Math.round(totalFlightHours / 50))} yrs experience`,
             phone: data.mobile || "N/A",
             email: data.email || "N/A",
-            rating: typeof ratingVal === "number" ? ratingVal : Number(ratingVal || 5),
+            rating: ratingVal,
             reviewsCount: data.stats?.totalReviews ?? completedMissions,
             missionsCount: completedMissions,
             flightHours: `${totalFlightHours} hrs`,
             activeMissionsCount: data.stats?.inProgressMissions ?? 0,
-            certificates: [data.licenceNumber || "CAASL-DP-001", "Precision Ag Drone Ops"],
-            droneDetails: {
-              model: "DJI Agras T40",
-              tankCapacity: "40L",
-              maxSpeed: "10 m/s",
-              lastServiced: "Jul 2026",
-              batteryHealth: "98%",
-            },
             performanceData: [
-              { label: "Feb", value: 38 },
-              { label: "Mar", value: 46 },
-              { label: "Apr", value: 32 },
-              { label: "May", value: 54 },
-              { label: "Jun", value: 48 },
-              { label: "Jul", value: 52 },
+              { label: "Feb", value: Math.round(completedMissions * 0.15) },
+              { label: "Mar", value: Math.round(completedMissions * 0.2) },
+              { label: "Apr", value: Math.round(completedMissions * 0.1) },
+              { label: "May", value: Math.round(completedMissions * 0.25) },
+              { label: "Jun", value: Math.round(completedMissions * 0.15) },
+              { label: "Jul", value: Math.round(completedMissions * 0.15) },
             ],
-            missionHistory: [
-              {
-                id: `MSN-${data.userId}01`,
-                field: "Precision Agri Zone",
-                date: formatDate(data.updatedAt),
-                result: "Completed",
-              },
-            ],
-            documents: [
-              {
-                id: "doc-1",
-                title: "CAASL Drone Pilot License",
-                docNumber: data.licenceNumber || "CAA-UAV-001",
-                issueDate: formatDate(data.createdAt),
-                expiryDate: "Valid 3 Years",
-                fileSize: "1.4 MB",
-              },
-              {
-                id: "doc-2",
-                title: "Safety & First Aid Certificate",
-                docNumber: `SLRC-FA-${data.userId}`,
-                issueDate: formatDate(data.createdAt),
-                expiryDate: "Valid",
-                fileSize: "820 KB",
-              },
-            ],
+            missionHistory,
           });
         }
       } catch (err: unknown) {
@@ -193,33 +192,29 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
 
       {/* Main Content Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Left Column: Pilot Profile, Drone Information, Mission History */}
+        {/* Left Column: Pilot Profile & Key Metrics */}
         <div className="space-y-6">
           <PilotProfileCard pilot={details} />
-          <DroneInfoCard drone={details.droneDetails} />
-          <MissionHistoryCard missions={details.missionHistory} />
-        </div>
-
-        {/* Right Column: Performance Bar Chart, Flight Hours / Rating Metrics, Certificates & Documents */}
-        <div className="space-y-6">
-          <PilotPerformanceCard data={details.performanceData} />
           <PilotMetricsRow
             flightHours={details.flightHours}
             rating={details.rating}
             reviewsCount={details.reviewsCount}
           />
-          <CertificatesCard documents={details.documents} onViewDocument={setSelectedDoc} />
+        </div>
+
+        {/* Right Column: Performance Bar Chart */}
+        <div className="space-y-6">
+          <PilotPerformanceCard data={details.performanceData || []} />
         </div>
       </div>
 
-      {/* Document Viewer Modal */}
-      <DocumentViewerModal
-        document={selectedDoc}
-        pilotName={details.name}
-        onClose={() => setSelectedDoc(null)}
-      />
+      {/* Mission History (Real Dynamic History or Clean Empty State) */}
+      <div className="pt-2">
+        <MissionHistoryCard missions={details.missionHistory} />
+      </div>
     </div>
   );
 }
 
 export default PilotDetailsView;
+

@@ -44,26 +44,21 @@ export function PilotProfileCard({ pilot }: PilotProfileCardProps) {
 
           {/* Rating & Missions Completed */}
           <div className="flex items-center gap-2 text-xs text-slate-700 font-normal pt-0.5">
-            <span className="font-medium text-slate-800">Rating {pilot.rating}</span>
+            <span className="font-medium text-slate-800">
+              Rating {Number(pilot.rating || 0).toFixed(1)}
+            </span>
             <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
             <span className="text-slate-300 mx-1">|</span>
             <span>{pilot.missionsCount} missions completed</span>
           </div>
 
-          {/* Footer Stats: Flight Hours & Certificates List */}
-          <div className="pt-3 border-t border-slate-100 text-xs text-slate-500 font-normal space-y-1">
+          {/* Footer Stats: Flight Hours */}
+          <div className="pt-3 border-t border-slate-100 text-xs text-slate-500 font-normal">
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-slate-400" />
               <span>
                 Flight Hours:{" "}
                 <strong className="font-medium text-slate-700">{pilot.flightHours}</strong>
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-slate-400" />
-              <span>
-                Certificates:{" "}
-                <span className="text-slate-700">{pilot.certificates.join(", ")}</span>
               </span>
             </div>
           </div>

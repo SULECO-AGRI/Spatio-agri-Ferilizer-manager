@@ -6,6 +6,8 @@ import type {
   PilotsPagination,
   DetailedPilotInfo,
   PilotProfileDetailDTO,
+  PilotMission,
+  MissionResult,
 } from "@/types/pilot";
 
 export const pilotFilterTabs = ["All", "Active", "On Mission", "Inactive", "Suspended"] as const;
@@ -110,9 +112,46 @@ export function usePilots(options: UsePilotsOptions = {}) {
   ): DetailedPilotInfo => {
     const initials =
       `${detail.firstName?.[0] || ""}${detail.lastName?.[0] || ""}`.toUpperCase() || "PL";
-    const ratingVal = detail.stats?.ratings ?? basicItem?.ratings ?? 5.0;
+    const rawRating =
+      detail.stats?.ratings ??
+      detail.stats?.rating ??
+      detail.stats?.averageRatings ??
+      basicItem?.ratings ??
+      basicItem?.rating ??
+      basicItem?.averageRatings ??
+      (detail as any)?.rating ??
+      (detail as any)?.ratings;
+
+    const ratingVal =
+      rawRating !== null && rawRating !== undefined && !isNaN(Number(rawRating)) && Number(rawRating) > 0
+        ? Number(rawRating)
+        : 0;
+
     const completedMissions = detail.stats?.completedMissions ?? basicItem?.completedMissions ?? 0;
     const totalFlightHours = detail.stats?.totalFlightHours ?? basicItem?.totalFlightHours ?? 0;
+
+    const rawMissions =
+      (detail as any)?.missions ||
+      (detail as any)?.serviceRequests ||
+      (detail as any)?.recentMissions ||
+      [];
+
+    const missionHistory: PilotMission[] = Array.isArray(rawMissions)
+      ? rawMissions.map((m: any) => ({
+          id: m.missionCode || m.requestCode || `MSN-${m.id || m.missionId || m.serviceRequestId || detail.userId}`,
+          field: m.fieldName || m.fieldLocation || m.farmName || m.cropType || "Agri Field",
+          date: formatDate(m.completedAt || m.scheduledDate || m.createdAt || m.date),
+          result: (m.status === "COMPLETED" || m.status === "Completed"
+            ? "Completed"
+            : m.status === "IN_PROGRESS" || m.status === "On Mission"
+            ? "Active"
+            : m.status === "FAILED" || m.status === "Failed"
+            ? "Failed"
+            : m.status === "CANCELLED" || m.status === "Cancelled"
+            ? "Cancelled"
+            : "Completed") as MissionResult,
+        }))
+      : [];
 
     return {
       pilotId: detail.userId,
@@ -123,52 +162,20 @@ export function usePilots(options: UsePilotsOptions = {}) {
       experience: `${Math.max(1, Math.round(totalFlightHours / 50))} yrs experience`,
       phone: detail.mobile || "N/A",
       email: detail.email || "N/A",
-      rating: typeof ratingVal === "number" ? ratingVal : Number(ratingVal || 5),
+      rating: ratingVal,
       reviewsCount: detail.stats?.totalReviews ?? completedMissions,
       missionsCount: completedMissions,
       flightHours: `${totalFlightHours} hrs`,
       activeMissionsCount: basicItem?.activeMissionsCount ?? detail.stats?.inProgressMissions ?? 0,
-      certificates: [detail.licenceNumber, "CAASL-Certified", "Precision Ag Drone Ops"],
-      droneDetails: {
-        model: "DJI Agras T40 / T30 Fleet",
-        tankCapacity: "40L",
-        maxSpeed: "10 m/s",
-        lastServiced: "Jul 2026",
-        batteryHealth: "98%",
-      },
       performanceData: [
-        { label: "Feb", value: 38 },
-        { label: "Mar", value: 46 },
-        { label: "Apr", value: 32 },
-        { label: "May", value: 54 },
-        { label: "Jun", value: 48 },
-        { label: "Jul", value: 52 },
+        { label: "Feb", value: Math.round(completedMissions * 0.15) },
+        { label: "Mar", value: Math.round(completedMissions * 0.2) },
+        { label: "Apr", value: Math.round(completedMissions * 0.1) },
+        { label: "May", value: Math.round(completedMissions * 0.25) },
+        { label: "Jun", value: Math.round(completedMissions * 0.15) },
+        { label: "Jul", value: Math.round(completedMissions * 0.15) },
       ],
-      missionHistory: [
-        {
-          id: `MSN-${detail.userId}01`,
-          field: "Central Agri Zone",
-          date: formatDate(detail.updatedAt),
-          result: "Completed",
-        },
-      ],
-      documents: [
-        {
-          id: `doc-${detail.userId}-1`,
-          title: "CAASL Pilot License",
-          docNumber: detail.licenceNumber,
-          issueDate: formatDate(detail.createdAt),
-          expiryDate: "Valid 3 Years",
-          fileSize: "1.2 MB",
-        },
-        {
-          id: `doc-${detail.userId}-2`,
-          title: "Medical & Safety Certificate",
-          docNumber: `MED-${detail.userId}`,
-          issueDate: formatDate(detail.createdAt),
-          fileSize: "850 KB",
-        },
-      ],
+      missionHistory,
     };
   };
 
@@ -204,21 +211,18 @@ export function usePilots(options: UsePilotsOptions = {}) {
               experience: "Active Pilot",
               phone: basic.mobile,
               email: basic.email,
-              rating: basic.ratings ?? 5,
+              rating:
+                basic.ratings ??
+                basic.rating ??
+                basic.averageRatings ??
+                (basic as any)?.profile?.rating ??
+                0,
               reviewsCount: basic.completedMissions,
               missionsCount: basic.completedMissions,
               flightHours: `${basic.totalFlightHours} hrs`,
               activeMissionsCount: basic.activeMissionsCount,
-              certificates: [basic.licenceNumber],
-              droneDetails: {
-                model: "DJI Agras T40",
-                tankCapacity: "40L",
-                maxSpeed: "10 m/s",
-                lastServiced: "Recent",
-              },
               performanceData: [],
               missionHistory: [],
-              documents: [],
             });
           }
         }

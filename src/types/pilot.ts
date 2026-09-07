@@ -14,7 +14,9 @@ export interface ApiPilotItem {
   mobile: string;
   licenceNumber: string;
   status: PilotStatus;
-  ratings: number | null;
+  ratings?: number | null;
+  rating?: number | null;
+  averageRatings?: number | null;
   completedMissions: number;
   totalFlightHours: number;
   activeMissionsCount: number;
@@ -54,7 +56,9 @@ export interface PilotQueryParams {
 }
 
 export interface PilotStatsDTO {
-  ratings: number | null;
+  ratings?: number | null;
+  rating?: number | null;
+  averageRatings?: number | null;
   completedMissions: number;
   totalFlightHours: number;
   scheduledMissions: number;
@@ -133,9 +137,10 @@ export interface DetailedPilotInfo {
   missionsCount: number;
   flightHours: string;
   activeMissionsCount?: number;
-  certificates: string[];
-  droneDetails: PilotDroneDetails;
-  performanceData: { label: string; value: number }[];
+  certificates?: string[];
+  droneDetails?: PilotDroneDetails;
+  performanceData?: { label: string; value: number }[];
   missionHistory: PilotMission[];
-  documents: PilotDocument[];
+  documents?: PilotDocument[];
 }
+

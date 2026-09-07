@@ -38,9 +38,6 @@ export function WorkflowView() {
       <div className="relative max-w-6xl mx-auto px-6 z-10">
         {/* Section Header */}
         <Reveal className="mb-20 text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 mb-4">
-            <span>PRECISION WORKFLOW</span>
-          </div>
           <h2 className="font-display text-4xl font-bold tracking-tight text-slate-900 md:text-5xl leading-tight">
             From Sky to Soil in 5 Simple Steps
           </h2>

@@ -32,7 +32,9 @@ export function PilotMetricsRow({ flightHours, rating, reviewsCount }: PilotMetr
           <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
         </div>
         <div className="my-2 flex items-center gap-1.5">
-          <h3 className="text-2xl font-medium text-slate-900 font-display">{rating}</h3>
+          <h3 className="text-2xl font-medium text-slate-900 font-display">
+            {Number(rating || 0).toFixed(1)}
+          </h3>
           <Star className="w-5 h-5 fill-amber-500 text-amber-500" />
         </div>
         <div className="text-xs text-slate-400 font-normal">{reviewsCount} reviews</div>

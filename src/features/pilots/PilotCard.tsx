@@ -13,10 +13,19 @@ export function PilotCard({ pilot, onViewDetails, onToggleStatus }: PilotCardPro
     `${pilot.firstName?.[0] || ""}${pilot.lastName?.[0] || ""}`.toUpperCase() || "PL";
   const isBusy = pilot.status === "ON_MISSION" || pilot.status === "Busy";
   const isSuspended = pilot.status === "SUSPENDED";
+  const rawRating =
+    pilot.ratings ??
+    pilot.rating ??
+    pilot.averageRatings ??
+    (pilot as any)?.profile?.rating ??
+    (pilot as any)?.profile?.ratings ??
+    (pilot as any)?.stats?.ratings ??
+    (pilot as any)?.stats?.rating;
+
   const ratingDisplay =
-    pilot.ratings !== null && pilot.ratings !== undefined
-      ? Number(pilot.ratings).toFixed(1)
-      : "5.0";
+    rawRating !== null && rawRating !== undefined && !isNaN(Number(rawRating)) && Number(rawRating) > 0
+      ? Number(rawRating).toFixed(1)
+      : "0.0";
 
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl p-6 flex flex-col justify-between shadow-xs hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-sans group">

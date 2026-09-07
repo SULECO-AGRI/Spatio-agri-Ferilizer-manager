@@ -181,7 +181,7 @@ export function Hero() {
         {/* ==================================================================== */}
         {/* LAYER 3 (FOREMOST LAYER): NAVBAR & CENTER HEADLINE                   */}
         {/* ==================================================================== */}
-        
+
         {/* Top Header / Navigation Bar */}
         <div className="relative z-50 w-full px-6 sm:px-10 lg:px-14 pt-5 sm:pt-7 flex items-center justify-between">
           {/* Brand Logo */}
@@ -189,21 +189,8 @@ export function Hero() {
             href="#hero"
             className="flex items-center gap-2.5 text-white group cursor-pointer"
           >
-            <div className="relative flex items-center justify-center">
-              <svg
-                viewBox="0 0 32 32"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8 text-white group-hover:text-emerald-300 transition-colors"
-              >
-                <path
-                  d="M16 4C10 4 5 10 5 17C5 21 8 25 12 27C11.5 24 12 20 14 17C16 14 19 12 23 11C23 15 20 19 17 21C15 22.5 13 23 12 27C17 28 27 26 27 15C27 7 22 4 16 4Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </div>
             <span className="font-display text-xl sm:text-2xl font-bold tracking-tight text-white drop-shadow-sm">
-              AgriFlyer
+              Fertilizer Manager
             </span>
           </a>
 
@@ -256,9 +243,8 @@ export function Hero() {
                 >
                   <span className="truncate max-w-[140px] sm:max-w-none">{userDisplayName}</span>
                   <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 shrink-0 text-zinc-300 group-hover:text-white ${
-                      isDropdownOpen ? "rotate-180" : ""
-                    }`}
+                    className={`w-3.5 h-3.5 transition-transform duration-200 shrink-0 text-zinc-300 group-hover:text-white ${isDropdownOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
