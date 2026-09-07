@@ -69,34 +69,29 @@ export function Nav() {
   }, []);
 
   useEffect(() => {
-    const sections = ["hero", "roi", "how-it-works", "demo", "cta"];
+    const sectionIds = ["hero", "roi", "how-it-works", "demo", "cta"];
 
-    const observerOptions = {
-      root: null,
-      rootMargin: "-40% 0px -40% 0px",
-      threshold: 0,
-    };
+    const updateActiveSection = () => {
+      const scrollPosition = window.scrollY + window.innerHeight * 0.35;
 
-    const observerCallback = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setActiveSection(entry.target.id);
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const section = document.getElementById(sectionIds[i]);
+        if (section) {
+          const top = section.offsetTop;
+          if (scrollPosition >= top) {
+            setActiveSection(sectionIds[i]);
+            return;
+          }
         }
-      });
+      }
+      setActiveSection("hero");
     };
 
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
-
-    sections.forEach((id) => {
-      const element = document.getElementById(id);
-      if (element) observer.observe(element);
-    });
+    window.addEventListener("scroll", updateActiveSection, { passive: true });
+    updateActiveSection();
 
     return () => {
-      sections.forEach((id) => {
-        const element = document.getElementById(id);
-        if (element) observer.unobserve(element);
-      });
+      window.removeEventListener("scroll", updateActiveSection);
     };
   }, []);
 
@@ -113,19 +108,19 @@ export function Nav() {
     : "User";
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-4 md:px-0 transition-all duration-300">
+    <header
+      className={`fixed inset-x-0 top-0 z-50 px-4 md:px-0 transition-all duration-300 ${
+        isScrolled
+          ? "opacity-100 translate-y-0 pointer-events-auto"
+          : "opacity-0 -translate-y-4 pointer-events-none"
+      }`}
+    >
       <div
-        className={`mx-auto mt-3 flex max-w-6xl items-center justify-between rounded-full px-5 py-2.5 transition-all duration-300 ${
-          isScrolled
-            ? "bg-white/80 border border-slate-200/60 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
-            : "bg-zinc-950/30 border border-white/15 backdrop-blur-lg shadow-none"
-        }`}
+        className="mx-auto mt-3 flex max-w-6xl items-center justify-between rounded-full px-5 py-2.5 bg-white/85 border border-slate-200/70 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
       >
         <Logo
           showIcon={false}
-          className={`shrink-0 transition-colors duration-300 ${
-            isScrolled ? "text-[#062419]" : "text-white"
-          }`}
+          className="shrink-0 text-[#062419]"
         />
 
         {/* Navigation links with active sliding indicator */}
