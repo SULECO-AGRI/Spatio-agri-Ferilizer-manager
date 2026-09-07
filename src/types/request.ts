@@ -38,7 +38,9 @@ export interface ApiMission {
   status: string;
   startedAt?: string | null;
   completedAt?: string | null;
+  pilot?: ApiAssignedPilot | null;
 }
+
 
 export interface ApiServiceRequestItem {
   requestId: number;

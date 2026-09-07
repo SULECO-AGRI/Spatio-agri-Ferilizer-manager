@@ -1,12 +1,11 @@
 import { useMemo } from "react";
-import { mockActivities } from "@/data/mockData";
 import type { ApiServiceRequestItem } from "@/types/request";
 
 interface RecentActivityProps {
   recentRequests?: ApiServiceRequestItem[];
 }
 
-export function RecentActivity({ recentRequests }: RecentActivityProps) {
+export function RecentActivity({ recentRequests = [] }: RecentActivityProps) {
   const activities = useMemo(() => {
     if (recentRequests && recentRequests.length > 0) {
       return recentRequests.slice(0, 5).map((req, idx) => {
@@ -36,7 +35,7 @@ export function RecentActivity({ recentRequests }: RecentActivityProps) {
         };
       });
     }
-    return mockActivities;
+    return [];
   }, [recentRequests]);
 
   return (
@@ -55,7 +54,14 @@ export function RecentActivity({ recentRequests }: RecentActivityProps) {
             </div>
           </div>
         ))}
+        {activities.length === 0 && (
+          <div className="text-slate-400 text-xs py-8 text-center font-normal">
+            No recent operational activity recorded.
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+export default RecentActivity;

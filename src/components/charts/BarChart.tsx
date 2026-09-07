@@ -14,13 +14,14 @@ interface BarChartProps {
 }
 
 export const BarChart = memo(function BarChart({
-  data,
+  data = [],
   title,
   maxHeightPx = 160,
   className = "",
 }: BarChartProps) {
   const maxValue = useMemo(() => {
-    return Math.max(...data.map((d) => d.value), 1);
+    const list = Array.isArray(data) ? data : [];
+    return Math.max(...list.map((d) => d.value || 0), 1);
   }, [data]);
 
   return (

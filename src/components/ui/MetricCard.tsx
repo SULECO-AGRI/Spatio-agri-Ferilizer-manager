@@ -1,11 +1,11 @@
-import { memo, type ReactNode } from "react";
+import { memo, isValidElement, type ReactNode, type ElementType } from "react";
 import type { LucideIcon } from "lucide-react";
 
 export interface MetricCardProps {
   title: string;
   value: string | number;
   footer?: string;
-  icon?: LucideIcon | ReactNode;
+  icon?: LucideIcon | ElementType | ReactNode;
   trend?: {
     value: string;
     isPositive?: boolean;
@@ -21,6 +21,13 @@ export const MetricCard = memo(function MetricCard({
   trend,
   className = "",
 }: MetricCardProps) {
+  const renderIcon = () => {
+    if (!Icon) return null;
+    if (isValidElement(Icon)) return Icon;
+    const Component = Icon as ElementType;
+    return <Component className="w-4 h-4 text-slate-400" />;
+  };
+
   return (
     <div
       className={`bg-white border border-slate-200/80 rounded-2xl p-5 flex flex-col justify-between font-sans shadow-xs ${className}`}
@@ -29,7 +36,7 @@ export const MetricCard = memo(function MetricCard({
         <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wider block">
           {title}
         </span>
-        {Icon && (typeof Icon === "function" ? <Icon className="w-4 h-4 text-slate-400" /> : Icon)}
+        {renderIcon()}
       </div>
 
       <div className="mt-2">

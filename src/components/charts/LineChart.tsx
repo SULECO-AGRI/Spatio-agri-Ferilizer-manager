@@ -15,12 +15,13 @@ interface LineChartProps {
 
 export const LineChart = memo(function LineChart({
   title,
-  points,
+  points = [],
   viewBox = "0 0 500 150",
   className = "",
 }: LineChartProps) {
   const polylinePoints = useMemo(() => {
-    return points.map((p) => `${p.x},${p.y}`).join(" ");
+    const list = Array.isArray(points) ? points : [];
+    return list.map((p) => `${p.x},${p.y}`).join(" ");
   }, [points]);
 
   return (

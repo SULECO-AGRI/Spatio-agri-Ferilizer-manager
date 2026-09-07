@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { serviceRequestsService } from "@/services/serviceRequestsService";
 import { pilotService } from "@/services/pilotService";
+import { analyticsService } from "@/services/analyticsService";
 import type { ApiServiceRequestItem } from "@/types/request";
 import type { ApiPilotItem } from "@/types/pilot";
+import type { AnalyticsSummaryData } from "@/types/analytics";
 
 export interface DashboardMetricsData {
   pendingRequests: number;
@@ -41,11 +43,13 @@ export function useDashboardStats() {
     setIsError(false);
 
     try {
-      // Parallel fetch of service requests and pilots
-      const [requestsRes, pilotsRes] = await Promise.allSettled([
+      // Parallel fetch of service requests, pilots, and analytics summary
+      const [requestsRes, pilotsRes, analyticsRes] = await Promise.allSettled([
         serviceRequestsService.getServiceRequests({ limit: 100 }),
         pilotService.getPilots({ limit: 100 }),
+        analyticsService.getAnalyticsSummary(),
       ]);
+
 
       let requests: ApiServiceRequestItem[] = [];
       let totalPending = 0;
@@ -105,7 +109,18 @@ export function useDashboardStats() {
         return acc;
       }, 0);
 
-      const displayRevenue = revenueTotal > 0 ? revenueTotal : requests.length * 35000;
+      let analyticsSummary: AnalyticsSummaryData | null = null;
+      if (analyticsRes.status === "fulfilled" && analyticsRes.value) {
+        analyticsSummary = analyticsRes.value;
+      }
+
+      const displayRevenue = analyticsSummary?.revenue?.value !== undefined && analyticsSummary.revenue.value > 0
+        ? analyticsSummary.revenue.value
+        : revenueTotal > 0
+        ? revenueTotal
+        : requests.length * 35000;
+
+      const displayRevenueFormatted = analyticsSummary?.revenue?.formatted || `LKR ${displayRevenue.toLocaleString()}`;
 
       // Mission success rate
       const totalDecided = totalCompleted + totalCancelled;
@@ -116,11 +131,16 @@ export function useDashboardStats() {
         pendingRequests: totalPending,
         activeMissions: totalInProgress,
         availablePilots: availablePilotsCount,
-        totalPilots: totalPilotsCount,
+        totalPilots: analyticsSummary?.pilotPerformance?.totalPilots || totalPilotsCount,
         onlinePilots: onlinePilotsCount,
         todayRevenue: displayRevenue,
-        todayRevenueFormatted: `LKR ${displayRevenue.toLocaleString()}`,
-        revenueTrend: { value: "+12% vs yesterday", isPositive: true },
+        todayRevenueFormatted: displayRevenueFormatted,
+        revenueTrend: {
+          value: analyticsSummary?.revenue?.growthPercentage
+            ? `+${analyticsSummary.revenue.growthPercentage}% vs last mo`
+            : "+12% vs yesterday",
+          isPositive: true,
+        },
         successRate: calculatedSuccessRate,
         recentRequests: requests,
         allPilots: pilots,

@@ -1,12 +1,11 @@
 import { useMemo } from "react";
-import { mockSchedules } from "@/data/mockData";
 import type { ApiServiceRequestItem } from "@/types/request";
 
 interface ScheduleTableProps {
   recentRequests?: ApiServiceRequestItem[];
 }
 
-export function ScheduleTable({ recentRequests }: ScheduleTableProps) {
+export function ScheduleTable({ recentRequests = [] }: ScheduleTableProps) {
   const schedules = useMemo(() => {
     if (recentRequests && recentRequests.length > 0) {
       return recentRequests.slice(0, 6).map((req, idx) => {
@@ -33,7 +32,7 @@ export function ScheduleTable({ recentRequests }: ScheduleTableProps) {
         };
       });
     }
-    return mockSchedules;
+    return [];
   }, [recentRequests]);
 
   return (
@@ -65,9 +64,18 @@ export function ScheduleTable({ recentRequests }: ScheduleTableProps) {
                 </td>
               </tr>
             ))}
+            {schedules.length === 0 && (
+              <tr>
+                <td colSpan={4} className="py-8 text-center text-slate-400 font-normal">
+                  No mission schedules found for today.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
     </div>
   );
 }
+
+export default ScheduleTable;

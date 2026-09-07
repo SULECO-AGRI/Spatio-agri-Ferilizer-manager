@@ -22,16 +22,24 @@ export const farmerService = {
   },
 
   /**
-   * Fetches single farmer details (if endpoint available or fallback)
+   * Fetches registered fields for a specific farmer from GET /farmers/:id/fields
    */
-  async getFarmerById(id: number | string): Promise<ApiFarmerItem | null> {
+  async getFarmerFields(farmerId: number | string): Promise<any[]> {
     try {
-      const response = await apiClient.get<{ status: string; data: { farmer: ApiFarmerItem } }>(
-        `/farmers/${id}`,
+      const response = await apiClient.get<{ status: string; data: { fields: any[] } }>(
+        `/farmers/${farmerId}/fields`,
       );
-      return response.data.farmer;
+      return response.data?.fields || [];
     } catch {
-      return null;
+      try {
+        const fallback = await apiClient.get<{ status: string; data: { fields: any[] } }>(
+          `/api/farmers/${farmerId}/fields`,
+        );
+        return fallback.data?.fields || [];
+      } catch {
+        return [];
+      }
     }
   },
 };
+
