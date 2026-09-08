@@ -34,7 +34,6 @@ export interface ActiveMission {
   field: string;
   region: string;
   pilotName: string;
-  droneModel: string;
   status: "Fertilizing" | "Spraying" | "Surveying" | "Returning";
   progress: number; // percentage 0 - 100
   battery: number; // percentage 0 - 100

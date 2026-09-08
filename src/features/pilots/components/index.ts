@@ -1,5 +1,4 @@
 export * from "./PilotProfileCard";
-export * from "./DroneInfoCard";
 export * from "./MissionHistoryCard";
 export * from "./PilotPerformanceCard";
 export * from "./PilotMetricsRow";

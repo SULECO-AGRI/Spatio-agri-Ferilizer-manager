@@ -93,49 +93,41 @@ export const serviceRequestsService = {
           (c.firstName ? `${c.firstName} ${c.lastName || ""}` : "") ||
           (user.firstName ? `${user.firstName} ${user.lastName || ""}` : "") ||
           c.name ||
-          `Pilot ${pilotId}`,
+          `Pilot #${pilotId}`,
       ).trim();
 
       const email = String(c.email || user.email || "");
       const mobile = String(c.mobile || user.mobile || c.phone || "");
       const licenceNumber = String(
-        c.licenceNumber || c.licenseNumber || profile.licenceNumber || c.license || "LIC-AGRI-001",
+        c.licenceNumber || c.licenseNumber || profile.licenceNumber || c.license || "N/A",
       );
 
       // Raw distance in km
-      let distanceKm = Number(
-        c.distanceKm ?? c.distance_km ?? c.distance ?? 10 + (index % 5) * 4.5,
-      );
-      if (isNaN(distanceKm) || distanceKm <= 0) {
-        distanceKm = Number((8 + (pilotId % 15) * 1.8).toFixed(1));
-      }
+      const rawDistance = Number(c.distanceKm ?? c.distance_km ?? c.distance ?? 0);
+      const distanceKm = !isNaN(rawDistance) && rawDistance > 0 ? Number(rawDistance.toFixed(1)) : 0;
 
-      // Rating (e.g., 4.8)
-      let rating = Number(c.rating ?? c.starRating ?? profile.rating ?? 4.5 + (index % 5) * 0.1);
-      if (isNaN(rating) || rating <= 0 || rating > 5) {
-        rating = 4.8;
-      }
+      // Rating
+      const rawRating = Number(c.rating ?? c.starRating ?? profile.rating ?? c.ratings ?? 0);
+      const rating = !isNaN(rawRating) && rawRating > 0 ? Number(rawRating.toFixed(1)) : 0;
 
       // Total completed missions
-      let totalMissions = Number(
+      const rawMissions = Number(
         c.totalMissions ??
           c.completedMissions ??
           profile.totalMissions ??
           profile.completedMissions ??
-          25 + (pilotId % 20) * 3,
+          0,
       );
-      if (isNaN(totalMissions)) totalMissions = 30;
+      const totalMissions = !isNaN(rawMissions) ? rawMissions : 0;
 
-      // Overall match score (percentage 0-100)
-      let matchScore = Number(c.matchScore ?? c.matchPercentage ?? c.match ?? 98 - index * 6);
+      // Overall match score
+      let matchScore = Number(c.matchScore ?? c.matchPercentage ?? c.match ?? 0);
       if (matchScore > 0 && matchScore <= 1) {
         matchScore = Math.round(matchScore * 100);
       }
-      if (isNaN(matchScore) || matchScore <= 0) {
-        matchScore = Math.max(50, 95 - index * 7);
+      if (isNaN(matchScore) || matchScore < 0) {
+        matchScore = 0;
       }
-
-      const droneModel = String(c.droneModel || profile.droneModel || "DJI Agras T40");
 
       return {
         pilotId,
@@ -143,17 +135,16 @@ export const serviceRequestsService = {
         email,
         mobile,
         licenceNumber,
-        distanceKm: Number(distanceKm.toFixed(1)),
-        rating: Number(rating.toFixed(1)),
+        distanceKm,
+        rating,
         totalMissions,
         matchScore: Math.round(matchScore),
         status: String(c.status || "AVAILABLE"),
-        droneModel,
         availabilityStatus: String(c.availabilityStatus || "READY"),
       };
     });
 
-    // Ensure sorted strictly by highest match score first
+    // Sort strictly by highest match score first
     normalized.sort((a, b) => b.matchScore - a.matchScore);
 
     return normalized;

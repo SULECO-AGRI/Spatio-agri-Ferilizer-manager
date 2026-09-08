@@ -1,26 +1,77 @@
-import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import type { Farmer, FarmerField, FarmerServiceHistory } from "@/types";
+import { farmerService } from "@/services/farmerService";
+import { serviceRequestsService } from "@/services/serviceRequestsService";
 import { FarmerOverviewCard } from "./components/FarmerOverviewCard";
 import { FarmerFieldsGrid } from "./components/FarmerFieldsGrid";
 import { FarmerHistoryTable } from "./components/FarmerHistoryTable";
 
 interface FarmerProfileViewProps {
   farmer: Farmer;
-  fields: FarmerField[];
-  serviceHistory: FarmerServiceHistory[];
+  fields?: FarmerField[];
+  serviceHistory?: FarmerServiceHistory[];
   onBack: () => void;
 }
 
-const profileTabs = ["Fields", "Drone History", "Payment History", "Service Notes"] as const;
+const profileTabs = ["Fields", "Service History", "Payment History", "Service Notes"] as const;
 
 export function FarmerProfileView({
   farmer,
-  fields,
-  serviceHistory,
+  fields: initialFields = [],
+  serviceHistory: initialHistory = [],
   onBack,
 }: FarmerProfileViewProps) {
   const [activeTab, setActiveTab] = useState<(typeof profileTabs)[number]>("Fields");
+  const [fields, setFields] = useState<FarmerField[]>(initialFields);
+  const [serviceHistory, setServiceHistory] = useState<FarmerServiceHistory[]>(initialHistory);
+  const [isLoadingDetails, setIsLoadingDetails] = useState<boolean>(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoadingDetails(true);
+
+    async function loadFarmerDetails() {
+      try {
+        const [fieldsData, requestsData] = await Promise.allSettled([
+          farmerService.getFarmerFields(farmer.userId),
+          serviceRequestsService.getServiceRequests({ search: farmer.fullName || undefined, limit: 20 }),
+        ]);
+
+        if (isMounted) {
+          if (fieldsData.status === "fulfilled" && Array.isArray(fieldsData.value)) {
+            const normalizedFields: FarmerField[] = fieldsData.value.map((f: any) => ({
+              id: f.id || f.fieldId,
+              name: f.fieldName || "Field Parcel",
+              size: `${f.area || 0} Hectares`,
+              notes: `${f.cropType || "Crop"} • ${f.district || f.city || "Sri Lanka"}`,
+            }));
+            setFields(normalizedFields);
+          }
+
+          if (requestsData.status === "fulfilled" && requestsData.value?.requests) {
+            const normalizedHistory: FarmerServiceHistory[] = requestsData.value.requests.map((r) => ({
+              date: r.createdAt ? new Date(r.createdAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "Recent",
+              field: r.field?.fieldName || `${r.field?.cropType || "Crop"} Plot`,
+              service: r.serviceType || "Fertilizing",
+              amount: r.estimatedCost ? `LKR ${r.estimatedCost.toLocaleString()}` : "LKR 0",
+            }));
+            setServiceHistory(normalizedHistory);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load farmer profile details:", err);
+      } finally {
+        if (isMounted) setIsLoadingDetails(false);
+      }
+    }
+
+    loadFarmerDetails();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [farmer.userId, farmer.fullName]);
 
   return (
     <div className="space-y-6 font-sans animate-in fade-in duration-200">

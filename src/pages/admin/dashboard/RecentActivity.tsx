@@ -8,10 +8,14 @@ interface RecentActivityProps {
 export function RecentActivity({ recentRequests = [] }: RecentActivityProps) {
   const activities = useMemo(() => {
     if (recentRequests && recentRequests.length > 0) {
-      return recentRequests.slice(0, 5).map((req, idx) => {
-        const timeStr = req.createdAt
-          ? new Date(req.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-          : `${10 * (idx + 1)}m ago`;
+      return recentRequests.slice(0, 5).map((req) => {
+        let timeStr = "Recent";
+        if (req.createdAt) {
+          const d = new Date(req.createdAt);
+          if (!isNaN(d.getTime())) {
+            timeStr = `${d.toLocaleDateString([], { month: "short", day: "numeric" })}, ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+          }
+        }
 
         let title = `Mission ${req.requestCode || `REQ-${req.requestId}`}: ${req.status.replace("_", " ")}`;
         let desc = `${req.serviceType || "Fertilizing"} on ${req.field?.fieldName || "Field Block"} (${req.farmer?.fullName || "Farmer"})`;

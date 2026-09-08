@@ -4,20 +4,17 @@ import {
   Layers,
   Maximize2,
   Minimize2,
-  Navigation,
-  BatteryCharging,
-  Droplets,
-  Wind,
-  Gauge,
-  User,
   Radio,
   Plane,
   Crosshair,
   MapPin,
   Map as MapIcon,
   RefreshCw,
-  Database,
-  CheckCircle2,
+  User,
+  Phone,
+  Sprout,
+  ShieldAlert,
+  Compass,
 } from "lucide-react";
 import { serviceRequestsService } from "@/services/serviceRequestsService";
 import { farmerService } from "@/services/farmerService";
@@ -131,29 +128,25 @@ function transformRequestToActiveMission(
     req.status === "COMPLETED"
       ? 100
       : req.status === "IN_PROGRESS"
-        ? 55 + (req.requestId % 30)
+        ? 60
         : req.status === "ASSIGNED"
-          ? 25 + (req.requestId % 15)
-          : 10;
-
-  const droneModels = ["DJI Agras T40", "DJI Agras T30", "XAG P100 Pro", "DJI Agras T25"];
-  const droneModel = droneModels[req.requestId % droneModels.length];
+          ? 30
+          : 0;
 
   return {
     id: `REQ-${req.requestId}`,
     missionCode,
     field: `${req.field?.fieldName || "Field Block"} (${req.field?.area ? `${req.field.area} Ha` : req.field?.cropType || "Paddy"})`,
-    region: `${req.field?.district || "Anuradhapura"}${req.field?.city ? ` (${req.field.city})` : ""}`,
-    pilotName: req.assignedPilot?.fullName || "Nimal Perera (Assigned)",
-    droneModel,
+    region: `${req.field?.district || "Sri Lanka"}${req.field?.city ? ` (${req.field.city})` : ""}`,
+    pilotName: req.assignedPilot?.fullName || "Unassigned",
     status,
     progress,
-    battery: Math.max(30, 95 - (req.requestId % 40)),
-    payloadLiters: Math.max(4, 38 - (req.requestId % 20)),
+    battery: 100,
+    payloadLiters: 0,
     maxPayloadLiters: 40.0,
-    altitudeMeters: 12 + (req.requestId % 6),
-    speedKmh: 16 + (req.requestId % 8),
-    sprayFlowRate: `${(3.8 + (req.requestId % 3) * 0.6).toFixed(1)} L/min`,
+    altitudeMeters: 0,
+    speedKmh: 0,
+    sprayFlowRate: "0.0 L/min",
     coordinates: {
       x: 200,
       y: 200,
@@ -162,14 +155,14 @@ function transformRequestToActiveMission(
     },
     polygonPoints: "",
     flightPath: [],
-    targetFertilizer: `${req.field?.cropType || "Paddy"} Nitrogen Blend`,
+    targetFertilizer: req.serviceType || `${req.field?.cropType || "Crop"} Treatment`,
     estimatedCompletion:
-      req.status === "COMPLETED" ? "Completed" : `${15 + (req.requestId % 20)} mins remaining`,
-    farmerName: req.farmer?.fullName || "Kamal Silva",
-    farmerMobile: req.farmer?.mobile || "+94 77 987 6543",
-    cropType: req.field?.cropType || "Paddy (BG 352)",
-    areaHa: req.field?.area || 4.5,
-    priority: req.priority || "HIGH",
+      req.status === "COMPLETED" ? "Completed" : "Scheduled Flight",
+    farmerName: req.farmer?.fullName || "Registered Farmer",
+    farmerMobile: req.farmer?.mobile || "",
+    cropType: req.field?.cropType || "Paddy",
+    areaHa: req.field?.area || 0,
+    priority: req.priority || "NORMAL",
     isRealDb: true,
     fieldPolygonCoords,
   };
@@ -238,7 +231,7 @@ export function LiveMissionMap() {
       });
 
       // 2. If farmer fields exist that don't have active requests, add them as Monitored Field Missions
-      farmerFields.forEach((f, idx) => {
+      farmerFields.forEach((f) => {
         const fieldCoords: [number, number][] = f.locationCoordinates || [
           [8.5361, 80.4922],
           [8.5385, 80.4945],
@@ -255,18 +248,17 @@ export function LiveMissionMap() {
           dbMissions.push({
             id: `FLD-${f.id}`,
             missionCode: `FLD-00${f.id}`,
-            field: `${f.fieldName} (${f.area || 4.5} Ha)`,
-            region: `${f.district || "Anuradhapura"}${f.city ? ` (${f.city})` : ""}`,
-            pilotName: "Nimal Perera (Ready)",
-            droneModel: "DJI Agras T40",
+            field: `${f.fieldName} (${f.area ? `${f.area} Ha` : "Field"})`,
+            region: `${f.district || "Sri Lanka"}${f.city ? ` (${f.city})` : ""}`,
+            pilotName: "Unassigned (Monitored)",
             status: "Fertilizing",
-            progress: 85,
-            battery: 92,
-            payloadLiters: 38.0,
+            progress: 0,
+            battery: 100,
+            payloadLiters: 0,
             maxPayloadLiters: 40.0,
-            altitudeMeters: 14,
-            speedKmh: 18,
-            sprayFlowRate: "4.2 L/min",
+            altitudeMeters: 0,
+            speedKmh: 0,
+            sprayFlowRate: "0.0 L/min",
             coordinates: {
               x: 200,
               y: 200,
@@ -275,13 +267,13 @@ export function LiveMissionMap() {
             },
             polygonPoints: "",
             flightPath: [],
-            targetFertilizer: `${f.cropType || "Paddy"} Custom VRA`,
-            estimatedCompletion: "Scheduled Flight",
-            farmerName: f.farmer?.fullName || "Kamal Silva",
-            farmerMobile: f.farmer?.mobile || "+94 77 987 6543",
-            cropType: f.cropType || "Paddy (BG 352)",
-            areaHa: f.area || 4.5,
-            priority: "HIGH",
+            targetFertilizer: f.cropType ? `${f.cropType} VRA` : "Crop Treatment",
+            estimatedCompletion: "Field Registered",
+            farmerName: f.farmer?.fullName || "Farmer",
+            farmerMobile: f.farmer?.mobile || "",
+            cropType: f.cropType || "Paddy",
+            areaHa: f.area || 0,
+            priority: "NORMAL",
             isRealDb: true,
             fieldPolygonCoords: fieldCoords,
           });
@@ -497,11 +489,11 @@ export function LiveMissionMap() {
           <div style="font-size: 11px; color: #64748b; margin-bottom: 8px;">${mission.region}</div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; padding-top: 6px; border-top: 1px solid #f1f5f9;">
             <div><span style="color:#94a3b8;">Pilot:</span> <span style="color:#1e293b; font-weight:600;">${mission.pilotName}</span></div>
-            <div><span style="color:#94a3b8;">Battery:</span> <span style="color:#1e293b; font-weight:600;">${mission.battery}%</span></div>
-            <div><span style="color:#94a3b8;">Progress:</span> <span style="color:#10b981; font-weight:700;">${mission.progress}%</span></div>
-            <div><span style="color:#94a3b8;">Rate:</span> <span style="color:#1e293b; font-weight:600;">${mission.sprayFlowRate}</span></div>
+            <div><span style="color:#94a3b8;">Crop:</span> <span style="color:#1e293b; font-weight:600;">${mission.cropType || "Paddy"}</span></div>
+            <div><span style="color:#94a3b8;">Area:</span> <span style="color:#1e293b; font-weight:600;">${mission.areaHa ? `${mission.areaHa} Ha` : "—"}</span></div>
+            <div><span style="color:#94a3b8;">Priority:</span> <span style="color:#10b981; font-weight:700;">${mission.priority || "NORMAL"}</span></div>
           </div>
-          ${mission.farmerName ? `<div style="font-size: 11px; color: #475569; margin-top: 6px; padding-top: 5px; border-top: 1px dashed #e2e8f0; display: flex; justify-content: space-between;"><span>Farmer: <strong>${mission.farmerName}</strong></span><span style="color:#10b981; font-weight:600;">DB LIVE</span></div>` : ""}
+          ${mission.farmerName ? `<div style="font-size: 11px; color: #475569; margin-top: 6px; padding-top: 5px; border-top: 1px dashed #e2e8f0; display: flex; justify-content: space-between;"><span>Farmer: <strong>${mission.farmerName}</strong></span><span style="color:#64748b;">${mission.farmerMobile || ""}</span></div>` : ""}
         </div>
       `);
 
@@ -554,15 +546,14 @@ export function LiveMissionMap() {
           <div className="flex items-center gap-2.5">
             <h2 className="text-base font-semibold text-slate-900 tracking-tight flex items-center gap-2">
               <Radio className="w-4 h-4 text-emerald-600" />
-              Live Database Active Missions Map
+              Live Active Missions Map
             </h2>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-              <Database className="w-3 h-3 text-emerald-600" />
-              {filteredMissions.length} DB Mission Places Active
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+              {filteredMissions.length} Mission Places Active
             </span>
           </div>
           <p className="text-xs text-slate-500 font-normal mt-0.5 flex items-center gap-1.5">
-            <span>Real-time database coordinates, polygon field boundaries & pilot flight telemetry</span>
+            <span>Real-time coordinates, polygon field boundaries & pilot flight telemetry</span>
             {lastSyncTime && <span className="text-slate-400 font-mono">• Synced: {lastSyncTime}</span>}
           </p>
         </div>
@@ -575,7 +566,7 @@ export function LiveMissionMap() {
             onClick={fetchRealMissions}
             disabled={isLoadingDb}
             className="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-            title="Refresh database active missions"
+            title="Refresh active missions"
           >
             <RefreshCw
               className={`w-3.5 h-3.5 text-emerald-600 ${isLoadingDb ? "animate-spin" : ""}`}
@@ -652,10 +643,7 @@ export function LiveMissionMap() {
           <div className="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur-md border border-white/10 rounded-xl px-3 py-1.5 text-white flex items-center gap-2.5 shadow-lg select-none z-[1000]">
             <div className="w-2 h-2 rounded-full bg-emerald-400" />
             <span className="text-[11px] font-medium tracking-wide">
-              Live Database RTK Coordinates • Centimeter Precision
-            </span>
-            <span className="text-[10px] text-emerald-400 border-l border-slate-700 pl-2 font-mono">
-              DB SYNCED
+              Live RTK Coordinates • Centimeter Precision
             </span>
           </div>
 
@@ -695,9 +683,9 @@ export function LiveMissionMap() {
                       >
                         {selectedMission.status}
                       </span>
-                      {selectedMission.isRealDb && (
-                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/40">
-                          DB LIVE
+                      {selectedMission.priority && (
+                        <span className="text-[9px] font-sans font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                          {selectedMission.priority}
                         </span>
                       )}
                     </div>
@@ -711,59 +699,25 @@ export function LiveMissionMap() {
                   </div>
                 </div>
 
-                {/* Progress Bar */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-slate-600">Mission Progress</span>
-                    <span className="font-mono text-emerald-600 font-bold">{selectedMission.progress}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-emerald-500 transition-all duration-500 rounded-full"
-                      style={{ width: `${selectedMission.progress}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Live Telemetry Grid */}
+                {/* Field & Agronomy Details Grid */}
                 <div className="grid grid-cols-2 gap-2.5 text-xs">
                   <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
                     <span className="text-slate-400 block text-[10px] uppercase font-semibold flex items-center gap-1">
-                      <BatteryCharging className="w-3 h-3 text-amber-500" />
-                      Battery
+                      <Sprout className="w-3 h-3 text-emerald-600" />
+                      Crop Type
                     </span>
-                    <span className="font-semibold text-slate-800 font-mono text-sm mt-0.5 block">
-                      {selectedMission.battery}%
-                    </span>
-                  </div>
-
-                  <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
-                    <span className="text-slate-400 block text-[10px] uppercase font-semibold flex items-center gap-1">
-                      <Droplets className="w-3 h-3 text-cyan-500" />
-                      Payload
-                    </span>
-                    <span className="font-semibold text-slate-800 font-mono text-sm mt-0.5 block">
-                      {selectedMission.payloadLiters} / {selectedMission.maxPayloadLiters} L
+                    <span className="font-semibold text-slate-800 text-xs mt-0.5 block truncate">
+                      {selectedMission.cropType || "Paddy"}
                     </span>
                   </div>
 
                   <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
                     <span className="text-slate-400 block text-[10px] uppercase font-semibold flex items-center gap-1">
-                      <Gauge className="w-3 h-3 text-indigo-500" />
-                      Altitude & Speed
+                      <Compass className="w-3 h-3 text-cyan-600" />
+                      Field Area
                     </span>
-                    <span className="font-semibold text-slate-800 font-mono text-xs mt-0.5 block">
-                      {selectedMission.altitudeMeters}m @ {selectedMission.speedKmh} km/h
-                    </span>
-                  </div>
-
-                  <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
-                    <span className="text-slate-400 block text-[10px] uppercase font-semibold flex items-center gap-1">
-                      <Wind className="w-3 h-3 text-teal-500" />
-                      Flow Rate
-                    </span>
-                    <span className="font-semibold text-slate-800 font-mono text-xs mt-0.5 block">
-                      {selectedMission.sprayFlowRate}
+                    <span className="font-semibold text-slate-800 text-xs mt-0.5 block">
+                      {selectedMission.areaHa ? `${selectedMission.areaHa} Ha` : "—"}
                     </span>
                   </div>
                 </div>
@@ -792,6 +746,18 @@ export function LiveMissionMap() {
                     </div>
                   )}
 
+                  {selectedMission.farmerMobile && (
+                    <div className="flex items-center justify-between pt-1.5 border-t border-slate-100">
+                      <span className="text-slate-400 flex items-center gap-1.5">
+                        <Phone className="w-3 h-3 text-emerald-600" />
+                        Contact:
+                      </span>
+                      <span className="font-mono text-slate-700 text-[11px]">
+                        {selectedMission.farmerMobile}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 font-mono text-[11px]">
                     <span className="text-slate-400">GPS Coords:</span>
                     <span className="text-emerald-700 font-semibold">
@@ -803,7 +769,7 @@ export function LiveMissionMap() {
             </AnimatePresence>
           ) : (
             <div className="flex-1 flex items-center justify-center text-xs text-slate-400 p-6 text-center">
-              Select an active mission point on the map to inspect live RTK telemetry.
+              Select an active mission point on the map to inspect coordinates and field details.
             </div>
           )}
 

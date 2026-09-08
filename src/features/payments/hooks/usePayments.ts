@@ -33,7 +33,7 @@ export function usePayments() {
 
       requests.forEach((req) => {
         const reqCode = req.requestCode || `REQ-${req.requestId}`;
-        const costNum = Number(req.estimatedCost) || (Number(req.field?.area) || 2.0) * 25000;
+        const costNum = Number(req.estimatedCost) || 0;
         const dateStr = req.createdAt
           ? new Date(req.createdAt).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0];

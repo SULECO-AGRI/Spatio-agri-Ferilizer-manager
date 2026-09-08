@@ -8,27 +8,25 @@ interface ScheduleTableProps {
 export function ScheduleTable({ recentRequests = [] }: ScheduleTableProps) {
   const schedules = useMemo(() => {
     if (recentRequests && recentRequests.length > 0) {
-      return recentRequests.slice(0, 6).map((req, idx) => {
-        let timeDisplay = "09:00 AM";
+      return recentRequests.slice(0, 6).map((req) => {
+        let timeDisplay = "Flexible Schedule";
         if (req.preferredDate) {
           const d = new Date(req.preferredDate);
           if (!isNaN(d.getTime())) {
-            timeDisplay = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            const formattedDate = d.toLocaleDateString([], { month: "short", day: "numeric" });
+            const formattedTime = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            timeDisplay = formattedTime === "12:00 AM" ? formattedDate : `${formattedDate}, ${formattedTime}`;
           }
-        }
-        if (timeDisplay === "12:00 AM" || !req.preferredDate) {
-          const times = ["08:30 AM", "10:15 AM", "11:45 AM", "02:00 PM", "03:30 PM", "04:45 PM"];
-          timeDisplay = times[idx % times.length];
         }
 
         return {
           id: String(req.requestId),
           time: timeDisplay,
-          field: req.field?.fieldName || `${req.field?.cropType || "Paddy"} Plot ${idx + 1}`,
+          field: req.field?.fieldName || `${req.field?.cropType || "Paddy"} Field`,
           service: req.serviceType || "Fertilizing",
           pilot:
             req.assignedPilot?.fullName ||
-            (req.status === "PENDING" ? "Unassigned" : "Assigned Pilot"),
+            (req.status === "PENDING" ? "Unassigned" : "Assigned"),
         };
       });
     }

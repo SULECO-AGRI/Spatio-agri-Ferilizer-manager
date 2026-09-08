@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { PageHeader, FormField } from "@/components/ui";
+import { useAuth } from "@/context/AuthContext";
 
 const permissionsList = [
   "Read Telemetry",
@@ -12,12 +13,29 @@ const permissionsList = [
 ];
 
 export function UserProfileView() {
+  const { user } = useAuth();
+
   const [profileData, setProfileData] = useState({
-    name: "Admin User",
-    email: "ops@spatioagri.com",
-    phone: "+94 77 123 4567",
-    department: "Operations Manager",
+    name: user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.fullName || "Administrator" : "Administrator",
+    email: user?.email || "",
+    phone: user?.mobile || "",
+    department: user?.role || user?.profile?.department || "Operations Manager",
   });
+
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.fullName || "Administrator",
+        email: user.email || "",
+        phone: user.mobile || "",
+        department: user.role || user.profile?.department || "Operations Manager",
+      });
+    }
+  }, [user]);
+
+  const initials = user
+    ? `${user.firstName?.[0] || "A"}${user.lastName?.[0] || "D"}`.toUpperCase()
+    : "AD";
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -53,13 +71,13 @@ export function UserProfileView() {
 
             {/* Avatar block with initials */}
             <div className="flex items-center gap-4 pb-2">
-              <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-800 text-lg font-normal flex items-center justify-center shadow-xs select-none">
-                AU
+              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-800 text-lg font-medium flex items-center justify-center shadow-xs select-none">
+                {initials}
               </div>
               <div className="space-y-1">
                 <h4 className="text-sm font-medium text-slate-700 leading-none">Profile Picture</h4>
                 <p className="text-[10px] text-slate-400 font-normal">
-                  Initial icon generated from account initials
+                  Initial icon generated from active account credentials
                 </p>
               </div>
             </div>

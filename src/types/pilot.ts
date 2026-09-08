@@ -106,14 +106,6 @@ export interface PilotMission {
   result: MissionResult;
 }
 
-export interface PilotDroneDetails {
-  model: string;
-  tankCapacity: string;
-  maxSpeed: string;
-  lastServiced: string;
-  batteryHealth?: string;
-}
-
 export interface PilotDocument {
   id: string;
   title: string;
@@ -138,7 +130,6 @@ export interface DetailedPilotInfo {
   flightHours: string;
   activeMissionsCount?: number;
   certificates?: string[];
-  droneDetails?: PilotDroneDetails;
   performanceData?: { label: string; value: number }[];
   missionHistory: PilotMission[];
   documents?: PilotDocument[];

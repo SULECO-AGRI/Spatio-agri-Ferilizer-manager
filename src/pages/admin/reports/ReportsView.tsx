@@ -204,16 +204,16 @@ export function ReportsView() {
 
           <div className="mt-4">
             <h4 className="text-xl font-bold font-display text-white">
-              {pilotPerformance?.topPerformingPilot?.fullName || "Nimal Perera"}
+              {pilotPerformance?.topPerformingPilot?.fullName || "Fleet Leader"}
             </h4>
             <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-300">
               <span className="inline-flex items-center gap-1 text-amber-400 font-medium">
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                {pilotPerformance?.topPerformingPilot?.ratings ?? 4.95} rating
+                {pilotPerformance?.topPerformingPilot?.ratings ?? "5.0"} rating
               </span>
               <span>•</span>
               <span className="text-emerald-400 font-medium">
-                {pilotPerformance?.topPerformingPilot?.completedMissions ?? 24} missions completed
+                {pilotPerformance?.topPerformingPilot?.completedMissions ?? 0} missions completed
               </span>
             </div>
           </div>

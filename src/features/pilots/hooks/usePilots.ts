@@ -153,13 +153,31 @@ export function usePilots(options: UsePilotsOptions = {}) {
         }))
       : [];
 
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const now = new Date();
+    const performanceData = Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+      const monthName = months[d.getMonth()];
+      const count = missionHistory.filter((m) => {
+        if (!m.date) return false;
+        const md = new Date(m.date);
+        return (
+          !isNaN(md.getTime()) &&
+          md.getMonth() === d.getMonth() &&
+          md.getFullYear() === d.getFullYear() &&
+          m.result === "Completed"
+        );
+      }).length;
+      return { label: monthName, value: count };
+    });
+
     return {
       pilotId: detail.userId,
       name: detail.fullName || `${detail.firstName} ${detail.lastName}`.trim(),
       initials,
       status: detail.status,
       license: detail.licenceNumber || "N/A",
-      experience: `${Math.max(1, Math.round(totalFlightHours / 50))} yrs experience`,
+      experience: totalFlightHours > 0 ? `${Math.max(1, Math.round(totalFlightHours / 50))} yrs experience` : "Certified Operator",
       phone: detail.mobile || "N/A",
       email: detail.email || "N/A",
       rating: ratingVal,
@@ -167,14 +185,7 @@ export function usePilots(options: UsePilotsOptions = {}) {
       missionsCount: completedMissions,
       flightHours: `${totalFlightHours} hrs`,
       activeMissionsCount: basicItem?.activeMissionsCount ?? detail.stats?.inProgressMissions ?? 0,
-      performanceData: [
-        { label: "Feb", value: Math.round(completedMissions * 0.15) },
-        { label: "Mar", value: Math.round(completedMissions * 0.2) },
-        { label: "Apr", value: Math.round(completedMissions * 0.1) },
-        { label: "May", value: Math.round(completedMissions * 0.25) },
-        { label: "Jun", value: Math.round(completedMissions * 0.15) },
-        { label: "Jul", value: Math.round(completedMissions * 0.15) },
-      ],
+      performanceData,
       missionHistory,
     };
   };

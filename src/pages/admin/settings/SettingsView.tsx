@@ -3,7 +3,7 @@ import { PageHeader, FormField } from "@/components/ui";
 
 const settingsTabs = [
   "Organization Settings",
-  "Drone Types",
+  "Service Types",
   "Chemical Catalog",
   "Mission Templates",
   "User Roles",

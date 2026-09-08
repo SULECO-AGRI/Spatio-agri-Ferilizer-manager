@@ -4,7 +4,6 @@ interface RequestFieldMetricsProps {
   service: string;
   prefDate: string;
   duration: string;
-  drone: string;
 }
 
 export function RequestFieldMetrics({
@@ -13,7 +12,6 @@ export function RequestFieldMetrics({
   service,
   prefDate,
   duration,
-  drone,
 }: RequestFieldMetricsProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-2 gap-6 text-xs font-normal pt-2 font-sans">
@@ -27,12 +25,6 @@ export function RequestFieldMetrics({
             Requested Service
           </span>
           <span className="text-slate-800 font-medium mt-1 block">{service}</span>
-        </div>
-        <div>
-          <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
-            Estimated Duration
-          </span>
-          <span className="text-slate-800 font-medium mt-1 block">{duration}</span>
         </div>
       </div>
 
@@ -51,9 +43,9 @@ export function RequestFieldMetrics({
         </div>
         <div>
           <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
-            Recommended Drone
+            Estimated Duration
           </span>
-          <span className="text-slate-800 font-medium mt-1 block">{drone}</span>
+          <span className="text-slate-800 font-medium mt-1 block">{duration}</span>
         </div>
       </div>
     </div>

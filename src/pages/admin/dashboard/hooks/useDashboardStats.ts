@@ -94,7 +94,7 @@ export function useDashboardStats() {
         return s !== "INACTIVE" && s !== "SUSPENDED";
       }).length;
 
-      // Calculate revenue from active and completed requests
+      // Calculate revenue from active and completed requests with actual recorded estimatedCost
       const revenueTotal = requests.reduce((acc, req) => {
         if (
           req.status === "COMPLETED" ||
@@ -103,8 +103,6 @@ export function useDashboardStats() {
         ) {
           const cost = Number(req.estimatedCost);
           if (!isNaN(cost) && cost > 0) return acc + cost;
-          const area = Number(req.field?.area) || 2.0;
-          return acc + area * 25000;
         }
         return acc;
       }, 0);
@@ -114,18 +112,24 @@ export function useDashboardStats() {
         analyticsSummary = analyticsRes.value;
       }
 
-      const displayRevenue = analyticsSummary?.revenue?.value !== undefined && analyticsSummary.revenue.value > 0
-        ? analyticsSummary.revenue.value
-        : revenueTotal > 0
-        ? revenueTotal
-        : requests.length * 35000;
+      const displayRevenue =
+        analyticsSummary?.revenue?.value !== undefined && analyticsSummary.revenue.value > 0
+          ? analyticsSummary.revenue.value
+          : revenueTotal;
 
-      const displayRevenueFormatted = analyticsSummary?.revenue?.formatted || `LKR ${displayRevenue.toLocaleString()}`;
+      const displayRevenueFormatted =
+        analyticsSummary?.revenue?.formatted || `LKR ${displayRevenue.toLocaleString()}`;
 
       // Mission success rate
       const totalDecided = totalCompleted + totalCancelled;
       const calculatedSuccessRate =
         totalDecided > 0 ? Math.round((totalCompleted / totalDecided) * 100) : 100;
+
+      const revenueGrowth = analyticsSummary?.revenue?.growthPercentage;
+      const trendValue =
+        revenueGrowth !== undefined && revenueGrowth !== null
+          ? `${revenueGrowth >= 0 ? "+" : ""}${revenueGrowth}% vs last mo`
+          : "Verified Ledger";
 
       setMetrics({
         pendingRequests: totalPending,
@@ -136,10 +140,8 @@ export function useDashboardStats() {
         todayRevenue: displayRevenue,
         todayRevenueFormatted: displayRevenueFormatted,
         revenueTrend: {
-          value: analyticsSummary?.revenue?.growthPercentage
-            ? `+${analyticsSummary.revenue.growthPercentage}% vs last mo`
-            : "+12% vs yesterday",
-          isPositive: true,
+          value: trendValue,
+          isPositive: (revenueGrowth ?? 0) >= 0,
         },
         successRate: calculatedSuccessRate,
         recentRequests: requests,

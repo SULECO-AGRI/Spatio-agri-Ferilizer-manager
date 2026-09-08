@@ -103,7 +103,6 @@ export interface CandidatePilot {
   distanceKm: number;
   matchScore: number;
   status?: string;
-  droneModel?: string;
   availabilityStatus?: string;
 }
 
@@ -167,7 +166,6 @@ export interface DetailedRequestInfo {
   service: string;
   prefDate: string;
   duration: string;
-  drone: string;
   weather: string;
   risk: string;
   area: string;
