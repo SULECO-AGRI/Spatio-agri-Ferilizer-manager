@@ -1,4 +1,5 @@
-import { Star, Phone, Mail, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { memo } from "react";
+import { Star, Phone, Mail, Clock, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { StatusBadge } from "@/components/ui";
 import type { ApiPilotItem } from "@/types/pilot";
 
@@ -6,9 +7,15 @@ interface PilotCardProps {
   pilot: ApiPilotItem;
   onViewDetails: (pilotId: number | string) => void;
   onToggleStatus?: (pilotId: number | string, currentStatus: string) => void;
+  isUpdating?: boolean;
 }
 
-export function PilotCard({ pilot, onViewDetails, onToggleStatus }: PilotCardProps) {
+function PilotCardComponent({
+  pilot,
+  onViewDetails,
+  onToggleStatus,
+  isUpdating = false,
+}: PilotCardProps) {
   const initials =
     `${pilot.firstName?.[0] || ""}${pilot.lastName?.[0] || ""}`.toUpperCase() || "PL";
   const isBusy = pilot.status === "ON_MISSION" || pilot.status === "Busy";
@@ -124,15 +131,25 @@ export function PilotCard({ pilot, onViewDetails, onToggleStatus }: PilotCardPro
         {onToggleStatus && (
           <button
             type="button"
+            disabled={isUpdating}
             onClick={() => onToggleStatus(pilot.userId, pilot.status)}
-            className={`py-1.5 px-2.5 border rounded-lg text-[11px] font-normal text-center transition-colors cursor-pointer ${
+            className={`py-1.5 px-2.5 border rounded-lg text-[11px] font-normal text-center transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-1 ${
               pilot.status === "ACTIVE"
                 ? "border-slate-200 text-slate-600 hover:bg-slate-50"
                 : "border-emerald-200 text-emerald-700 bg-emerald-50/50 hover:bg-emerald-50"
             }`}
             title={`Toggle status (currently ${pilot.status})`}
           >
-            {pilot.status === "ACTIVE" ? "Set Inactive" : "Activate"}
+            {isUpdating ? (
+              <>
+                <Loader2 className="w-3 h-3 animate-spin text-emerald-700 shrink-0" />
+                <span>Updating...</span>
+              </>
+            ) : pilot.status === "ACTIVE" ? (
+              "Set Inactive"
+            ) : (
+              "Activate"
+            )}
           </button>
         )}
 
@@ -165,3 +182,6 @@ export function PilotCard({ pilot, onViewDetails, onToggleStatus }: PilotCardPro
     </div>
   );
 }
+
+export const PilotCard = memo(PilotCardComponent);
+export default PilotCard;

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { ChevronLeft, ChevronRight, RefreshCw, AlertCircle, Users, Loader2 } from "lucide-react";
 import { PageHeader, FilterPills, TableToolbar } from "@/components/ui";
 import { usePilots, pilotFilterTabs } from "./hooks/usePilots";
@@ -29,7 +30,27 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
     selectPilot,
     clearSelectedPilot,
     updateStatus,
+    updatingPilotIds,
   } = usePilots({ initialPilotId });
+
+  const handleViewDetails = useCallback(
+    (pilotId: number | string) => {
+      selectPilot(pilotId);
+    },
+    [selectPilot],
+  );
+
+  const handleToggleStatus = useCallback(
+    async (pilotId: number | string, currentStatus: string) => {
+      const nextStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+      try {
+        await updateStatus(pilotId, nextStatus);
+      } catch {
+        // Handled within usePilots hook rollback
+      }
+    },
+    [updateStatus],
+  );
 
   // If a pilot is selected, display the detailed view
   if (selectedPilotId) {
@@ -105,11 +126,13 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
             <PilotCard
               key={pilot.userId}
               pilot={pilot}
-              onViewDetails={(pilotId) => selectPilot(pilotId)}
-              onToggleStatus={async (pilotId, currentStatus) => {
-                const nextStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-                await updateStatus(pilotId, nextStatus);
-              }}
+              isUpdating={
+                updatingPilotIds.has(pilot.userId) ||
+                updatingPilotIds.has(Number(pilot.userId)) ||
+                updatingPilotIds.has(String(pilot.userId))
+              }
+              onViewDetails={handleViewDetails}
+              onToggleStatus={handleToggleStatus}
             />
           ))}
 

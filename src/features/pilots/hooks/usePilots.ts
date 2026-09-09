@@ -57,6 +57,7 @@ export function usePilots(options: UsePilotsOptions = {}) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [updatingPilotIds, setUpdatingPilotIds] = useState<Set<number | string>>(new Set());
   const [, startTransition] = useTransition();
 
   // Search input debounce (300ms)
@@ -70,35 +71,44 @@ export function usePilots(options: UsePilotsOptions = {}) {
   }, [searchQuery]);
 
   // Fetch paginated list of pilots from live backend
-  const fetchPilots = useCallback(async () => {
-    setIsLoading(true);
-    setIsError(false);
-    setError(null);
+  const fetchPilots = useCallback(
+    async (options: { silent?: boolean } = {}) => {
+      if (!options.silent) {
+        setIsLoading(true);
+        setIsError(false);
+        setError(null);
+      }
 
-    try {
-      const apiStatus = TAB_STATUS_MAP[activeFilter];
-      const data = await pilotService.getPilots({
-        page,
-        limit,
-        status: apiStatus,
-        search: debouncedSearch || undefined,
-        sortBy,
-        sortOrder,
-      });
+      try {
+        const apiStatus = TAB_STATUS_MAP[activeFilter];
+        const data = await pilotService.getPilots({
+          page,
+          limit,
+          status: apiStatus,
+          search: debouncedSearch || undefined,
+          sortBy,
+          sortOrder,
+        });
 
-      startTransition(() => {
-        setPilots(data.pilots || []);
-        if (data.pagination) {
-          setPagination(data.pagination);
+        startTransition(() => {
+          setPilots(data.pilots || []);
+          if (data.pagination) {
+            setPagination(data.pagination);
+          }
+        });
+      } catch (err: unknown) {
+        if (!options.silent) {
+          setIsError(true);
+          setError(err instanceof Error ? err.message : "Failed to load pilots from server.");
         }
-      });
-    } catch (err: unknown) {
-      setIsError(true);
-      setError(err instanceof Error ? err.message : "Failed to load pilots from server.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [activeFilter, page, limit, sortBy, sortOrder, debouncedSearch]);
+      } finally {
+        if (!options.silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [activeFilter, page, limit, sortBy, sortOrder, debouncedSearch],
+  );
 
   // Trigger fetch on parameter change
   useEffect(() => {
@@ -267,15 +277,83 @@ export function usePilots(options: UsePilotsOptions = {}) {
 
   const updateStatus = useCallback(
     async (pilotId: number | string, newStatus: string) => {
+      const numericId = Number(pilotId);
+
+      // Track previous status for rollback if request fails
+      let previousStatus: string | undefined;
+      setPilots((prev) => {
+        const target = prev.find(
+          (p) => p.userId === numericId || String(p.userId) === String(pilotId),
+        );
+        if (target) {
+          previousStatus = target.status;
+        }
+        return prev.map((p) =>
+          p.userId === numericId || String(p.userId) === String(pilotId)
+            ? { ...p, status: newStatus }
+            : p,
+        );
+      });
+
+      // Also optimistically update selectedPilotDetails if open
+      setSelectedPilotDetails((prev) => {
+        if (prev && (prev.pilotId === numericId || String(prev.pilotId) === String(pilotId))) {
+          return { ...prev, status: newStatus };
+        }
+        return prev;
+      });
+
+      // Mark this pilot as actively updating
+      setUpdatingPilotIds((prev) => new Set(prev).add(pilotId));
+
       try {
-        await pilotService.updatePilotStatus(pilotId, newStatus);
-        await fetchPilots();
+        const updatedPilot = await pilotService.updatePilotStatus(pilotId, newStatus);
+        // Silently reconcile the updated pilot object from server if available
+        if (updatedPilot) {
+          setPilots((prev) =>
+            prev.map((p) =>
+              p.userId === numericId || String(p.userId) === String(pilotId)
+                ? { ...p, ...updatedPilot, status: updatedPilot.status || newStatus }
+                : p,
+            ),
+          );
+        }
       } catch (err: unknown) {
-        console.error("Failed to update status:", err);
+        console.error("Failed to update status, rolling back:", err);
+        // Rollback optimistic update
+        if (previousStatus !== undefined) {
+          setPilots((prev) =>
+            prev.map((p) =>
+              p.userId === numericId || String(p.userId) === String(pilotId)
+                ? { ...p, status: previousStatus! }
+                : p,
+            ),
+          );
+          setSelectedPilotDetails((prev) => {
+            if (prev && (prev.pilotId === numericId || String(prev.pilotId) === String(pilotId))) {
+              return { ...prev, status: previousStatus! };
+            }
+            return prev;
+          });
+        }
         throw err;
+      } finally {
+        setUpdatingPilotIds((prev) => {
+          const next = new Set(prev);
+          next.delete(pilotId);
+          return next;
+        });
       }
     },
-    [fetchPilots],
+    [],
+  );
+
+  const isPilotUpdating = useCallback(
+    (pilotId: number | string) =>
+      updatingPilotIds.has(pilotId) ||
+      updatingPilotIds.has(Number(pilotId)) ||
+      updatingPilotIds.has(String(pilotId)),
+    [updatingPilotIds],
   );
 
   return {
@@ -304,5 +382,7 @@ export function usePilots(options: UsePilotsOptions = {}) {
     selectPilot,
     clearSelectedPilot,
     updateStatus,
+    updatingPilotIds,
+    isPilotUpdating,
   };
 }
