@@ -60,7 +60,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
       <LiveMissionMap />
 
       {/* Activity and Schedule Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
         <RecentActivity recentRequests={metrics.recentRequests} />
         <ScheduleTable recentRequests={metrics.recentRequests} />
       </div>

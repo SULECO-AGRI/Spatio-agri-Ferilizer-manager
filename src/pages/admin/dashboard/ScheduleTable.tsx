@@ -34,11 +34,11 @@ export function ScheduleTable({ recentRequests = [] }: ScheduleTableProps) {
   }, [recentRequests]);
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 flex-1 font-sans shadow-xs">
+    <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 flex flex-col h-full font-sans shadow-xs">
       <h3 className="text-xl font-medium text-slate-900 mb-6 font-display">Today's Schedule</h3>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="overflow-x-auto flex-1 flex flex-col">
+        <table className="w-full text-left border-collapse flex-1">
           <thead>
             <tr className="border-b border-slate-100 text-slate-400 text-xs font-normal">
               <th className="pb-3">Time</th>
