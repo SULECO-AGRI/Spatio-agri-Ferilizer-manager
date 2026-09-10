@@ -1,5 +1,13 @@
 export type TabId =
-  "dashboard" | "requests" | "pilots" | "farmers" | "reports" | "payments" | "settings" | "profile";
+  | "dashboard"
+  | "requests"
+  | "pilots"
+  | "farmers"
+  | "fields"
+  | "reports"
+  | "payments"
+  | "settings"
+  | "profile";
 
 export type Priority = "High" | "Medium" | "Low";
 

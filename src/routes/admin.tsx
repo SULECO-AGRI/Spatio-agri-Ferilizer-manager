@@ -20,6 +20,9 @@ const PilotManagementView = lazy(() =>
 const FarmersListView = lazy(() =>
   import("@/features/farmers").then((m) => ({ default: m.FarmersListView })),
 );
+const FieldsManagementView = lazy(() =>
+  import("@/features/fields").then((m) => ({ default: m.FieldsManagementView })),
+);
 const ReportsView = lazy(() =>
   import("@/features/reports").then((m) => ({ default: m.ReportsView })),
 );
@@ -98,6 +101,8 @@ function AdminPage() {
               <PilotManagementView />
             ) : activeTab === "farmers" ? (
               <FarmersListView />
+            ) : activeTab === "fields" ? (
+              <FieldsManagementView />
             ) : activeTab === "reports" ? (
               <ReportsView />
             ) : activeTab === "payments" ? (

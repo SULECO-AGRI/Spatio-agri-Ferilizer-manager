@@ -5,3 +5,4 @@ export * from "./farmer";
 export * from "./payment";
 export * from "./auth";
 export * from "./analytics";
+export * from "./field";
