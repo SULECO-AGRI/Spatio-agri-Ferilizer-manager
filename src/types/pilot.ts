@@ -115,6 +115,14 @@ export interface PilotDocument {
   fileSize?: string;
 }
 
+export interface PilotDroneDetails {
+  model: string;
+  tankCapacity: string;
+  maxSpeed: string;
+  lastServiced: string;
+  batteryHealth?: string;
+}
+
 export interface DetailedPilotInfo {
   pilotId: string | number;
   name: string;
@@ -133,5 +141,5 @@ export interface DetailedPilotInfo {
   performanceData?: { label: string; value: number }[];
   missionHistory: PilotMission[];
   documents?: PilotDocument[];
+  drone?: PilotDroneDetails;
 }
-

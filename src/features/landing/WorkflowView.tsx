@@ -42,7 +42,8 @@ export function WorkflowView() {
             From Sky to Soil in 5 Simple Steps
           </h2>
           <p className="mt-4 text-slate-500 max-w-xl mx-auto text-base md:text-lg">
-            A seamless digital pipeline designed for speed, sub-inch accuracy, and automated crop analytics.
+            A seamless digital pipeline designed for speed, sub-inch accuracy, and automated crop
+            analytics.
           </p>
         </Reveal>
 

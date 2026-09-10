@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
 import { pilotService } from "@/services/pilotService";
@@ -9,17 +9,22 @@ import {
   MissionHistoryCard,
   PilotPerformanceCard,
   PilotMetricsRow,
+  DeletePilotDialog,
+  type PilotDeleteTarget,
 } from "./components";
 
 interface PilotDetailsProps {
   pilotId: number | string;
   onBack: () => void;
+  onDelete?: () => Promise<void>;
 }
 
-export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
+export function PilotDetailsView({ pilotId, onBack, onDelete }: PilotDetailsProps) {
   const [details, setDetails] = useState<DetailedPilotInfo | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -42,7 +47,10 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
             (data as any)?.profile?.ratings;
 
           const ratingVal =
-            rawRating !== null && rawRating !== undefined && !isNaN(Number(rawRating)) && Number(rawRating) > 0
+            rawRating !== null &&
+            rawRating !== undefined &&
+            !isNaN(Number(rawRating)) &&
+            Number(rawRating) > 0
               ? Number(rawRating)
               : 0;
 
@@ -57,22 +65,38 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
 
           const missionHistory: PilotMission[] = Array.isArray(rawMissions)
             ? rawMissions.map((m: any) => ({
-                id: m.missionCode || m.requestCode || `MSN-${m.id || m.missionId || m.serviceRequestId || data.userId}`,
+                id:
+                  m.missionCode ||
+                  m.requestCode ||
+                  `MSN-${m.id || m.missionId || m.serviceRequestId || data.userId}`,
                 field: m.fieldName || m.fieldLocation || m.farmName || m.cropType || "Agri Field",
                 date: formatDate(m.completedAt || m.scheduledDate || m.createdAt || m.date),
                 result: (m.status === "COMPLETED" || m.status === "Completed"
                   ? "Completed"
                   : m.status === "IN_PROGRESS" || m.status === "On Mission"
-                  ? "Active"
-                  : m.status === "FAILED" || m.status === "Failed"
-                  ? "Failed"
-                  : m.status === "CANCELLED" || m.status === "Cancelled"
-                  ? "Cancelled"
-                  : "Completed") as MissionResult,
+                    ? "Active"
+                    : m.status === "FAILED" || m.status === "Failed"
+                      ? "Failed"
+                      : m.status === "CANCELLED" || m.status === "Cancelled"
+                        ? "Cancelled"
+                        : "Completed") as MissionResult,
               }))
             : [];
 
-          const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          const months = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
           const now = new Date();
           const performanceData = Array.from({ length: 6 }, (_, i) => {
             const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
@@ -96,7 +120,10 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
             initials,
             status: data.status,
             license: data.licenceNumber || "N/A",
-            experience: totalFlightHours > 0 ? `${Math.max(1, Math.round(totalFlightHours / 50))} yrs experience` : "Certified Operator",
+            experience:
+              totalFlightHours > 0
+                ? `${Math.max(1, Math.round(totalFlightHours / 50))} yrs experience`
+                : "Certified Operator",
             phone: data.mobile || "N/A",
             email: data.email || "N/A",
             rating: ratingVal,
@@ -125,6 +152,25 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
       isMounted = false;
     };
   }, [pilotId]);
+
+  const handleDeleteConfirm = async (id: number | string) => {
+    if (onDelete) {
+      setIsDeleting(true);
+      try {
+        await onDelete();
+      } finally {
+        setIsDeleting(false);
+      }
+    } else {
+      setIsDeleting(true);
+      try {
+        await pilotService.deletePilot(id);
+        onBack();
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -176,6 +222,18 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
     );
   }
 
+  const pilotItemForDialog: PilotDeleteTarget = {
+    userId: Number(details.pilotId),
+    fullName: details.name,
+    firstName: details.name.split(" ")[0] || "",
+    lastName: details.name.split(" ").slice(1).join(" ") || "",
+    mobile: details.phone,
+    licenceNumber: details.license,
+    status: details.status,
+    totalFlightHours: parseInt(details.flightHours, 10) || 0,
+    completedMissions: details.missionsCount,
+  };
+
   return (
     <div className="space-y-6 font-sans animate-in fade-in duration-200">
       {/* Back Link Breadcrumb */}
@@ -190,7 +248,7 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
         </button>
       </div>
 
-      {/* Header Bar: Pilot Name & Status Badge */}
+      {/* Header Bar: Pilot Name, Status Badge & Delete Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-medium tracking-tight text-slate-900 font-display">
@@ -198,7 +256,18 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
           </h1>
           <p className="text-xs text-slate-400 mt-1 font-mono">Pilot ID: #{details.pilotId}</p>
         </div>
-        <StatusBadge status={details.status} size="md" />
+        <div className="flex items-center gap-3">
+          <StatusBadge status={details.status} size="md" />
+          <button
+            type="button"
+            onClick={() => setIsDeleteDialogOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-rose-200 text-rose-700 bg-rose-50/50 hover:bg-rose-50 hover:border-rose-300 rounded-xl text-xs font-normal transition-colors cursor-pointer shadow-2xs"
+            title="Delete Pilot Profile"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+            <span>Delete Pilot</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Content Layout */}
@@ -223,9 +292,17 @@ export function PilotDetailsView({ pilotId, onBack }: PilotDetailsProps) {
       <div className="pt-2">
         <MissionHistoryCard missions={details.missionHistory} />
       </div>
+
+      {/* Delete Pilot Dialog */}
+      <DeletePilotDialog
+        isOpen={isDeleteDialogOpen}
+        pilot={pilotItemForDialog}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }
 
 export default PilotDetailsView;
-

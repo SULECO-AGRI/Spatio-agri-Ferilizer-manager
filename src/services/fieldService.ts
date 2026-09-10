@@ -23,7 +23,8 @@ export function normalizeField(raw: any): Field {
   const district = raw.district ?? "Matara";
   const city = raw.city ?? raw.town ?? "Kamburupitiya";
   const village = raw.village ?? raw.gramaNiladhariDivision ?? "";
-  const location_coordinates = raw.location_coordinates ?? raw.locationCoordinates ?? raw.coordinates ?? null;
+  const location_coordinates =
+    raw.location_coordinates ?? raw.locationCoordinates ?? raw.coordinates ?? null;
   const created_at = raw.created_at ?? raw.createdAt ?? new Date().toISOString();
   const updated_at = raw.updated_at ?? raw.updatedAt ?? new Date().toISOString();
 
@@ -38,7 +39,8 @@ export function normalizeField(raw: any): Field {
   } else if (farmer) {
     farmer = {
       id: farmer.id ?? farmer.userId ?? farmer_id,
-      fullName: farmer.fullName ?? `${farmer.firstName || ""} ${farmer.lastName || ""}`.trim() ?? "Farmer",
+      fullName:
+        farmer.fullName ?? `${farmer.firstName || ""} ${farmer.lastName || ""}`.trim() ?? "Farmer",
       firstName: farmer.firstName,
       lastName: farmer.lastName,
       email: farmer.email || "",
@@ -74,7 +76,9 @@ export const fieldService = {
   /**
    * Fetches paginated, searchable, and filterable fields list from GET /fields
    */
-  async getFields(params: FieldQueryParams = {}): Promise<{ fields: Field[]; pagination: FieldsPagination }> {
+  async getFields(
+    params: FieldQueryParams = {},
+  ): Promise<{ fields: Field[]; pagination: FieldsPagination }> {
     const queryParams: Record<string, string | number | boolean | undefined> = {};
 
     if (params.page !== undefined) queryParams.page = params.page;
@@ -93,7 +97,9 @@ export const fieldService = {
       responseData = res.data;
     } catch {
       // Fallback endpoint if /api/fields prefix is mapped
-      const altRes = await apiClient.get<FieldsListResponse>("/api/fields", { params: queryParams });
+      const altRes = await apiClient.get<FieldsListResponse>("/api/fields", {
+        params: queryParams,
+      });
       responseData = altRes.data;
     }
 
@@ -193,7 +199,8 @@ export const fieldService = {
     if (data.district !== undefined) payload.district = data.district.trim();
     if (data.city !== undefined) payload.city = data.city.trim();
     if (data.village !== undefined) payload.village = data.village.trim();
-    if (data.location_coordinates !== undefined) payload.location_coordinates = data.location_coordinates;
+    if (data.location_coordinates !== undefined)
+      payload.location_coordinates = data.location_coordinates;
 
     let responseData: any;
     try {

@@ -53,4 +53,25 @@ export const pilotService = {
     );
     return response.data;
   },
+
+  /**
+   * Deletes a pilot by ID via DELETE /pilots/:id
+   */
+  async deletePilot(pilotId: number | string): Promise<{ success: boolean; message?: string }> {
+    try {
+      await apiClient.delete(`/pilots/${pilotId}`);
+      return { success: true, message: "Pilot deleted successfully" };
+    } catch {
+      try {
+        await apiClient.delete(`/api/pilots/${pilotId}`);
+        return { success: true, message: "Pilot deleted successfully" };
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Failed to delete pilot. The pilot may be assigned to active missions.";
+        throw new Error(message);
+      }
+    }
+  },
 };

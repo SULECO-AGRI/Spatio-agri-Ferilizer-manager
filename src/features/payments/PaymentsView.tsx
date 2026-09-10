@@ -32,7 +32,9 @@ export function PaymentsView() {
           disabled={isLoading}
           className="self-start sm:self-auto inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-medium shadow-2xs transition-all cursor-pointer disabled:opacity-60"
         >
-          <RefreshCw className={`w-3.5 h-3.5 text-emerald-600 ${isLoading ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`w-3.5 h-3.5 text-emerald-600 ${isLoading ? "animate-spin" : ""}`}
+          />
           <span>{isLoading ? "Syncing..." : "Sync Ledgers"}</span>
         </button>
       </div>

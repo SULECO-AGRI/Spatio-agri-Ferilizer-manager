@@ -33,7 +33,8 @@ export const PilotPerformanceCard = memo(function PilotPerformanceCard({
             style={{ height: `${chartHeightPx + 20}px` }}
           >
             {data.map((item) => {
-              const heightPercent = item.value > 0 ? Math.max(15, Math.round((item.value / maxValue) * 100)) : 6;
+              const heightPercent =
+                item.value > 0 ? Math.max(15, Math.round((item.value / maxValue) * 100)) : 6;
               const heightPx = `${(heightPercent / 100) * chartHeightPx}px`;
 
               return (

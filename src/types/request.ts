@@ -41,7 +41,6 @@ export interface ApiMission {
   pilot?: ApiAssignedPilot | null;
 }
 
-
 export interface ApiServiceRequestItem {
   requestId: number;
   requestCode: string;

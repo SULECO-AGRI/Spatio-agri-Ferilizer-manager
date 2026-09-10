@@ -20,7 +20,9 @@ export interface UseReportsAnalyticsOptions {
 export function useReportsAnalytics(options: UseReportsAnalyticsOptions = {}) {
   // Aggregate KPI state
   const [summary, setSummary] = useState<AnalyticsSummaryData | null>(null);
-  const [completedMissions, setCompletedMissions] = useState<CompletedMissionsAnalytics | null>(null);
+  const [completedMissions, setCompletedMissions] = useState<CompletedMissionsAnalytics | null>(
+    null,
+  );
   const [revenue, setRevenue] = useState<RevenueAnalytics | null>(null);
   const [pilotPerformance, setPilotPerformance] = useState<PilotPerformanceAnalytics | null>(null);
   const [farmerGrowth, setFarmerGrowth] = useState<FarmerGrowthAnalytics | null>(null);
@@ -136,7 +138,17 @@ export function useReportsAnalytics(options: UseReportsAnalyticsOptions = {}) {
   const exportToCSV = () => {
     if (!pilots.length) return;
 
-    const headers = ["Pilot Name", "Email", "Mobile", "License", "Status", "Completed Missions", "Rating", "Flight Hours", "Earnings (LKR)"];
+    const headers = [
+      "Pilot Name",
+      "Email",
+      "Mobile",
+      "License",
+      "Status",
+      "Completed Missions",
+      "Rating",
+      "Flight Hours",
+      "Earnings (LKR)",
+    ];
     const rows = pilots.map((p) => [
       `"${p.pilotName}"`,
       `"${p.email}"`,
@@ -149,11 +161,16 @@ export function useReportsAnalytics(options: UseReportsAnalyticsOptions = {}) {
       p.totalEarnings,
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Spatio_Agri_Pilot_Performance_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute(
+      "download",
+      `Spatio_Agri_Pilot_Performance_${new Date().toISOString().slice(0, 10)}.csv`,
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

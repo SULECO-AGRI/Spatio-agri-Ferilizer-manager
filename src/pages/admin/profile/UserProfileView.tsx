@@ -16,7 +16,11 @@ export function UserProfileView() {
   const { user } = useAuth();
 
   const [profileData, setProfileData] = useState({
-    name: user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.fullName || "Administrator" : "Administrator",
+    name: user
+      ? `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+        (user as any).fullName ||
+        "Administrator"
+      : "Administrator",
     email: user?.email || "",
     phone: user?.mobile || "",
     department: user?.role || user?.profile?.department || "Operations Manager",
@@ -25,7 +29,10 @@ export function UserProfileView() {
   useEffect(() => {
     if (user) {
       setProfileData({
-        name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.fullName || "Administrator",
+        name:
+          `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+          (user as any).fullName ||
+          "Administrator",
         email: user.email || "",
         phone: user.mobile || "",
         department: user.role || user.profile?.department || "Operations Manager",

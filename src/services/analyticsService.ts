@@ -12,7 +12,14 @@ import type {
 export interface PilotPerformanceTableParams {
   page?: number;
   limit?: number;
-  sortBy?: "completedMissions" | "averageRatings" | "flightHours" | "pilotName" | "totalEarnings" | "createdAt" | string;
+  sortBy?:
+    | "completedMissions"
+    | "averageRatings"
+    | "flightHours"
+    | "pilotName"
+    | "totalEarnings"
+    | "createdAt"
+    | string;
   sortOrder?: "asc" | "desc";
   search?: string;
 }

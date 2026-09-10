@@ -280,14 +280,17 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
                   <option value="">-- Select Farmer --</option>
                   {farmersList.map((f) => (
                     <option key={f.userId} value={f.userId}>
-                      {f.fullName || `${f.firstName || ""} ${f.lastName || ""}`.trim() || `Farmer #${f.userId}`}{" "}
+                      {f.fullName ||
+                        `${f.firstName || ""} ${f.lastName || ""}`.trim() ||
+                        `Farmer #${f.userId}`}{" "}
                       ({f.mobile || f.email || `ID: ${f.userId}`})
                     </option>
                   ))}
                 </select>
                 {isLoadingFarmers && (
                   <span className="text-[10px] text-slate-400 mt-1 inline-flex items-center gap-1">
-                    <Loader2 className="w-2.5 h-2.5 animate-spin text-emerald-600" /> Loading farmers...
+                    <Loader2 className="w-2.5 h-2.5 animate-spin text-emerald-600" /> Loading
+                    farmers...
                   </span>
                 )}
               </div>
@@ -417,7 +420,9 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
 
               {/* City / Town */}
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">City / Division</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">
+                  City / Division
+                </label>
                 <input
                   type="text"
                   value={city}
@@ -429,7 +434,9 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
 
               {/* Village / Grama Niladhari */}
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Village / GN Division</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">
+                  Village / GN Division
+                </label>
                 <input
                   type="text"
                   value={village}
@@ -443,7 +450,9 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
             {/* Optional Coordinates */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div>
-                <label className="block text-[11px] font-normal text-slate-500 mb-1">Latitude (WGS84)</label>
+                <label className="block text-[11px] font-normal text-slate-500 mb-1">
+                  Latitude (WGS84)
+                </label>
                 <input
                   type="text"
                   value={latitude}
@@ -453,7 +462,9 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-normal text-slate-500 mb-1">Longitude (WGS84)</label>
+                <label className="block text-[11px] font-normal text-slate-500 mb-1">
+                  Longitude (WGS84)
+                </label>
                 <input
                   type="text"
                   value={longitude}

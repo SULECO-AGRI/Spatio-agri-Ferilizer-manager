@@ -4,3 +4,4 @@ export * from "./PilotPerformanceCard";
 export * from "./PilotMetricsRow";
 export * from "./CertificatesCard";
 export * from "./DocumentViewerModal";
+export * from "./DeletePilotDialog";

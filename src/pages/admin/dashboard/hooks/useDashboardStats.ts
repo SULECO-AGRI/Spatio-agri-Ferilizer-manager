@@ -50,7 +50,6 @@ export function useDashboardStats() {
         analyticsService.getAnalyticsSummary(),
       ]);
 
-
       let requests: ApiServiceRequestItem[] = [];
       let totalPending = 0;
       let totalInProgress = 0;

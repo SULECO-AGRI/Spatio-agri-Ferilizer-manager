@@ -1,9 +1,19 @@
-import { useCallback } from "react";
-import { ChevronLeft, ChevronRight, RefreshCw, AlertCircle, Users, Loader2 } from "lucide-react";
+import { useState, useCallback } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  AlertCircle,
+  Users,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
 import { PageHeader, FilterPills, TableToolbar } from "@/components/ui";
 import { usePilots, pilotFilterTabs } from "./hooks/usePilots";
 import { PilotCard } from "./PilotCard";
 import { PilotDetailsView } from "./PilotDetailsView";
+import { DeletePilotDialog } from "./components/DeletePilotDialog";
+import type { ApiPilotItem } from "@/types/pilot";
 
 interface PilotManagementProps {
   initialPilotId?: string | number | null;
@@ -31,7 +41,33 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
     clearSelectedPilot,
     updateStatus,
     updatingPilotIds,
+    deletePilot,
+    deletingPilotId,
   } = usePilots({ initialPilotId });
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [pilotToDelete, setPilotToDelete] = useState<ApiPilotItem | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 4000);
+  };
+
+  const handleOpenDelete = useCallback((pilot: ApiPilotItem) => {
+    setPilotToDelete(pilot);
+    setIsDeleteDialogOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(
+    async (pilotId: number | string) => {
+      await deletePilot(pilotId);
+      showToast("Pilot profile deleted successfully.");
+    },
+    [deletePilot],
+  );
 
   const handleViewDetails = useCallback(
     (pilotId: number | string) => {
@@ -54,7 +90,17 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
 
   // If a pilot is selected, display the detailed view
   if (selectedPilotId) {
-    return <PilotDetailsView pilotId={selectedPilotId} onBack={clearSelectedPilot} />;
+    return (
+      <PilotDetailsView
+        pilotId={selectedPilotId}
+        onBack={clearSelectedPilot}
+        onDelete={async () => {
+          await deletePilot(selectedPilotId);
+          clearSelectedPilot();
+          showToast("Pilot profile deleted successfully.");
+        }}
+      />
+    );
   }
 
   const startItem = totalCount === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
@@ -133,6 +179,7 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
               }
               onViewDetails={handleViewDetails}
               onToggleStatus={handleToggleStatus}
+              onDelete={handleOpenDelete}
             />
           ))}
 
@@ -166,6 +213,26 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
           )}
         </div>
       )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-emerald-900 text-white text-xs font-medium rounded-xl shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeletePilotDialog
+        isOpen={isDeleteDialogOpen}
+        pilot={pilotToDelete}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setPilotToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={deletingPilotId === pilotToDelete?.userId}
+      />
 
       {/* Pagination & Counter Footer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-slate-500 font-normal">

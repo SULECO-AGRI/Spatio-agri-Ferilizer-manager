@@ -64,8 +64,6 @@ const DISTRICT_COORDINATES: Record<string, [number, number]> = {
   kalutara: [6.5854, 79.9607],
 };
 
-
-
 // Transform database service request into ActiveMission structure
 function transformRequestToActiveMission(
   req: ApiServiceRequestItem,
@@ -73,10 +71,11 @@ function transformRequestToActiveMission(
 ): ActiveMissionDisplay {
   const districtKey = (req.field?.district || "").toLowerCase().replace(/[^a-z]/g, "");
   const cityKey = (req.field?.city || "").toLowerCase().replace(/[^a-z]/g, "");
-  const baseCoord: [number, number] = DISTRICT_COORDINATES[cityKey] || DISTRICT_COORDINATES[districtKey] || [
-    8.5361 + (index % 3) * 0.05,
-    80.4922 + (index % 3) * 0.05,
-  ];
+  const baseCoord: [number, number] = DISTRICT_COORDINATES[cityKey] ||
+    DISTRICT_COORDINATES[districtKey] || [
+      8.5361 + (index % 3) * 0.05,
+      80.4922 + (index % 3) * 0.05,
+    ];
 
   // Determine center coordinates from locationCoordinates or district anchor
   let centerLat = baseCoord[0];
@@ -156,8 +155,7 @@ function transformRequestToActiveMission(
     polygonPoints: "",
     flightPath: [],
     targetFertilizer: req.serviceType || `${req.field?.cropType || "Crop"} Treatment`,
-    estimatedCompletion:
-      req.status === "COMPLETED" ? "Completed" : "Scheduled Flight",
+    estimatedCompletion: req.status === "COMPLETED" ? "Completed" : "Scheduled Flight",
     farmerName: req.farmer?.fullName || "Registered Farmer",
     farmerMobile: req.farmer?.mobile || "",
     cropType: req.field?.cropType || "Paddy",
@@ -554,7 +552,9 @@ export function LiveMissionMap() {
           </div>
           <p className="text-xs text-slate-500 font-normal mt-0.5 flex items-center gap-1.5">
             <span>Real-time coordinates, polygon field boundaries & pilot flight telemetry</span>
-            {lastSyncTime && <span className="text-slate-400 font-mono">• Synced: {lastSyncTime}</span>}
+            {lastSyncTime && (
+              <span className="text-slate-400 font-mono">• Synced: {lastSyncTime}</span>
+            )}
           </p>
         </div>
 
@@ -787,11 +787,9 @@ export function LiveMissionMap() {
                     type="button"
                     onClick={() => {
                       setSelectedMissionId(m.id);
-                      mapInstanceRef.current?.flyTo(
-                        [m.coordinates.lat, m.coordinates.lng],
-                        12,
-                        { duration: 0.8 },
-                      );
+                      mapInstanceRef.current?.flyTo([m.coordinates.lat, m.coordinates.lng], 12, {
+                        duration: 0.8,
+                      });
                     }}
                     className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer flex items-center gap-1.5 border ${
                       isSel

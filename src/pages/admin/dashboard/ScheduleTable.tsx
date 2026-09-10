@@ -15,7 +15,8 @@ export function ScheduleTable({ recentRequests = [] }: ScheduleTableProps) {
           if (!isNaN(d.getTime())) {
             const formattedDate = d.toLocaleDateString([], { month: "short", day: "numeric" });
             const formattedTime = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-            timeDisplay = formattedTime === "12:00 AM" ? formattedDate : `${formattedDate}, ${formattedTime}`;
+            timeDisplay =
+              formattedTime === "12:00 AM" ? formattedDate : `${formattedDate}, ${formattedTime}`;
           }
         }
 
@@ -25,8 +26,7 @@ export function ScheduleTable({ recentRequests = [] }: ScheduleTableProps) {
           field: req.field?.fieldName || `${req.field?.cropType || "Paddy"} Field`,
           service: req.serviceType || "Fertilizing",
           pilot:
-            req.assignedPilot?.fullName ||
-            (req.status === "PENDING" ? "Unassigned" : "Assigned"),
+            req.assignedPilot?.fullName || (req.status === "PENDING" ? "Unassigned" : "Assigned"),
         };
       });
     }

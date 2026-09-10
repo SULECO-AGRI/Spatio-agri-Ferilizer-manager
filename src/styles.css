@@ -83,15 +83,21 @@
 
   --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-glow));
   --gradient-hero:
-    radial-gradient(120% 80% at 80% 0%,
+    radial-gradient(
+      120% 80% at 80% 0%,
       color-mix(in oklab, var(--primary-glow) 22%, transparent),
-      transparent 60%),
-    radial-gradient(80% 60% at 0% 100%,
+      transparent 60%
+    ),
+    radial-gradient(
+      80% 60% at 0% 100%,
       color-mix(in oklab, var(--primary) 12%, transparent),
-      transparent 60%);
-  --gradient-radar: radial-gradient(circle at 100% 0%,
-      color-mix(in oklab, var(--primary-glow) 45%, transparent),
-      transparent 55%);
+      transparent 60%
+    );
+  --gradient-radar: radial-gradient(
+    circle at 100% 0%,
+    color-mix(in oklab, var(--primary-glow) 45%, transparent),
+    transparent 55%
+  );
 
   --shadow-elegant: 0 20px 50px -20px color-mix(in oklab, var(--accent) 30%, transparent);
   --shadow-glow:
@@ -155,10 +161,12 @@
     inset: -1px;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(120deg,
-        color-mix(in oklab, var(--color-primary-glow) 70%, transparent),
-        color-mix(in oklab, var(--color-primary) 40%, transparent),
-        color-mix(in oklab, var(--color-primary-glow) 70%, transparent));
+    background: linear-gradient(
+      120deg,
+      color-mix(in oklab, var(--color-primary-glow) 70%, transparent),
+      color-mix(in oklab, var(--color-primary) 40%, transparent),
+      color-mix(in oklab, var(--color-primary-glow) 70%, transparent)
+    );
     background-size: 200% 200%;
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
@@ -172,11 +180,15 @@
 
 @utility grid-bg {
   background-image:
-    linear-gradient(color-mix(in oklab, var(--color-foreground) 6%, transparent) 1px,
-      transparent 1px),
-    linear-gradient(90deg,
+    linear-gradient(
       color-mix(in oklab, var(--color-foreground) 6%, transparent) 1px,
-      transparent 1px);
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--color-foreground) 6%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 44px 44px;
 }
 
@@ -191,7 +203,6 @@
 }
 
 @keyframes pulse-soft {
-
   0%,
   100% {
     box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-primary) 40%, transparent);
@@ -213,7 +224,6 @@
 }
 
 @keyframes float-y {
-
   0%,
   100% {
     transform: translateY(0);

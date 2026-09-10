@@ -115,13 +115,8 @@ export function Nav() {
           : "opacity-0 -translate-y-4 pointer-events-none"
       }`}
     >
-      <div
-        className="mx-auto mt-3 flex max-w-6xl items-center justify-between rounded-full px-5 py-2.5 bg-white/85 border border-slate-200/70 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
-      >
-        <Logo
-          showIcon={false}
-          className="shrink-0 text-[#062419]"
-        />
+      <div className="mx-auto mt-3 flex max-w-6xl items-center justify-between rounded-full px-5 py-2.5 bg-white/85 border border-slate-200/70 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+        <Logo showIcon={false} className="shrink-0 text-[#062419]" />
 
         {/* Navigation links with active sliding indicator */}
         <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-sm font-medium">

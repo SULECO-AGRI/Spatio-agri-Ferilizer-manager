@@ -137,9 +137,14 @@ export function useFields(options: UseFieldsOptions = {}) {
         const updated = await fieldService.updateField(id, data);
         // Optimistically update locally
         setFields((prev) =>
-          prev.map((f) => (f.id === Number(id) || String(f.id) === String(id) ? { ...f, ...updated } : f)),
+          prev.map((f) =>
+            f.id === Number(id) || String(f.id) === String(id) ? { ...f, ...updated } : f,
+          ),
         );
-        if (selectedField && (selectedField.id === Number(id) || String(selectedField.id) === String(id))) {
+        if (
+          selectedField &&
+          (selectedField.id === Number(id) || String(selectedField.id) === String(id))
+        ) {
           setSelectedField({ ...selectedField, ...updated });
         }
         await fetchFields({ silent: true });
@@ -166,7 +171,10 @@ export function useFields(options: UseFieldsOptions = {}) {
           ...prev,
           total: Math.max(0, prev.total - 1),
         }));
-        if (selectedField && (selectedField.id === Number(id) || String(selectedField.id) === String(id))) {
+        if (
+          selectedField &&
+          (selectedField.id === Number(id) || String(selectedField.id) === String(id))
+        ) {
           setSelectedField(null);
         }
         await fetchFields({ silent: true });

@@ -69,8 +69,12 @@ export function ReportsView() {
 
   // Dynamic Bar Chart data mapped from completed missions
   const barChartData = useMemo(() => {
-    const thisMonthVal = completedMissions?.completedThisMonth ?? (summary?.completedMissions?.value ? Math.round(summary.completedMissions.value * 0.4) : 0);
-    const lastMonthVal = completedMissions?.completedLastMonth ?? (summary?.completedMissions?.value ? Math.round(summary.completedMissions.value * 0.3) : 0);
+    const thisMonthVal =
+      completedMissions?.completedThisMonth ??
+      (summary?.completedMissions?.value ? Math.round(summary.completedMissions.value * 0.4) : 0);
+    const lastMonthVal =
+      completedMissions?.completedLastMonth ??
+      (summary?.completedMissions?.value ? Math.round(summary.completedMissions.value * 0.3) : 0);
     const prevMonthVal = Math.max(0, Math.round(lastMonthVal * 0.8));
 
     return [
@@ -84,7 +88,9 @@ export function ReportsView() {
   // Dynamic Line Chart points mapped from revenue analytics
   const lineChartPoints = useMemo(() => {
     const totalRev = Number(revenue?.totalRevenue || summary?.revenue?.value || 0);
-    const revThisMonth = Number(revenue?.revenueThisMonth || summary?.revenue?.revenueThisMonth || 0);
+    const revThisMonth = Number(
+      revenue?.revenueThisMonth || summary?.revenue?.revenueThisMonth || 0,
+    );
     const revLastMonth = Number(revenue?.revenueLastMonth || Math.round(revThisMonth * 0.85));
 
     const maxRev = Math.max(totalRev, revThisMonth, 1000);
@@ -99,9 +105,15 @@ export function ReportsView() {
   }, [revenue, summary]);
 
   const currencyStr = revenue?.currency || summary?.revenue?.currency || "LKR";
-  const revenueTotalVal = summary?.revenue?.formatted || (revenue ? `${currencyStr} ${formatNum(revenue.totalRevenue)}` : "LKR 0");
-  const revenueThisMonthVal = formatNum(summary?.revenue?.revenueThisMonth ?? revenue?.revenueThisMonth ?? 0);
-  const missionsCountVal = summary?.completedMissions?.formatted || formatNum(completedMissions?.totalCompletedMissions, "0");
+  const revenueTotalVal =
+    summary?.revenue?.formatted ||
+    (revenue ? `${currencyStr} ${formatNum(revenue.totalRevenue)}` : "LKR 0");
+  const revenueThisMonthVal = formatNum(
+    summary?.revenue?.revenueThisMonth ?? revenue?.revenueThisMonth ?? 0,
+  );
+  const missionsCountVal =
+    summary?.completedMissions?.formatted ||
+    formatNum(completedMissions?.totalCompletedMissions, "0");
 
   return (
     <div className="space-y-6 md:space-y-8 font-sans animate-in fade-in duration-300">
@@ -123,7 +135,9 @@ export function ReportsView() {
             className="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-medium shadow-2xs transition-all cursor-pointer disabled:opacity-60"
             title="Refresh live analytics data"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-emerald-600 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 text-emerald-600 ${isLoading ? "animate-spin" : ""}`}
+            />
             <span>{isLoading ? "Syncing..." : "Sync Live Data"}</span>
           </button>
         </div>
@@ -165,7 +179,12 @@ export function ReportsView() {
         {/* Pilot Fleet Performance Card */}
         <MetricCard
           title="Pilot Performance"
-          value={isLoading ? "..." : summary?.pilotPerformance?.formatted || `${pilotPerformance?.fleetAverageRating || 5.0} avg`}
+          value={
+            isLoading
+              ? "..."
+              : summary?.pilotPerformance?.formatted ||
+                `${pilotPerformance?.fleetAverageRating || 5.0} avg`
+          }
           footer={`${summary?.pilotPerformance?.activePilots ?? pilotPerformance?.activePilots ?? 0} active / ${summary?.pilotPerformance?.totalPilots ?? pilotPerformance?.totalPilots ?? 0} pilots`}
           trend={{
             value: `${pilotPerformance?.totalFleetFlightHours ?? 0} flight hrs`,
@@ -177,7 +196,11 @@ export function ReportsView() {
         {/* Farmer Growth Rate Card */}
         <MetricCard
           title="Farmer Growth"
-          value={isLoading ? "..." : summary?.farmerGrowth?.formatted || `+${farmerGrowth?.growthPercentage ?? 100}%`}
+          value={
+            isLoading
+              ? "..."
+              : summary?.farmerGrowth?.formatted || `+${farmerGrowth?.growthPercentage ?? 100}%`
+          }
           footer={`Total: ${summary?.farmerGrowth?.totalFarmers ?? farmerGrowth?.totalFarmers ?? 0} registered`}
           trend={{
             value: `+${summary?.farmerGrowth?.newFarmersThisMonth ?? farmerGrowth?.newFarmersThisMonth ?? 0} new this mo`,
@@ -232,7 +255,8 @@ export function ReportsView() {
               {completedMissions?.completionRatePercentage ?? 100}%
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Zero flight anomalies reported across {completedMissions?.totalCompletedMissions ?? 24} total missions.
+              Zero flight anomalies reported across{" "}
+              {completedMissions?.totalCompletedMissions ?? 24} total missions.
             </p>
           </div>
         </div>
@@ -250,7 +274,8 @@ export function ReportsView() {
               {farmerGrowth?.totalFieldsRegistered ?? 1} Registered Fields
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              {farmerGrowth?.activeFarmersWithFields ?? 1} active client farms receiving precision prescription maps.
+              {farmerGrowth?.activeFarmersWithFields ?? 1} active client farms receiving precision
+              prescription maps.
             </p>
           </div>
         </div>
@@ -259,22 +284,18 @@ export function ReportsView() {
       {/* 3. Interactive Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Missions Completed Bar Chart */}
-        <BarChart
-          title="Monthly Trends — Missions Completed"
-          data={barChartData}
-        />
+        <BarChart title="Monthly Trends — Missions Completed" data={barChartData} />
 
         {/* Revenue Trend SVG Line Chart */}
         <div className="relative">
-          <LineChart
-            title="Revenue & Commission Growth"
-            points={lineChartPoints}
-          />
+          <LineChart title="Revenue & Commission Growth" points={lineChartPoints} />
           {/* Revenue split footer summary */}
           {revenue && (
             <div className="mt-3 grid grid-cols-2 gap-2 text-center text-xs">
               <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5">
-                <span className="text-slate-400 block text-[10px] uppercase">Company Commission</span>
+                <span className="text-slate-400 block text-[10px] uppercase">
+                  Company Commission
+                </span>
                 <span className="font-semibold text-slate-800 font-mono">
                   {currencyStr} {formatNum(revenue.companyCommission)}
                 </span>
@@ -404,12 +425,8 @@ export function ReportsView() {
                     {/* Pilot Info */}
                     <td className="py-4 pl-2">
                       <div>
-                        <span className="text-slate-900 font-medium block">
-                          {p.pilotName}
-                        </span>
-                        <span className="text-xs text-slate-400 font-mono block">
-                          {p.email}
-                        </span>
+                        <span className="text-slate-900 font-medium block">{p.pilotName}</span>
+                        <span className="text-xs text-slate-400 font-mono block">{p.email}</span>
                       </div>
                     </td>
 
@@ -420,8 +437,8 @@ export function ReportsView() {
                           p.status === "ACTIVE"
                             ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                             : p.status === "ON_MISSION"
-                            ? "bg-sky-50 text-sky-700 border border-sky-200"
-                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                              ? "bg-sky-50 text-sky-700 border border-sky-200"
+                              : "bg-slate-100 text-slate-600 border border-slate-200"
                         }`}
                       >
                         {p.status}
@@ -469,7 +486,10 @@ export function ReportsView() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100 text-xs text-slate-500">
           <div>
             Showing <span className="font-semibold text-slate-700">{pilots.length}</span> of{" "}
-            <span className="font-semibold text-slate-700">{pagination?.total ?? pilots.length}</span> registered pilots
+            <span className="font-semibold text-slate-700">
+              {pagination?.total ?? pilots.length}
+            </span>{" "}
+            registered pilots
           </div>
 
           <div className="flex items-center gap-2">
@@ -529,4 +549,3 @@ export function ReportsView() {
 }
 
 export default ReportsView;
-

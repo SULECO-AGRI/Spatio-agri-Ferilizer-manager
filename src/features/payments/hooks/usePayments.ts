@@ -49,7 +49,9 @@ export function usePayments() {
         txns.push({
           id: `INV-${reqCode}`,
           type: "Invoice",
-          party: req.farmer?.fullName || (req.farmer?.userId ? `Farmer #${req.farmer.userId}` : "Farmer"),
+          party:
+            req.farmer?.fullName ||
+            (req.farmer?.userId ? `Farmer #${req.farmer.userId}` : "Farmer"),
           amount: `LKR ${costNum.toLocaleString()}`,
           status: invoiceStatus,
           date: dateStr,

@@ -34,6 +34,7 @@ export function useFarmers(options: UseFarmersOptions = {}) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [deletingFarmerId, setDeletingFarmerId] = useState<string | number | null>(null);
   const [, startTransition] = useTransition();
 
   // Search input debounce (300ms)
@@ -96,6 +97,36 @@ export function useFarmers(options: UseFarmersOptions = {}) {
     setSelectedFarmerDetails(null);
   }, []);
 
+  // Delete farmer action with local state removal (no refetch)
+  const deleteFarmer = useCallback(
+    async (id: number | string): Promise<void> => {
+      setDeletingFarmerId(id);
+      try {
+        await farmerService.deleteFarmer(id);
+        // Optimistically remove from local state without refetching
+        setFarmers((prev) =>
+          prev.filter((f) => f.userId !== Number(id) && String(f.userId) !== String(id)),
+        );
+        setPagination((prev) => ({
+          ...prev,
+          total: Math.max(0, prev.total - 1),
+        }));
+        if (
+          selectedFarmerId !== null &&
+          (String(selectedFarmerId) === String(id) || Number(selectedFarmerId) === Number(id))
+        ) {
+          clearSelectedFarmer();
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to delete farmer.";
+        throw new Error(msg);
+      } finally {
+        setDeletingFarmerId(null);
+      }
+    },
+    [selectedFarmerId, clearSelectedFarmer],
+  );
+
   return {
     farmers,
     pagination,
@@ -118,5 +149,7 @@ export function useFarmers(options: UseFarmersOptions = {}) {
     selectedFarmer,
     selectFarmer,
     clearSelectedFarmer,
+    deleteFarmer,
+    deletingFarmerId,
   };
 }

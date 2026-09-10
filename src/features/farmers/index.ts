@@ -3,4 +3,5 @@ export { FarmerProfileView } from "./FarmerProfileView";
 export * from "./components/FarmerOverviewCard";
 export * from "./components/FarmerFieldsGrid";
 export * from "./components/FarmerHistoryTable";
+export * from "./components/DeleteFarmerDialog";
 export * from "./hooks/useFarmers";

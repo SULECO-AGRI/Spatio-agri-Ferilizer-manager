@@ -41,5 +41,25 @@ export const farmerService = {
       }
     }
   },
-};
 
+  /**
+   * Deletes a farmer by ID via DELETE /farmers/:id
+   */
+  async deleteFarmer(farmerId: number | string): Promise<{ success: boolean; message?: string }> {
+    try {
+      await apiClient.delete(`/farmers/${farmerId}`);
+      return { success: true, message: "Farmer deleted successfully" };
+    } catch {
+      try {
+        await apiClient.delete(`/api/farmers/${farmerId}`);
+        return { success: true, message: "Farmer deleted successfully" };
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Failed to delete farmer. The farmer may have active field parcels or service requests.";
+        throw new Error(message);
+      }
+    }
+  },
+};

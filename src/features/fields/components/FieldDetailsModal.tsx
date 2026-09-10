@@ -50,8 +50,12 @@ export function FieldDetailsModal({ isOpen, field, onClose, onEdit }: FieldDetai
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl">
               <span className="text-[10px] text-emerald-700 font-medium uppercase block">Area</span>
-              <span className="text-base font-semibold text-emerald-950 font-display">{field.area} ha</span>
-              <span className="text-[10px] text-slate-400 block mt-0.5">{(field.area * 2.471).toFixed(1)} acres</span>
+              <span className="text-base font-semibold text-emerald-950 font-display">
+                {field.area} ha
+              </span>
+              <span className="text-[10px] text-slate-400 block mt-0.5">
+                {(field.area * 2.471).toFixed(1)} acres
+              </span>
             </div>
             <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
               <span className="text-[10px] text-slate-500 font-medium uppercase block">Crop</span>
@@ -60,7 +64,9 @@ export function FieldDetailsModal({ isOpen, field, onClose, onEdit }: FieldDetai
               </span>
             </div>
             <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
-              <span className="text-[10px] text-slate-500 font-medium uppercase block">Division</span>
+              <span className="text-[10px] text-slate-500 font-medium uppercase block">
+                Division
+              </span>
               <span className="text-sm font-semibold text-slate-800 truncate block mt-0.5">
                 {field.district}
               </span>
@@ -147,7 +153,8 @@ export function FieldDetailsModal({ isOpen, field, onClose, onEdit }: FieldDetai
           {/* Timestamps */}
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
             <span className="inline-flex items-center gap-1">
-              <Calendar className="w-3 h-3" /> Registered: {formatDate(field.created_at || field.createdAt)}
+              <Calendar className="w-3 h-3" /> Registered:{" "}
+              {formatDate(field.created_at || field.createdAt)}
             </span>
             <span>ID: {field.id}</span>
           </div>

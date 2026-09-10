@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ChevronRight,
   ChevronLeft,
@@ -7,10 +8,14 @@ import {
   RefreshCw,
   AlertCircle,
   Loader2,
+  Trash2,
+  CheckCircle2,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui";
 import { useFarmers } from "./hooks/useFarmers";
 import { FarmerProfileView } from "./FarmerProfileView";
+import { DeleteFarmerDialog } from "./components/DeleteFarmerDialog";
+import type { ApiFarmerItem } from "@/types/farmer";
 
 interface FarmersListViewProps {
   initialFarmerId?: string | number | null;
@@ -34,7 +39,31 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
     selectedFarmer,
     selectFarmer,
     clearSelectedFarmer,
+    deleteFarmer,
+    deletingFarmerId,
   } = useFarmers({ initialFarmerId });
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [farmerToDelete, setFarmerToDelete] = useState<ApiFarmerItem | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 4000);
+  };
+
+  const handleOpenDelete = (farmer: ApiFarmerItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFarmerToDelete(farmer);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async (farmerId: number | string) => {
+    await deleteFarmer(farmerId);
+    showToast("Farmer profile deleted successfully.");
+  };
 
   const handleView = (id: string | number) => {
     if (onViewProfile) {
@@ -57,6 +86,10 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
         fields={[]}
         serviceHistory={[]}
         onBack={clearSelectedFarmer}
+        onDelete={async () => {
+          await deleteFarmer(selectedFarmer.userId);
+          showToast("Farmer profile deleted successfully.");
+        }}
       />
     );
   }
@@ -216,17 +249,28 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
 
                     {/* Actions */}
                     <td className="p-4 pr-6 text-right">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleView(farmer.userId);
-                        }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-normal transition-colors cursor-pointer"
-                      >
-                        <span>Profile</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleView(farmer.userId);
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-normal transition-colors cursor-pointer"
+                          title="View Profile"
+                        >
+                          <span>Profile</span>
+                          <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleOpenDelete(farmer, e)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Delete Farmer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -248,6 +292,26 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
           </tbody>
         </table>
       </div>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-emerald-900 text-white text-xs font-medium rounded-xl shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteFarmerDialog
+        isOpen={isDeleteDialogOpen}
+        farmer={farmerToDelete}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setFarmerToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={deletingFarmerId === farmerToDelete?.userId}
+      />
 
       {/* Pagination Footer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 font-normal">

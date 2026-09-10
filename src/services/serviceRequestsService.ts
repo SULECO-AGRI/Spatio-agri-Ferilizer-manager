@@ -104,7 +104,8 @@ export const serviceRequestsService = {
 
       // Raw distance in km
       const rawDistance = Number(c.distanceKm ?? c.distance_km ?? c.distance ?? 0);
-      const distanceKm = !isNaN(rawDistance) && rawDistance > 0 ? Number(rawDistance.toFixed(1)) : 0;
+      const distanceKm =
+        !isNaN(rawDistance) && rawDistance > 0 ? Number(rawDistance.toFixed(1)) : 0;
 
       // Rating
       const rawRating = Number(c.rating ?? c.starRating ?? profile.rating ?? c.ratings ?? 0);

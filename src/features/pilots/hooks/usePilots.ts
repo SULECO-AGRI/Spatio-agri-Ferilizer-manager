@@ -58,6 +58,7 @@ export function usePilots(options: UsePilotsOptions = {}) {
   const [isError, setIsError] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [updatingPilotIds, setUpdatingPilotIds] = useState<Set<number | string>>(new Set());
+  const [deletingPilotId, setDeletingPilotId] = useState<string | number | null>(null);
   const [, startTransition] = useTransition();
 
   // Search input debounce (300ms)
@@ -133,7 +134,10 @@ export function usePilots(options: UsePilotsOptions = {}) {
       (detail as any)?.ratings;
 
     const ratingVal =
-      rawRating !== null && rawRating !== undefined && !isNaN(Number(rawRating)) && Number(rawRating) > 0
+      rawRating !== null &&
+      rawRating !== undefined &&
+      !isNaN(Number(rawRating)) &&
+      Number(rawRating) > 0
         ? Number(rawRating)
         : 0;
 
@@ -148,22 +152,38 @@ export function usePilots(options: UsePilotsOptions = {}) {
 
     const missionHistory: PilotMission[] = Array.isArray(rawMissions)
       ? rawMissions.map((m: any) => ({
-          id: m.missionCode || m.requestCode || `MSN-${m.id || m.missionId || m.serviceRequestId || detail.userId}`,
+          id:
+            m.missionCode ||
+            m.requestCode ||
+            `MSN-${m.id || m.missionId || m.serviceRequestId || detail.userId}`,
           field: m.fieldName || m.fieldLocation || m.farmName || m.cropType || "Agri Field",
           date: formatDate(m.completedAt || m.scheduledDate || m.createdAt || m.date),
           result: (m.status === "COMPLETED" || m.status === "Completed"
             ? "Completed"
             : m.status === "IN_PROGRESS" || m.status === "On Mission"
-            ? "Active"
-            : m.status === "FAILED" || m.status === "Failed"
-            ? "Failed"
-            : m.status === "CANCELLED" || m.status === "Cancelled"
-            ? "Cancelled"
-            : "Completed") as MissionResult,
+              ? "Active"
+              : m.status === "FAILED" || m.status === "Failed"
+                ? "Failed"
+                : m.status === "CANCELLED" || m.status === "Cancelled"
+                  ? "Cancelled"
+                  : "Completed") as MissionResult,
         }))
       : [];
 
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     const now = new Date();
     const performanceData = Array.from({ length: 6 }, (_, i) => {
       const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
@@ -187,7 +207,10 @@ export function usePilots(options: UsePilotsOptions = {}) {
       initials,
       status: detail.status,
       license: detail.licenceNumber || "N/A",
-      experience: totalFlightHours > 0 ? `${Math.max(1, Math.round(totalFlightHours / 50))} yrs experience` : "Certified Operator",
+      experience:
+        totalFlightHours > 0
+          ? `${Math.max(1, Math.round(totalFlightHours / 50))} yrs experience`
+          : "Certified Operator",
       phone: detail.mobile || "N/A",
       email: detail.email || "N/A",
       rating: ratingVal,
@@ -275,78 +298,75 @@ export function usePilots(options: UsePilotsOptions = {}) {
     setPage(1);
   }, []);
 
-  const updateStatus = useCallback(
-    async (pilotId: number | string, newStatus: string) => {
-      const numericId = Number(pilotId);
+  const updateStatus = useCallback(async (pilotId: number | string, newStatus: string) => {
+    const numericId = Number(pilotId);
 
-      // Track previous status for rollback if request fails
-      let previousStatus: string | undefined;
-      setPilots((prev) => {
-        const target = prev.find(
-          (p) => p.userId === numericId || String(p.userId) === String(pilotId),
+    // Track previous status for rollback if request fails
+    let previousStatus: string | undefined;
+    setPilots((prev) => {
+      const target = prev.find(
+        (p) => p.userId === numericId || String(p.userId) === String(pilotId),
+      );
+      if (target) {
+        previousStatus = target.status;
+      }
+      return prev.map((p) =>
+        p.userId === numericId || String(p.userId) === String(pilotId)
+          ? { ...p, status: newStatus }
+          : p,
+      );
+    });
+
+    // Also optimistically update selectedPilotDetails if open
+    setSelectedPilotDetails((prev) => {
+      if (prev && (prev.pilotId === numericId || String(prev.pilotId) === String(pilotId))) {
+        return { ...prev, status: newStatus };
+      }
+      return prev;
+    });
+
+    // Mark this pilot as actively updating
+    setUpdatingPilotIds((prev) => new Set(prev).add(pilotId));
+
+    try {
+      const updatedPilot = await pilotService.updatePilotStatus(pilotId, newStatus);
+      // Silently reconcile the updated pilot object from server if available
+      if (updatedPilot) {
+        setPilots((prev) =>
+          prev.map((p) =>
+            p.userId === numericId || String(p.userId) === String(pilotId)
+              ? { ...p, ...updatedPilot, status: updatedPilot.status || newStatus }
+              : p,
+          ),
         );
-        if (target) {
-          previousStatus = target.status;
-        }
-        return prev.map((p) =>
-          p.userId === numericId || String(p.userId) === String(pilotId)
-            ? { ...p, status: newStatus }
-            : p,
+      }
+    } catch (err: unknown) {
+      console.error("Failed to update status, rolling back:", err);
+      // Rollback optimistic update
+      if (previousStatus !== undefined) {
+        setPilots((prev) =>
+          prev.map((p) =>
+            p.userId === numericId || String(p.userId) === String(pilotId)
+              ? { ...p, status: previousStatus! }
+              : p,
+          ),
         );
-      });
-
-      // Also optimistically update selectedPilotDetails if open
-      setSelectedPilotDetails((prev) => {
-        if (prev && (prev.pilotId === numericId || String(prev.pilotId) === String(pilotId))) {
-          return { ...prev, status: newStatus };
-        }
-        return prev;
-      });
-
-      // Mark this pilot as actively updating
-      setUpdatingPilotIds((prev) => new Set(prev).add(pilotId));
-
-      try {
-        const updatedPilot = await pilotService.updatePilotStatus(pilotId, newStatus);
-        // Silently reconcile the updated pilot object from server if available
-        if (updatedPilot) {
-          setPilots((prev) =>
-            prev.map((p) =>
-              p.userId === numericId || String(p.userId) === String(pilotId)
-                ? { ...p, ...updatedPilot, status: updatedPilot.status || newStatus }
-                : p,
-            ),
-          );
-        }
-      } catch (err: unknown) {
-        console.error("Failed to update status, rolling back:", err);
-        // Rollback optimistic update
-        if (previousStatus !== undefined) {
-          setPilots((prev) =>
-            prev.map((p) =>
-              p.userId === numericId || String(p.userId) === String(pilotId)
-                ? { ...p, status: previousStatus! }
-                : p,
-            ),
-          );
-          setSelectedPilotDetails((prev) => {
-            if (prev && (prev.pilotId === numericId || String(prev.pilotId) === String(pilotId))) {
-              return { ...prev, status: previousStatus! };
-            }
-            return prev;
-          });
-        }
-        throw err;
-      } finally {
-        setUpdatingPilotIds((prev) => {
-          const next = new Set(prev);
-          next.delete(pilotId);
-          return next;
+        setSelectedPilotDetails((prev) => {
+          if (prev && (prev.pilotId === numericId || String(prev.pilotId) === String(pilotId))) {
+            return { ...prev, status: previousStatus! };
+          }
+          return prev;
         });
       }
-    },
-    [],
-  );
+      throw err;
+    } finally {
+      setUpdatingPilotIds((prev) => {
+        const next = new Set(prev);
+        next.delete(pilotId);
+        return next;
+      });
+    }
+  }, []);
 
   const isPilotUpdating = useCallback(
     (pilotId: number | string) =>
@@ -354,6 +374,36 @@ export function usePilots(options: UsePilotsOptions = {}) {
       updatingPilotIds.has(Number(pilotId)) ||
       updatingPilotIds.has(String(pilotId)),
     [updatingPilotIds],
+  );
+
+  // Delete Pilot Action with local state removal (no refetch)
+  const deletePilot = useCallback(
+    async (id: number | string): Promise<void> => {
+      setDeletingPilotId(id);
+      try {
+        await pilotService.deletePilot(id);
+        // Optimistically remove from local state without refetching
+        setPilots((prev) =>
+          prev.filter((p) => p.userId !== Number(id) && String(p.userId) !== String(id)),
+        );
+        setPagination((prev) => ({
+          ...prev,
+          total: Math.max(0, prev.total - 1),
+        }));
+        if (
+          selectedPilotId !== null &&
+          (String(selectedPilotId) === String(id) || Number(selectedPilotId) === Number(id))
+        ) {
+          clearSelectedPilot();
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to delete pilot.";
+        throw new Error(msg);
+      } finally {
+        setDeletingPilotId(null);
+      }
+    },
+    [selectedPilotId, clearSelectedPilot],
   );
 
   return {
@@ -384,5 +434,7 @@ export function usePilots(options: UsePilotsOptions = {}) {
     updateStatus,
     updatingPilotIds,
     isPilotUpdating,
+    deletePilot,
+    deletingPilotId,
   };
 }

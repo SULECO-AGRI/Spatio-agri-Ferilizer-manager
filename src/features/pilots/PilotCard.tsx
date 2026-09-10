@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Star, Phone, Mail, Clock, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Star, Phone, Mail, Clock, CheckCircle2, AlertCircle, Loader2, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/ui";
 import type { ApiPilotItem } from "@/types/pilot";
 
@@ -7,6 +7,7 @@ interface PilotCardProps {
   pilot: ApiPilotItem;
   onViewDetails: (pilotId: number | string) => void;
   onToggleStatus?: (pilotId: number | string, currentStatus: string) => void;
+  onDelete?: (pilot: ApiPilotItem) => void;
   isUpdating?: boolean;
 }
 
@@ -14,6 +15,7 @@ function PilotCardComponent({
   pilot,
   onViewDetails,
   onToggleStatus,
+  onDelete,
   isUpdating = false,
 }: PilotCardProps) {
   const initials =
@@ -30,12 +32,15 @@ function PilotCardComponent({
     (pilot as any)?.stats?.rating;
 
   const ratingDisplay =
-    rawRating !== null && rawRating !== undefined && !isNaN(Number(rawRating)) && Number(rawRating) > 0
+    rawRating !== null &&
+    rawRating !== undefined &&
+    !isNaN(Number(rawRating)) &&
+    Number(rawRating) > 0
       ? Number(rawRating).toFixed(1)
       : "0.0";
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl p-6 flex flex-col justify-between shadow-xs hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-sans group">
+    <div className="bg-white border border-slate-200/80 rounded-2xl p-6 flex flex-col justify-between shadow-xs hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-sans group relative">
       {/* Card Top: Initials Avatar, Name & Status */}
       <div className="cursor-pointer" onClick={() => onViewDetails(pilot.userId)}>
         <div className="flex items-start justify-between gap-3">
@@ -51,13 +56,28 @@ function PilotCardComponent({
             </div>
           </div>
 
-          {/* Active Missions Badge if any */}
-          {pilot.activeMissionsCount > 0 && (
-            <span className="px-2 py-0.5 text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200/80 rounded-full shrink-0 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              {pilot.activeMissionsCount} active
-            </span>
-          )}
+          {/* Top Actions: Active Missions Badge & Delete Button */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {pilot.activeMissionsCount > 0 && (
+              <span className="px-2 py-0.5 text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200/80 rounded-full flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                {pilot.activeMissionsCount} active
+              </span>
+            )}
+            {onDelete && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(pilot);
+                }}
+                className="p-1.5 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                title="Delete Pilot"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* License & Contacts */}

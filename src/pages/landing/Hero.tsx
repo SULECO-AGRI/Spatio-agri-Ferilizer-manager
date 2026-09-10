@@ -158,11 +158,26 @@ export function Hero() {
 
           {/* Floating Organic Seeds & Micro Particles (Mid-depth Debris) */}
           <div className="absolute top-[22%] left-[18%] w-2 h-2 rounded-full bg-emerald-200/50 shadow-[0_0_12px_rgba(52,211,153,0.9)] animate-pulse" />
-          <div className="absolute top-[28%] right-[22%] w-1.5 h-1.5 rounded-full bg-amber-300/60 shadow-[0_0_10px_rgba(252,211,77,0.9)] animate-pulse" style={{ animationDelay: "1.2s" }} />
-          <div className="absolute top-[45%] left-[28%] w-2 h-2 rounded-full bg-emerald-300/45 shadow-[0_0_10px_rgba(110,231,183,0.8)] animate-pulse" style={{ animationDelay: "2.4s" }} />
-          <div className="absolute top-[62%] right-[26%] w-1.5 h-1.5 rounded-full bg-white/40 shadow-[0_0_8px_rgba(255,255,255,0.8)] animate-pulse" style={{ animationDelay: "0.8s" }} />
-          <div className="absolute bottom-[28%] left-[24%] w-2.5 h-2.5 rounded-full bg-emerald-400/35 shadow-[0_0_14px_rgba(52,211,153,0.7)] animate-pulse" style={{ animationDelay: "1.8s" }} />
-          <div className="absolute bottom-[35%] right-[30%] w-1.5 h-1.5 rounded-full bg-amber-200/40 shadow-[0_0_8px_rgba(253,230,138,0.7)] animate-pulse" style={{ animationDelay: "3s" }} />
+          <div
+            className="absolute top-[28%] right-[22%] w-1.5 h-1.5 rounded-full bg-amber-300/60 shadow-[0_0_10px_rgba(252,211,77,0.9)] animate-pulse"
+            style={{ animationDelay: "1.2s" }}
+          />
+          <div
+            className="absolute top-[45%] left-[28%] w-2 h-2 rounded-full bg-emerald-300/45 shadow-[0_0_10px_rgba(110,231,183,0.8)] animate-pulse"
+            style={{ animationDelay: "2.4s" }}
+          />
+          <div
+            className="absolute top-[62%] right-[26%] w-1.5 h-1.5 rounded-full bg-white/40 shadow-[0_0_8px_rgba(255,255,255,0.8)] animate-pulse"
+            style={{ animationDelay: "0.8s" }}
+          />
+          <div
+            className="absolute bottom-[28%] left-[24%] w-2.5 h-2.5 rounded-full bg-emerald-400/35 shadow-[0_0_14px_rgba(52,211,153,0.7)] animate-pulse"
+            style={{ animationDelay: "1.8s" }}
+          />
+          <div
+            className="absolute bottom-[35%] right-[30%] w-1.5 h-1.5 rounded-full bg-amber-200/40 shadow-[0_0_8px_rgba(253,230,138,0.7)] animate-pulse"
+            style={{ animationDelay: "3s" }}
+          />
         </motion.div>
 
         {/* Near-Camera Fast Debris Specks */}
@@ -185,10 +200,7 @@ export function Hero() {
         {/* Top Header / Navigation Bar */}
         <div className="relative z-50 w-full px-6 sm:px-10 lg:px-14 pt-5 sm:pt-7 flex items-center justify-between">
           {/* Brand Logo */}
-          <a
-            href="#hero"
-            className="flex items-center gap-2.5 text-white group cursor-pointer"
-          >
+          <a href="#hero" className="flex items-center gap-2.5 text-white group cursor-pointer">
             <span className="font-display text-xl sm:text-2xl font-bold tracking-tight text-white drop-shadow-sm">
               Fertilizer Manager
             </span>
@@ -243,8 +255,9 @@ export function Hero() {
                 >
                   <span className="truncate max-w-[140px] sm:max-w-none">{userDisplayName}</span>
                   <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 shrink-0 text-zinc-300 group-hover:text-white ${isDropdownOpen ? "rotate-180" : ""
-                      }`}
+                    className={`w-3.5 h-3.5 transition-transform duration-200 shrink-0 text-zinc-300 group-hover:text-white ${
+                      isDropdownOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
 
@@ -356,13 +369,13 @@ export function Hero() {
 
           {/* Subtitle */}
           <p className="mt-4 sm:mt-5 text-zinc-200 text-xs sm:text-sm md:text-base max-w-xl text-center leading-relaxed font-sans drop-shadow">
-            Precision fertilizing powered by drone images. Apply only what your crops need, exactly where they need it.
+            Precision fertilizing powered by drone images. Apply only what your crops need, exactly
+            where they need it.
           </p>
         </motion.div>
 
         {/* Subtle Bottom Bar Spacer */}
         <div className="relative z-10 w-full h-4 pointer-events-none" />
-
       </motion.div>
     </section>
   );

@@ -332,9 +332,7 @@ export function FieldsManagementView() {
                           <p className="font-medium text-slate-900 group-hover:text-emerald-800 transition-colors">
                             {f.field_name || f.fieldName}
                           </p>
-                          <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-                            ID #{f.id}
-                          </p>
+                          <p className="text-[11px] text-slate-400 font-mono mt-0.5">ID #{f.id}</p>
                         </div>
                       </div>
                     </td>
@@ -390,10 +388,7 @@ export function FieldsManagementView() {
                     </td>
 
                     {/* Actions */}
-                    <td
-                      className="py-4 px-5 text-right"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <td className="py-4 px-5 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
                         <button
                           type="button"
