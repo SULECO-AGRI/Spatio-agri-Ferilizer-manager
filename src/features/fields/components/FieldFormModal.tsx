@@ -54,15 +54,30 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
 
   const [farmerId, setFarmerId] = useState<string>("");
   const [fieldName, setFieldName] = useState<string>("");
-  const [cropType, setCropType] = useState<string>("Paddy (Rice)");
+  const [cropType, setCropType] = useState<string>("Tea");
   const [customCrop, setCustomCrop] = useState<string>("");
   const [area, setArea] = useState<string>("");
-  const [province, setProvince] = useState<string>("Southern");
-  const [district, setDistrict] = useState<string>("Matara");
-  const [city, setCity] = useState<string>("Kamburupitiya");
-  const [village, setVillage] = useState<string>("");
-  const [latitude, setLatitude] = useState<string>("");
-  const [longitude, setLongitude] = useState<string>("");
+  const [province, setProvince] = useState<string>("Central");
+  const [district, setDistrict] = useState<string>("Nuwara Eliya");
+  const [city, setCity] = useState<string>("Nuwara Eliya");
+  const [village, setVillage] = useState<string>("Pedro");
+
+  // Coordinate modes: "polygon" | "point"
+  const [coordMode, setCoordMode] = useState<"polygon" | "point">("polygon");
+  const [polygonCoordsText, setPolygonCoordsText] = useState<string>(
+    JSON.stringify(
+      [
+        [6.9271, 80.7781],
+        [6.9295, 80.7812],
+        [6.9255, 80.7845],
+        [6.923, 80.78],
+      ],
+      null,
+      2,
+    ),
+  );
+  const [latitude, setLatitude] = useState<string>("6.9271");
+  const [longitude, setLongitude] = useState<string>("80.7781");
 
   const [farmersList, setFarmersList] = useState<ApiFarmerItem[]>([]);
   const [isLoadingFarmers, setIsLoadingFarmers] = useState<boolean>(false);
@@ -110,20 +125,35 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
         setCustomCrop(field.crop_type || field.cropType || "");
       }
       setArea(String(field.area || ""));
-      setProvince(field.province || "Southern");
-      setDistrict(field.district || "Matara");
-      setCity(field.city || "");
-      setVillage(field.village || "");
+      setProvince(field.province || "Central");
+      setDistrict(field.district || "Nuwara Eliya");
+      setCity(field.city || "Nuwara Eliya");
+      setVillage(field.village || "Pedro");
 
       // Handle coordinates
       const coords = field.location_coordinates || field.locationCoordinates;
       if (coords) {
-        if (coords.lat !== undefined && coords.lng !== undefined) {
-          setLatitude(String(coords.lat));
-          setLongitude(String(coords.lng));
-        } else if (Array.isArray(coords) && coords.length >= 2) {
-          setLatitude(String(coords[1]));
-          setLongitude(String(coords[0]));
+        if (Array.isArray(coords) && coords.length > 0) {
+          if (Array.isArray(coords[0])) {
+            // Nested polygon array [[lat, lng], [lat, lng], ...]
+            setCoordMode("polygon");
+            setPolygonCoordsText(JSON.stringify(coords, null, 2));
+            setLatitude(String(coords[0][0]));
+            setLongitude(String(coords[0][1]));
+          } else if (typeof coords[0] === "number") {
+            setCoordMode("point");
+            setLatitude(String(coords[0]));
+            setLongitude(String(coords[1]));
+          }
+        } else if (typeof coords === "object") {
+          if (coords.lat !== undefined && coords.lng !== undefined) {
+            setCoordMode("point");
+            setLatitude(String(coords.lat));
+            setLongitude(String(coords.lng));
+          } else if (coords.coordinates && Array.isArray(coords.coordinates)) {
+            setCoordMode("polygon");
+            setPolygonCoordsText(JSON.stringify(coords.coordinates, null, 2));
+          }
         }
       } else {
         setLatitude("");
@@ -132,15 +162,28 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
     } else {
       setFarmerId("");
       setFieldName("");
-      setCropType("Paddy (Rice)");
+      setCropType("Tea");
       setCustomCrop("");
       setArea("");
-      setProvince("Southern");
-      setDistrict("Matara");
-      setCity("Kamburupitiya");
-      setVillage("");
-      setLatitude("6.0844");
-      setLongitude("80.5702");
+      setProvince("Central");
+      setDistrict("Nuwara Eliya");
+      setCity("Nuwara Eliya");
+      setVillage("Pedro");
+      setCoordMode("polygon");
+      setPolygonCoordsText(
+        JSON.stringify(
+          [
+            [6.9271, 80.7781],
+            [6.9295, 80.7812],
+            [6.9255, 80.7845],
+            [6.923, 80.78],
+          ],
+          null,
+          2,
+        ),
+      );
+      setLatitude("6.9271");
+      setLongitude("80.7781");
     }
     setValidationError(null);
   }, [field, isOpen]);
@@ -148,10 +191,25 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
   // Handle province change updating available districts
   const handleProvinceChange = (newProvince: string) => {
     setProvince(newProvince);
-    const districts = SRI_LANKA_DISTRICTS[newProvince] || ["Matara"];
+    const districts = SRI_LANKA_DISTRICTS[newProvince] || ["Nuwara Eliya"];
     if (!districts.includes(district)) {
       setDistrict(districts[0]);
     }
+  };
+
+  const handleLoadSamplePolygon = () => {
+    setPolygonCoordsText(
+      JSON.stringify(
+        [
+          [6.9271, 80.7781],
+          [6.9295, 80.7812],
+          [6.9255, 80.7845],
+          [6.923, 80.78],
+        ],
+        null,
+        2,
+      ),
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -187,24 +245,64 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
     }
 
     let location_coordinates: any = null;
-    const lat = parseFloat(latitude);
-    const lng = parseFloat(longitude);
-    if (!isNaN(lat) && !isNaN(lng)) {
-      location_coordinates = { lat, lng, type: "Point", coordinates: [lng, lat] };
+    if (coordMode === "polygon") {
+      if (polygonCoordsText.trim()) {
+        try {
+          const parsed = JSON.parse(polygonCoordsText.trim());
+          if (!Array.isArray(parsed)) {
+            setValidationError(
+              "Location coordinates must be an array of [latitude, longitude] pairs.",
+            );
+            return;
+          }
+          location_coordinates = parsed;
+        } catch {
+          setValidationError(
+            "Invalid JSON format for location coordinates. Format example: [[6.9271, 80.7781], [6.9295, 80.7812]]",
+          );
+          return;
+        }
+      }
+    } else {
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        location_coordinates = [
+          [lat, lng],
+          [lat + 0.002, lng + 0.003],
+          [lat - 0.002, lng + 0.004],
+          [lat - 0.004, lng],
+        ];
+      }
     }
 
     setIsSubmitting(true);
     try {
-      const payload = {
+      const selectedFarmer = farmersList.find((f) => Number(f.userId) === fId);
+
+      const payload: CreateFieldDTO = {
         farmer_id: fId,
         field_name: fieldName.trim(),
         crop_type: finalCrop,
         area: Number(numArea.toFixed(2)),
+        location_coordinates,
         province: province.trim(),
         district: district.trim(),
         city: city.trim() || district.trim(),
         village: village.trim(),
-        location_coordinates,
+        farmer: selectedFarmer
+          ? {
+              id: fId,
+              fullName:
+                selectedFarmer.fullName ||
+                `${selectedFarmer.firstName || ""} ${selectedFarmer.lastName || ""}`.trim() ||
+                `Farmer #${fId}`,
+              firstName: selectedFarmer.firstName,
+              lastName: selectedFarmer.lastName,
+              email: selectedFarmer.email,
+              mobile: selectedFarmer.mobile,
+            }
+          : undefined,
       };
 
       await onSubmit(payload);
@@ -447,32 +545,90 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
               </div>
             </div>
 
-            {/* Optional Coordinates */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <div>
-                <label className="block text-[11px] font-normal text-slate-500 mb-1">
-                  Latitude (WGS84)
+            {/* Precision Geospatial Coordinates */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-medium text-slate-700">
+                  Precision Boundary Coordinates
                 </label>
-                <input
-                  type="text"
-                  value={latitude}
-                  onChange={(e) => setLatitude(e.target.value)}
-                  placeholder="e.g. 6.0844"
-                  className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                />
+                <div className="flex items-center gap-1.5 p-0.5 bg-slate-100 rounded-lg text-[11px]">
+                  <button
+                    type="button"
+                    onClick={() => setCoordMode("polygon")}
+                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
+                      coordMode === "polygon"
+                        ? "bg-white text-slate-900 shadow-2xs"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    Polygon (Matrix)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCoordMode("point")}
+                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
+                      coordMode === "point"
+                        ? "bg-white text-slate-900 shadow-2xs"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    Center Point (Lat/Lng)
+                  </button>
+                </div>
               </div>
-              <div>
-                <label className="block text-[11px] font-normal text-slate-500 mb-1">
-                  Longitude (WGS84)
-                </label>
-                <input
-                  type="text"
-                  value={longitude}
-                  onChange={(e) => setLongitude(e.target.value)}
-                  placeholder="e.g. 80.5702"
-                  className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                />
-              </div>
+
+              {coordMode === "polygon" ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Array of [latitude, longitude] boundary points:</span>
+                    <button
+                      type="button"
+                      onClick={handleLoadSamplePolygon}
+                      className="text-emerald-700 hover:text-emerald-800 font-medium cursor-pointer"
+                    >
+                      Load Sample Polygon
+                    </button>
+                  </div>
+                  <textarea
+                    rows={4}
+                    value={polygonCoordsText}
+                    onChange={(e) => setPolygonCoordsText(e.target.value)}
+                    placeholder="[[6.9271, 80.7781], [6.9295, 80.7812], [6.9255, 80.7845], [6.9230, 80.7800]]"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-y"
+                  />
+                  <p className="text-[10px] text-slate-400">
+                    Example format: [[6.9271, 80.7781], [6.9295, 80.7812], [6.9255, 80.7845],
+                    [6.9230, 80.7800]]
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-normal text-slate-500 mb-1">
+                      Latitude (WGS84)
+                    </label>
+                    <input
+                      type="text"
+                      value={latitude}
+                      onChange={(e) => setLatitude(e.target.value)}
+                      placeholder="e.g. 6.9271"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-normal text-slate-500 mb-1">
+                      Longitude (WGS84)
+                    </label>
+                    <input
+                      type="text"
+                      value={longitude}
+                      onChange={(e) => setLongitude(e.target.value)}
+                      placeholder="e.g. 80.7781"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </form>

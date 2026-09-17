@@ -111,25 +111,27 @@ export function useFields(options: UseFieldsOptions = {}) {
     fetchFields();
   }, [fetchFields]);
 
-  // Create Field Action
-  const createField = useCallback(
-    async (data: CreateFieldDTO): Promise<Field> => {
-      setIsSubmitting(true);
-      try {
-        const newField = await fieldService.createField(data);
-        await fetchFields({ silent: true });
-        return newField;
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Failed to create field.";
-        throw new Error(msg);
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [fetchFields],
-  );
+  // Create Field Action - prepends newly created field and updates total count without full refetch
+  const createField = useCallback(async (data: CreateFieldDTO): Promise<Field> => {
+    setIsSubmitting(true);
+    try {
+      const newField = await fieldService.createField(data);
+      // Prepend new field to local list and increment count
+      setFields((prev) => [newField, ...prev]);
+      setPagination((prev) => ({
+        ...prev,
+        total: (prev.total || 0) + 1,
+      }));
+      return newField;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to create field.";
+      throw new Error(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, []);
 
-  // Update Field Action
+  // Update Field Action - updates item in-place locally without full refetch
   const updateField = useCallback(
     async (id: number | string, data: UpdateFieldDTO): Promise<Field> => {
       setIsSubmitting(true);
@@ -145,9 +147,8 @@ export function useFields(options: UseFieldsOptions = {}) {
           selectedField &&
           (selectedField.id === Number(id) || String(selectedField.id) === String(id))
         ) {
-          setSelectedField({ ...selectedField, ...updated });
+          setSelectedField((prev) => (prev ? { ...prev, ...updated } : null));
         }
-        await fetchFields({ silent: true });
         return updated;
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Failed to update field.";
@@ -156,10 +157,10 @@ export function useFields(options: UseFieldsOptions = {}) {
         setIsSubmitting(false);
       }
     },
-    [fetchFields, selectedField],
+    [selectedField],
   );
 
-  // Delete Field Action
+  // Delete Field Action - removes item locally without full refetch
   const deleteField = useCallback(
     async (id: number | string): Promise<void> => {
       setDeletingFieldId(id);
@@ -177,7 +178,6 @@ export function useFields(options: UseFieldsOptions = {}) {
         ) {
           setSelectedField(null);
         }
-        await fetchFields({ silent: true });
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Failed to delete field.";
         throw new Error(msg);
@@ -185,7 +185,7 @@ export function useFields(options: UseFieldsOptions = {}) {
         setDeletingFieldId(null);
       }
     },
-    [fetchFields, selectedField],
+    [selectedField],
   );
 
   // Computed summary metrics

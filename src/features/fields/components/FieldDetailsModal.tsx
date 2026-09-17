@@ -14,8 +14,36 @@ export function FieldDetailsModal({ isOpen, field, onClose, onEdit }: FieldDetai
 
   const farmer = field.farmer;
   const coords = field.location_coordinates || field.locationCoordinates;
-  const lat = coords?.lat ?? (Array.isArray(coords?.coordinates) ? coords.coordinates[1] : null);
-  const lng = coords?.lng ?? (Array.isArray(coords?.coordinates) ? coords.coordinates[0] : null);
+  let lat: number | null = null;
+  let lng: number | null = null;
+  let polygonPointCount: number | null = null;
+
+  if (coords) {
+    if (Array.isArray(coords) && coords.length > 0) {
+      if (Array.isArray(coords[0]) && coords[0].length >= 2) {
+        lat = Number(coords[0][0]);
+        lng = Number(coords[0][1]);
+        polygonPointCount = coords.length;
+      } else if (typeof coords[0] === "number" && coords.length >= 2) {
+        lat = Number(coords[0]);
+        lng = Number(coords[1]);
+      }
+    } else if (typeof coords === "object") {
+      if (coords.lat !== undefined && coords.lng !== undefined) {
+        lat = Number(coords.lat);
+        lng = Number(coords.lng);
+      } else if (Array.isArray(coords.coordinates)) {
+        if (Array.isArray(coords.coordinates[0])) {
+          lat = Number(coords.coordinates[0][1] ?? coords.coordinates[0][0]);
+          lng = Number(coords.coordinates[0][0] ?? coords.coordinates[0][1]);
+          polygonPointCount = coords.coordinates.length;
+        } else {
+          lng = Number(coords.coordinates[0]);
+          lat = Number(coords.coordinates[1]);
+        }
+      }
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs font-sans animate-in fade-in duration-200">
@@ -133,10 +161,17 @@ export function FieldDetailsModal({ isOpen, field, onClose, onEdit }: FieldDetai
             {lat && lng && (
               <div className="p-3 bg-emerald-50/40 border border-emerald-100 rounded-xl flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
-                  <Navigation className="w-4 h-4 text-emerald-700" />
-                  <span className="font-mono text-slate-700 text-[11px]">
-                    {Number(lat).toFixed(6)}° N, {Number(lng).toFixed(6)}° E
-                  </span>
+                  <Navigation className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <div className="space-y-0.5">
+                    <span className="font-mono text-slate-700 text-[11px] block">
+                      {Number(lat).toFixed(6)}° N, {Number(lng).toFixed(6)}° E
+                    </span>
+                    {polygonPointCount && (
+                      <span className="text-[10px] text-emerald-700 font-medium block">
+                        Precision Polygon Boundary ({polygonPointCount} vertices)
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <a
                   href={`https://www.google.com/maps?q=${lat},${lng}`}

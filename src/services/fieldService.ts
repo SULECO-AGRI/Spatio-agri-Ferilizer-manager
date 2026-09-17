@@ -177,13 +177,51 @@ export const fieldService = {
     let responseData: any;
     try {
       const response = await apiClient.post<any>("/fields", payload);
-      responseData = response.data?.data?.field ?? response.data?.field ?? response.data;
+      responseData =
+        response.data?.data?.field ?? response.data?.field ?? response.data?.data ?? response.data;
     } catch {
       const alt = await apiClient.post<any>("/api/fields", payload);
-      responseData = alt.data?.data?.field ?? alt.data?.field ?? alt.data;
+      responseData = alt.data?.data?.field ?? alt.data?.field ?? alt.data?.data ?? alt.data;
     }
 
-    return normalizeField(responseData);
+    const normalized = normalizeField(responseData);
+    if (normalized) {
+      if (!normalized.farmer_id && payload.farmer_id) {
+        normalized.farmer_id = payload.farmer_id;
+        normalized.farmerId = payload.farmer_id;
+      }
+      if (!normalized.field_name && payload.field_name) {
+        normalized.field_name = payload.field_name;
+        normalized.fieldName = payload.field_name;
+      }
+      if (!normalized.crop_type && payload.crop_type) {
+        normalized.crop_type = payload.crop_type;
+        normalized.cropType = payload.crop_type;
+      }
+      if (!normalized.area && payload.area) {
+        normalized.area = payload.area;
+      }
+      if (!normalized.province && payload.province) {
+        normalized.province = payload.province;
+      }
+      if (!normalized.district && payload.district) {
+        normalized.district = payload.district;
+      }
+      if (!normalized.city && payload.city) {
+        normalized.city = payload.city;
+      }
+      if (!normalized.village && payload.village) {
+        normalized.village = payload.village;
+      }
+      if (!normalized.location_coordinates && payload.location_coordinates) {
+        normalized.location_coordinates = payload.location_coordinates;
+        normalized.locationCoordinates = payload.location_coordinates;
+      }
+      if (!normalized.farmer && data.farmer) {
+        normalized.farmer = data.farmer;
+      }
+    }
+    return normalized;
   },
 
   /**

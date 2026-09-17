@@ -70,6 +70,7 @@ export interface CreateFieldDTO {
   city: string;
   village: string;
   location_coordinates?: any;
+  farmer?: FieldFarmer;
 }
 
 export interface UpdateFieldDTO {
@@ -82,4 +83,5 @@ export interface UpdateFieldDTO {
   city?: string;
   village?: string;
   location_coordinates?: any;
+  farmer?: FieldFarmer;
 }
