@@ -372,100 +372,40 @@ export function LiveMissionMap() {
       const latLng: [number, number] = [mission.coordinates.lat, mission.coordinates.lng];
       boundsPoints.push(latLng);
 
-      // 1. Draw Field Boundary Polygon from Database Coordinates
-      const polygonCoords = mission.fieldPolygonCoords;
-      if (polygonCoords && polygonCoords.length >= 3) {
-        polygonCoords.forEach((p: [number, number]) => boundsPoints.push(p));
-
-        const polygon = L.polygon(polygonCoords, {
-          color: colors.hex,
-          weight: isSelected ? 2.5 : 1.5,
-          opacity: isSelected ? 0.9 : 0.65,
-          fillColor: colors.hex,
-          fillOpacity: isSelected ? 0.25 : 0.12,
-          dashArray: isSelected ? undefined : "4, 4",
-        });
-
-        polygon.on("click", () => {
-          setSelectedMissionId(mission.id);
-          mapInstanceRef.current?.flyTo(latLng, Math.max(mapInstanceRef.current.getZoom(), 12), {
-            duration: 0.8,
-          });
-        });
-
-        polygon.bindTooltip(
-          `<strong>${mission.field}</strong><br/><span style="color:${colors.hex}">${mission.status}</span> • ${mission.farmerName ? `Farmer: ${mission.farmerName}` : mission.region}`,
-          { className: "text-xs font-sans rounded-lg shadow-sm", sticky: true },
-        );
-
-        polygon.addTo(layerGroup);
-      }
-
-      // 2. Custom Point-wise Solid Marker (Non-blinking, crisp Pin Point)
+      // Simple Clean Map Pin Marker
       const markerHtml = `
-        <div class="mission-point-marker cursor-pointer" style="width: 48px; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
-          <!-- Monospace Code Tag -->
+        <div class="mission-point-marker cursor-pointer" style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+          <!-- Compact Code Tag -->
           <div style="
-            position: absolute;
-            top: -14px;
-            background: ${isSelected ? "#062419" : "rgba(15, 23, 42, 0.9)"};
+            background: ${isSelected ? "#062419" : "rgba(15, 23, 42, 0.88)"};
             color: #ffffff;
             font-family: monospace;
             font-size: 10px;
             font-weight: 700;
-            padding: 1.5px 6px;
-            border-radius: 5px;
-            border: 1.5px solid ${colors.hex};
+            padding: 1px 6px;
+            border-radius: 4px;
+            border: 1px solid ${colors.hex};
+            margin-bottom: 2px;
             white-space: nowrap;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
             pointer-events: none;
-            z-index: 20;
           ">
             ${mission.missionCode}
           </div>
 
-          <!-- Solid Point Pin Body -->
-          <div style="
-            width: ${isSelected ? "34px" : "28px"};
-            height: ${isSelected ? "34px" : "28px"};
-            background: #062419;
-            border: 2.5px solid ${colors.hex};
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.35);
-            position: relative;
-            z-index: 10;
-          ">
-            <!-- Center Solid Point Dot -->
-            <div style="
-              width: ${isSelected ? "11px" : "9px"};
-              height: ${isSelected ? "11px" : "9px"};
-              background-color: ${colors.hex};
-              border-radius: 9999px;
-            "></div>
-          </div>
-
-          <!-- Downward Pointer Triangle -->
-          <div style="
-            width: 0;
-            height: 0;
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            border-top: 6px solid ${colors.hex};
-            margin-top: -1px;
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
-            z-index: 5;
-          "></div>
+          <!-- Simple Teardrop Location Pin SVG -->
+          <svg width="${isSelected ? "28" : "24"}" height="${isSelected ? "34" : "30"}" viewBox="0 0 24 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+            <path d="M12 0C5.37258 0 0 5.37258 0 12C0 19.5 12 30 12 30C12 30 24 19.5 24 12C24 5.37258 18.6274 0 12 0Z" fill="${colors.hex}" stroke="#ffffff" stroke-width="1.5"/>
+            <circle cx="12" cy="11" r="4" fill="#ffffff"/>
+          </svg>
         </div>
       `;
 
       const customIcon = L.divIcon({
         html: markerHtml,
         className: "custom-mission-point-icon",
-        iconSize: [48, 52],
-        iconAnchor: [24, 44],
+        iconSize: [64, 52],
+        iconAnchor: [32, 50],
       });
 
       const marker = L.marker(latLng, { icon: customIcon });
@@ -551,7 +491,7 @@ export function LiveMissionMap() {
             </span>
           </div>
           <p className="text-xs text-slate-500 font-normal mt-0.5 flex items-center gap-1.5">
-            <span>Real-time coordinates, polygon field boundaries & pilot flight telemetry</span>
+            <span>Real-time coordinates & pilot flight telemetry</span>
             {lastSyncTime && (
               <span className="text-slate-400 font-mono">• Synced: {lastSyncTime}</span>
             )}
