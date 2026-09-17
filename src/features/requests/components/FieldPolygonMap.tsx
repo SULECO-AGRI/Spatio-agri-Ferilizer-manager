@@ -102,11 +102,11 @@ export function FieldPolygonMap({
   return (
     <div
       className={`bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs relative transition-all duration-300 ${
-        isExpanded ? "fixed inset-6 z-50 shadow-2xl flex flex-col" : "w-full h-[280px]"
+        isExpanded ? "fixed inset-6 z-[9990] shadow-2xl flex flex-col" : "w-full h-[280px]"
       }`}
     >
       {/* Top Map Toolbar Header */}
-      <div className="absolute top-3 left-3 z-[1000] flex items-center gap-2">
+      <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
         <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 px-3 py-1.5 rounded-xl shadow-xs flex items-center gap-2 text-xs text-slate-800">
           <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
           <span className="font-medium truncate max-w-[160px] sm:max-w-[240px]">{fieldName}</span>
@@ -119,7 +119,7 @@ export function FieldPolygonMap({
       </div>
 
       {/* Map Action Controls */}
-      <div className="absolute top-3 right-3 z-[1000] flex items-center gap-1.5">
+      <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5">
         {/* Style Selector */}
         <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl p-1 shadow-xs flex items-center gap-1 text-[11px]">
           <button

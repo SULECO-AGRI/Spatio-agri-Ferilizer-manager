@@ -3,6 +3,7 @@ import { X, Loader2, MapPin, Sprout, User, Layers, Check, AlertCircle } from "lu
 import { farmerService } from "@/services/farmerService";
 import type { Field, CreateFieldDTO, UpdateFieldDTO } from "@/types/field";
 import type { ApiFarmerItem } from "@/types/farmer";
+import { FieldLocationMapPicker } from "./FieldLocationMapPicker";
 
 interface FieldFormModalProps {
   isOpen: boolean;
@@ -64,21 +65,11 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
 
   // Coordinate modes: "polygon" | "point"
   const [coordMode, setCoordMode] = useState<"polygon" | "point">("polygon");
-  const [polygonCoordsText, setPolygonCoordsText] = useState<string>(
-    JSON.stringify(
-      [
-        [6.9271, 80.7781],
-        [6.9295, 80.7812],
-        [6.9255, 80.7845],
-        [6.923, 80.78],
-      ],
-      null,
-      2,
-    ),
-  );
-  const [latitude, setLatitude] = useState<string>("6.9271");
-  const [longitude, setLongitude] = useState<string>("80.7781");
+  const [polygonCoordsText, setPolygonCoordsText] = useState<string>("");
+  const [latitude, setLatitude] = useState<string>("");
+  const [longitude, setLongitude] = useState<string>("");
 
+  const [showAdvancedCoords, setShowAdvancedCoords] = useState<boolean>(false);
   const [farmersList, setFarmersList] = useState<ApiFarmerItem[]>([]);
   const [isLoadingFarmers, setIsLoadingFarmers] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -170,20 +161,9 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
       setCity("Nuwara Eliya");
       setVillage("Pedro");
       setCoordMode("polygon");
-      setPolygonCoordsText(
-        JSON.stringify(
-          [
-            [6.9271, 80.7781],
-            [6.9295, 80.7812],
-            [6.9255, 80.7845],
-            [6.923, 80.78],
-          ],
-          null,
-          2,
-        ),
-      );
-      setLatitude("6.9271");
-      setLongitude("80.7781");
+      setPolygonCoordsText("");
+      setLatitude("");
+      setLongitude("");
     }
     setValidationError(null);
   }, [field, isOpen]);
@@ -317,7 +297,7 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs font-sans animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs font-sans animate-in fade-in duration-200">
       <div className="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
@@ -545,88 +525,135 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
               </div>
             </div>
 
-            {/* Precision Geospatial Coordinates */}
+            {/* Interactive Geospatial Map Location & Boundary Selector */}
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-medium text-slate-700">
-                  Precision Boundary Coordinates
+                <label className="block text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                  Interactive Map Location & Precision Boundary
                 </label>
-                <div className="flex items-center gap-1.5 p-0.5 bg-slate-100 rounded-lg text-[11px]">
-                  <button
-                    type="button"
-                    onClick={() => setCoordMode("polygon")}
-                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
-                      coordMode === "polygon"
-                        ? "bg-white text-slate-900 shadow-2xs"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    Polygon (Matrix)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCoordMode("point")}
-                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
-                      coordMode === "point"
-                        ? "bg-white text-slate-900 shadow-2xs"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    Center Point (Lat/Lng)
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedCoords((prev) => !prev)}
+                  className="text-[11px] text-emerald-700 hover:text-emerald-800 font-medium cursor-pointer"
+                >
+                  {showAdvancedCoords ? "Hide Raw Coordinates" : "Advanced / Raw Input"}
+                </button>
               </div>
 
-              {coordMode === "polygon" ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-[11px] text-slate-500">
-                    <span>Array of [latitude, longitude] boundary points:</span>
-                    <button
-                      type="button"
-                      onClick={handleLoadSamplePolygon}
-                      className="text-emerald-700 hover:text-emerald-800 font-medium cursor-pointer"
-                    >
-                      Load Sample Polygon
-                    </button>
+              {/* Leaflet Map Picker Component */}
+              <FieldLocationMapPicker
+                coordinates={
+                  (() => {
+                    try {
+                      const parsed = JSON.parse(polygonCoordsText);
+                      if (Array.isArray(parsed)) return parsed;
+                    } catch {
+                      // ignore parse error
+                    }
+                    return [];
+                  })()
+                }
+                initialDistrict={district}
+                initialCity={city}
+                onChange={(newCoords, center, calculatedAreaHa) => {
+                  setPolygonCoordsText(JSON.stringify(newCoords, null, 2));
+                  if (center) {
+                    setLatitude(String(center[0]));
+                    setLongitude(String(center[1]));
+                  }
+                  if (calculatedAreaHa && calculatedAreaHa > 0 && (!area || Number(area) <= 0)) {
+                    setArea(String(calculatedAreaHa));
+                  }
+                }}
+                onLocationSelect={({ city: locCity, district: locDistrict, province: locProvince }) => {
+                  if (locDistrict) {
+                    // Match with known districts
+                    const matchedDistrict = Object.keys(SRI_LANKA_DISTRICTS).flatMap(p => SRI_LANKA_DISTRICTS[p]).find(
+                      d => d.toLowerCase().includes(locDistrict.toLowerCase()) || locDistrict.toLowerCase().includes(d.toLowerCase())
+                    );
+                    if (matchedDistrict) setDistrict(matchedDistrict);
+                  }
+                  if (locCity) setCity(locCity);
+                  if (locProvince) {
+                    const matchedProv = SRI_LANKA_PROVINCES.find(
+                      p => p.toLowerCase().includes(locProvince.toLowerCase())
+                    );
+                    if (matchedProv) setProvince(matchedProv);
+                  }
+                }}
+              />
+
+              {/* Advanced / Manual Coordinate Text Inputs (Collapsible) */}
+              {showAdvancedCoords && (
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-3 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-700">
+                      Manual Coordinate Override (JSON / Lat-Lng)
+                    </span>
+                    <div className="flex items-center gap-1 p-0.5 bg-white border border-slate-200 rounded-lg text-[10px]">
+                      <button
+                        type="button"
+                        onClick={() => setCoordMode("polygon")}
+                        className={`px-2 py-0.5 rounded font-medium cursor-pointer ${
+                          coordMode === "polygon" ? "bg-emerald-50 text-emerald-800" : "text-slate-500"
+                        }`}
+                      >
+                        Polygon Matrix
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCoordMode("point")}
+                        className={`px-2 py-0.5 rounded font-medium cursor-pointer ${
+                          coordMode === "point" ? "bg-emerald-50 text-emerald-800" : "text-slate-500"
+                        }`}
+                      >
+                        Point (Lat/Lng)
+                      </button>
+                    </div>
                   </div>
-                  <textarea
-                    rows={4}
-                    value={polygonCoordsText}
-                    onChange={(e) => setPolygonCoordsText(e.target.value)}
-                    placeholder="[[6.9271, 80.7781], [6.9295, 80.7812], [6.9255, 80.7845], [6.9230, 80.7800]]"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-y"
-                  />
-                  <p className="text-[10px] text-slate-400">
-                    Example format: [[6.9271, 80.7781], [6.9295, 80.7812], [6.9255, 80.7845],
-                    [6.9230, 80.7800]]
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[11px] font-normal text-slate-500 mb-1">
-                      Latitude (WGS84)
-                    </label>
-                    <input
-                      type="text"
-                      value={latitude}
-                      onChange={(e) => setLatitude(e.target.value)}
-                      placeholder="e.g. 6.9271"
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-normal text-slate-500 mb-1">
-                      Longitude (WGS84)
-                    </label>
-                    <input
-                      type="text"
-                      value={longitude}
-                      onChange={(e) => setLongitude(e.target.value)}
-                      placeholder="e.g. 80.7781"
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                    />
-                  </div>
+
+                  {coordMode === "polygon" ? (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-[11px] text-slate-500">
+                        <span>Array of [lat, lng] boundary points:</span>
+                        <button
+                          type="button"
+                          onClick={handleLoadSamplePolygon}
+                          className="text-emerald-700 hover:text-emerald-800 font-medium cursor-pointer"
+                        >
+                          Load Sample Polygon
+                        </button>
+                      </div>
+                      <textarea
+                        rows={3}
+                        value={polygonCoordsText}
+                        onChange={(e) => setPolygonCoordsText(e.target.value)}
+                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                      />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] text-slate-500 mb-0.5">Latitude</label>
+                        <input
+                          type="text"
+                          value={latitude}
+                          onChange={(e) => setLatitude(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-800"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-500 mb-0.5">Longitude</label>
+                        <input
+                          type="text"
+                          value={longitude}
+                          onChange={(e) => setLongitude(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-800"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -80,37 +80,28 @@ export function usePayments() {
 
       setRawTransactions(txns);
 
-      // Compute dynamic revenue and payment metrics
-      let totalRevenueNum = 0;
-      let pilotPayoutsNum = 0;
-      let pendingInvoicesCount = 0;
+      // Compute real revenue and payment metrics from live ledger
+      const totalInvoicedSum = txns
+        .filter((t) => t.type === "Invoice")
+        .reduce((sum, t) => sum + (Number(t.amount.replace(/[^0-9.-]+/g, "")) || 0), 0);
 
-      if (revenueRes.status === "fulfilled" && revenueRes.value) {
-        totalRevenueNum = Number(revenueRes.value.totalRevenue) || 0;
-        pilotPayoutsNum = Number(revenueRes.value.pilotEarnings) || 0;
-      } else {
-        totalRevenueNum = txns
-          .filter((t) => t.type === "Invoice" && t.status === "Paid")
-          .reduce((sum, t) => sum + (Number(t.amount.replace(/[^0-9.-]+/g, "")) || 0), 0);
+      const paidOutSum = txns
+        .filter((t) => t.type === "Pilot Payout" && t.status === "Paid")
+        .reduce((sum, t) => sum + (Number(t.amount.replace(/[^0-9.-]+/g, "")) || 0), 0);
 
-        pilotPayoutsNum = txns
-          .filter((t) => t.type === "Pilot Payout" && t.status === "Paid")
-          .reduce((sum, t) => sum + (Number(t.amount.replace(/[^0-9.-]+/g, "")) || 0), 0);
-      }
-
-      pendingInvoicesCount = txns.filter(
+      const pendingInvoicesCount = txns.filter(
         (t) => t.type === "Invoice" && t.status === "Pending",
       ).length;
 
       const dynamicMetrics: MetricItem[] = [
         {
           title: "Total Invoiced",
-          value: `LKR ${totalRevenueNum.toLocaleString()}`,
+          value: `LKR ${totalInvoicedSum.toLocaleString()}`,
           footer: `${txns.filter((t) => t.type === "Invoice").length} Total Invoices Generated`,
         },
         {
           title: "Paid Out",
-          value: `LKR ${pilotPayoutsNum.toLocaleString()}`,
+          value: `LKR ${paidOutSum.toLocaleString()}`,
           footer: `${txns.filter((t) => t.type === "Pilot Payout" && t.status === "Paid").length} Pilot Disbursements Settled`,
         },
         {

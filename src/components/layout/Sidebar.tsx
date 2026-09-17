@@ -55,29 +55,14 @@ export const Sidebar = memo(function Sidebar({ activeTab, onTabChange }: Sidebar
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Header / Logo (Redirect to Landing Page) */}
+        {/* Header / Brand (Redirect to Landing Page) */}
         <Link
           to="/"
-          className="p-6 flex items-center gap-3 border-b border-slate-100 font-sans cursor-pointer hover:bg-slate-50/80 transition-all group select-none"
+          className="p-6 flex items-center border-b border-slate-100 font-sans cursor-pointer hover:bg-slate-50/80 transition-all group select-none"
           title="Return to Landing Page"
         >
-          <svg
-            className="w-9 h-9 shrink-0 shadow-xs rounded-lg group-hover:scale-105 transition-transform"
-            viewBox="0 0 32 32"
-          >
-            <rect width="32" height="32" rx="8" fill="#062419" />
-            <path d="M9 21c4-1 7-4 8-12 5 4 5 12-1 14-3 1-6-.5-7-2Z" fill="#10b981" />
-            <path
-              d="M9 21c3-1 6-4 8-12"
-              stroke="#d1fae5"
-              strokeOpacity="0.7"
-              strokeWidth="1"
-              fill="none"
-              strokeLinecap="round"
-            />
-          </svg>
           <div>
-            <h2 className="font-medium text-base text-slate-800 leading-none group-hover:text-emerald-700 transition-colors">
+            <h2 className="font-semibold text-base text-slate-800 leading-none group-hover:text-emerald-700 transition-colors">
               Fertilizer manager
             </h2>
             <span className="text-[11px] font-normal text-slate-400 mt-1 block">Admin</span>

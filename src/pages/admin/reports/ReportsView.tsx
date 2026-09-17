@@ -4,17 +4,11 @@ import {
   RefreshCw,
   Download,
   FileSpreadsheet,
-  TrendingUp,
-  Plane,
-  Award,
-  Users,
   Clock,
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
   Search,
-  CheckCircle2,
-  DollarSign,
   AlertCircle,
 } from "lucide-react";
 import { PageHeader, MetricCard } from "@/components/ui";
@@ -70,16 +64,12 @@ export function ReportsView() {
   // Dynamic Bar Chart data mapped from completed missions
   const barChartData = useMemo(() => {
     const thisMonthVal =
-      completedMissions?.completedThisMonth ??
-      (summary?.completedMissions?.value ? Math.round(summary.completedMissions.value * 0.4) : 0);
-    const lastMonthVal =
-      completedMissions?.completedLastMonth ??
-      (summary?.completedMissions?.value ? Math.round(summary.completedMissions.value * 0.3) : 0);
-    const prevMonthVal = Math.max(0, Math.round(lastMonthVal * 0.8));
+      completedMissions?.completedThisMonth ?? summary?.completedMissions?.value ?? 0;
+    const lastMonthVal = completedMissions?.completedLastMonth ?? 0;
 
     return [
-      { label: "M-3", value: Math.max(0, Math.round(prevMonthVal * 0.85)) },
-      { label: "M-2", value: prevMonthVal },
+      { label: "M-3", value: 0 },
+      { label: "M-2", value: 0 },
       { label: "Last Month", value: lastMonthVal },
       { label: "This Month", value: thisMonthVal },
     ];
@@ -91,14 +81,14 @@ export function ReportsView() {
     const revThisMonth = Number(
       revenue?.revenueThisMonth || summary?.revenue?.revenueThisMonth || 0,
     );
-    const revLastMonth = Number(revenue?.revenueLastMonth || Math.round(revThisMonth * 0.85));
+    const revLastMonth = Number(revenue?.revenueLastMonth || 0);
 
-    const maxRev = Math.max(totalRev, revThisMonth, 1000);
+    const maxRev = Math.max(totalRev, revThisMonth, revLastMonth, 1000);
     const getY = (val: number) => Math.round(135 - (val / maxRev) * 100);
 
     return [
-      { label: "M-3", x: 60, y: getY(Math.round(revLastMonth * 0.7)) },
-      { label: "M-2", x: 180, y: getY(Math.round(revLastMonth * 0.85)) },
+      { label: "M-3", x: 60, y: getY(0) },
+      { label: "M-2", x: 180, y: getY(0) },
       { label: "Last Mo", x: 300, y: getY(revLastMonth) },
       { label: "This Mo", x: 420, y: getY(revThisMonth || totalRev) },
     ];
@@ -161,7 +151,6 @@ export function ReportsView() {
             value: `+${summary?.completedMissions?.growthPercentage ?? completedMissions?.monthOverMonthGrowthPercentage ?? 0}% MoM`,
             isPositive: (summary?.completedMissions?.growthPercentage ?? 0) >= 0,
           }}
-          icon={Plane}
         />
 
         {/* Total Revenue Card */}
@@ -173,7 +162,6 @@ export function ReportsView() {
             value: `+${summary?.revenue?.growthPercentage ?? revenue?.monthOverMonthGrowthPercentage ?? 0}% vs last mo`,
             isPositive: (summary?.revenue?.growthPercentage ?? 0) >= 0,
           }}
-          icon={DollarSign}
         />
 
         {/* Pilot Fleet Performance Card */}
@@ -190,7 +178,6 @@ export function ReportsView() {
             value: `${pilotPerformance?.totalFleetFlightHours ?? 0} flight hrs`,
             isPositive: true,
           }}
-          icon={Award}
         />
 
         {/* Farmer Growth Rate Card */}
@@ -206,36 +193,33 @@ export function ReportsView() {
             value: `+${summary?.farmerGrowth?.newFarmersThisMonth ?? farmerGrowth?.newFarmersThisMonth ?? 0} new this mo`,
             isPositive: (summary?.farmerGrowth?.newFarmersThisMonth ?? 0) > 0,
           }}
-          icon={Users}
         />
       </div>
 
       {/* 2. Operational Highlights Strip */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Top Performer Banner */}
-        <div className="bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-950 text-white rounded-2xl p-5 border border-emerald-500/20 shadow-sm relative overflow-hidden flex flex-col justify-between">
-          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
+        {/* Top Performer Card */}
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-semibold flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Top Fleet Pilot
             </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">
               LEADER
             </span>
           </div>
 
-          <div className="mt-4">
-            <h4 className="text-xl font-bold font-display text-white">
+          <div className="mt-3">
+            <h4 className="text-2xl font-bold font-display text-slate-900">
               {pilotPerformance?.topPerformingPilot?.fullName || "Fleet Leader"}
             </h4>
-            <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-300">
-              <span className="inline-flex items-center gap-1 text-amber-400 font-medium">
+            <div className="flex items-center gap-2.5 mt-1 text-xs text-slate-500">
+              <span className="inline-flex items-center gap-1 text-amber-600 font-semibold font-mono">
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                 {pilotPerformance?.topPerformingPilot?.ratings ?? "5.0"} rating
               </span>
               <span>•</span>
-              <span className="text-emerald-400 font-medium">
+              <span className="text-emerald-700 font-medium">
                 {pilotPerformance?.topPerformingPilot?.completedMissions ?? 0} missions completed
               </span>
             </div>
@@ -248,7 +232,6 @@ export function ReportsView() {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Mission Completion Rate
             </span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
           </div>
           <div className="mt-3">
             <div className="text-2xl font-bold text-slate-900 font-display">
@@ -256,7 +239,7 @@ export function ReportsView() {
             </div>
             <p className="text-xs text-slate-500 mt-1">
               Zero flight anomalies reported across{" "}
-              {completedMissions?.totalCompletedMissions ?? 24} total missions.
+              {completedMissions?.totalCompletedMissions ?? summary?.completedMissions?.value ?? 0} total missions.
             </p>
           </div>
         </div>
@@ -267,14 +250,13 @@ export function ReportsView() {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Active Field Coverage
             </span>
-            <TrendingUp className="w-4 h-4 text-sky-500" />
           </div>
           <div className="mt-3">
             <div className="text-2xl font-bold text-slate-900 font-display">
-              {farmerGrowth?.totalFieldsRegistered ?? 1} Registered Fields
+              {farmerGrowth?.totalFieldsRegistered ?? 0} Registered Fields
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              {farmerGrowth?.activeFarmersWithFields ?? 1} active client farms receiving precision
+              {farmerGrowth?.activeFarmersWithFields ?? 0} active client farms receiving precision
               prescription maps.
             </p>
           </div>

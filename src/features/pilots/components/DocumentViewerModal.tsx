@@ -11,7 +11,7 @@ export function DocumentViewerModal({ document, pilotName, onClose }: DocumentVi
   if (!document) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
       <div
         className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg shadow-xl overflow-hidden font-sans"
         onClick={(e) => e.stopPropagation()}
