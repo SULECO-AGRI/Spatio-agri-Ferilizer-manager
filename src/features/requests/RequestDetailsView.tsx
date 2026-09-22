@@ -8,7 +8,7 @@ import {
   Radio,
   MapPin,
 } from "lucide-react";
-import { StatusBadge } from "@/components/ui";
+import { StatusBadge } from "@/components/common";
 import { formatFullDate as formatDate, formatServiceType } from "@/lib/utils";
 import type { ApiServiceRequestItem } from "@/types/request";
 import { FieldPolygonMap } from "./components/FieldPolygonMap";

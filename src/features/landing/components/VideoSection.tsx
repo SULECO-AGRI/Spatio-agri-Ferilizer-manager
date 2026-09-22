@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Play, Pause, Volume2, VolumeX, Eye, Activity } from "lucide-react";
 import { motion, useInView } from "framer-motion";
-import { Reveal } from "./primitives/Reveal";
+import { Reveal } from "../primitives/Reveal";
 
 export function VideoSection() {
   const containerRef = useRef<HTMLDivElement>(null);

@@ -1,12 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  Search,
-  MapPin,
-  Trash2,
-  Loader2,
-  X,
-  Crosshair,
-} from "lucide-react";
+import { Search, MapPin, Trash2, Loader2, X, Crosshair } from "lucide-react";
 import { useLeaflet, type LeafletTileStyle } from "@/hooks/useLeaflet";
 
 interface SearchResultItem {
@@ -74,21 +67,26 @@ export function FieldLocationMapPicker({
   const [showResults, setShowResults] = useState(false);
 
   // Single pinpoint location [lat, lng] or null
-  const [pinpoint, setPinpoint] = useState<[number, number] | null>(() => extractPoint(coordinates));
+  const [pinpoint, setPinpoint] = useState<[number, number] | null>(() =>
+    extractPoint(coordinates),
+  );
 
-  const defaultCenter: [number, number] =
-    DISTRICT_COORDINATES[initialDistrict] || [7.8731, 80.6511];
+  const defaultCenter: [number, number] = DISTRICT_COORDINATES[initialDistrict] || [
+    7.8731, 80.6511,
+  ];
 
   const initialMapCenter = pinpoint || defaultCenter;
 
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
-  const { L, isReady, mapContainerRef, mapInstanceRef, layerGroupRef, invalidateSize } = useLeaflet({
-    center: initialMapCenter,
-    zoom: 13,
-    tileStyle: mapStyle,
-  });
+  const { L, isReady, mapContainerRef, mapInstanceRef, layerGroupRef, invalidateSize } = useLeaflet(
+    {
+      center: initialMapCenter,
+      zoom: 13,
+      tileStyle: mapStyle,
+    },
+  );
 
   // Sync external coordinates
   useEffect(() => {
@@ -97,7 +95,13 @@ export function FieldLocationMapPicker({
 
   // Sync map center when district changes if no pinpoint placed yet
   useEffect(() => {
-    if (isReady && !pinpoint && initialDistrict && DISTRICT_COORDINATES[initialDistrict] && mapInstanceRef.current) {
+    if (
+      isReady &&
+      !pinpoint &&
+      initialDistrict &&
+      DISTRICT_COORDINATES[initialDistrict] &&
+      mapInstanceRef.current
+    ) {
       mapInstanceRef.current.flyTo(DISTRICT_COORDINATES[initialDistrict], 13, { duration: 0.5 });
     }
   }, [isReady, initialDistrict, pinpoint]);
@@ -154,7 +158,11 @@ export function FieldLocationMapPicker({
 
     // Extract address metadata for parent form sync
     if (onLocationSelect && item.address) {
-      const city = item.address.city || item.address.town || item.address.village || item.display_name.split(",")[0];
+      const city =
+        item.address.city ||
+        item.address.town ||
+        item.address.village ||
+        item.display_name.split(",")[0];
       const district = item.address.county || item.address.district || "";
       const province = item.address.state || "";
       onLocationSelect({ city, district, province });
@@ -170,7 +178,9 @@ export function FieldLocationMapPicker({
       } else if (searchQuery.trim()) {
         const query = searchQuery.trim();
         const matchedKey = Object.keys(DISTRICT_COORDINATES).find(
-          (k) => k.toLowerCase() === query.toLowerCase() || k.toLowerCase().includes(query.toLowerCase()),
+          (k) =>
+            k.toLowerCase() === query.toLowerCase() ||
+            k.toLowerCase().includes(query.toLowerCase()),
         );
         if (matchedKey && DISTRICT_COORDINATES[matchedKey]) {
           handleQuickJump(matchedKey);
@@ -422,4 +432,3 @@ export function FieldLocationMapPicker({
 }
 
 export default FieldLocationMapPicker;
-

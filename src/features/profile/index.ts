@@ -1,1 +1,1 @@
-export { UserProfileView } from "@/pages/admin/profile/UserProfileView";
+export { UserProfileView } from "./components/UserProfileView";

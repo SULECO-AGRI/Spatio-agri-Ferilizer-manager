@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useTransition } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { farmerService } from "@/services/farmerService";
 import type { ApiFarmerItem, FarmersPagination } from "@/types/farmer";
 
@@ -8,7 +9,18 @@ interface UseFarmersOptions {
   initialLimit?: number;
 }
 
+const defaultPagination: FarmersPagination = {
+  total: 0,
+  page: 1,
+  limit: 10,
+  totalPages: 1,
+  hasNextPage: false,
+  hasPrevPage: false,
+};
+
 export function useFarmers(options: UseFarmersOptions = {}) {
+  const queryClient = useQueryClient();
+
   const [selectedFarmerId, setSelectedFarmerId] = useState<string | number | null>(
     options.initialFarmerId ?? null,
   );
@@ -21,22 +33,6 @@ export function useFarmers(options: UseFarmersOptions = {}) {
   const [sortBy, setSortBy] = useState<"createdAt" | "name" | "email" | "memberSince">("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  const [farmers, setFarmers] = useState<ApiFarmerItem[]>([]);
-  const [pagination, setPagination] = useState<FarmersPagination>({
-    total: 0,
-    page: 1,
-    limit: 10,
-    totalPages: 1,
-    hasNextPage: false,
-    hasPrevPage: false,
-  });
-
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [deletingFarmerId, setDeletingFarmerId] = useState<string | number | null>(null);
-  const [, startTransition] = useTransition();
-
   // Search input debounce (300ms)
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -47,46 +43,40 @@ export function useFarmers(options: UseFarmersOptions = {}) {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // Fetch farmers list from backend
-  const fetchFarmers = useCallback(async () => {
-    setIsLoading(true);
-    setIsError(false);
-    setError(null);
+  // TanStack Query for farmers list
+  const queryKey = useMemo(
+    () => ["farmers", { page, limit, search: debouncedSearch, sortBy, sortOrder }],
+    [page, limit, debouncedSearch, sortBy, sortOrder],
+  );
 
-    try {
-      const data = await farmerService.getFarmers({
+  const {
+    data,
+    isLoading,
+    isError,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey,
+    queryFn: () =>
+      farmerService.getFarmers({
         page,
         limit,
         search: debouncedSearch || undefined,
         sortBy,
         sortOrder,
-      });
+      }),
+    staleTime: 30_000,
+  });
 
-      startTransition(() => {
-        setFarmers(data.farmers || []);
-        if (data.pagination) {
-          setPagination(data.pagination);
-        }
-      });
-    } catch (err: unknown) {
-      setIsError(true);
-      setError(err instanceof Error ? err.message : "Failed to load farmers from server.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, limit, debouncedSearch, sortBy, sortOrder]);
-
-  // Trigger fetch on parameter changes
-  useEffect(() => {
-    fetchFarmers();
-  }, [fetchFarmers]);
+  const farmers = useMemo(() => data?.farmers || [], [data?.farmers]);
+  const pagination = useMemo(() => data?.pagination || defaultPagination, [data?.pagination]);
 
   // Selected farmer resolution
-  const selectedFarmer: ApiFarmerItem | null =
-    selectedFarmerDetails ||
-    (selectedFarmerId !== null
-      ? (farmers.find((f) => String(f.userId) === String(selectedFarmerId)) ?? null)
-      : null);
+  const selectedFarmer: ApiFarmerItem | null = useMemo(() => {
+    if (selectedFarmerDetails) return selectedFarmerDetails;
+    if (selectedFarmerId === null) return null;
+    return farmers.find((f) => String(f.userId) === String(selectedFarmerId)) ?? null;
+  }, [selectedFarmerDetails, selectedFarmerId, farmers]);
 
   const selectFarmer = useCallback((id: string | number | null) => {
     setSelectedFarmerId(id);
@@ -97,34 +87,40 @@ export function useFarmers(options: UseFarmersOptions = {}) {
     setSelectedFarmerDetails(null);
   }, []);
 
-  // Delete farmer action with local state removal (no refetch)
+  // Delete mutation with optimistic updates and invalidation
+  const deleteMutation = useMutation({
+    mutationFn: (id: number | string) => farmerService.deleteFarmer(id),
+    onSuccess: (_, id) => {
+      queryClient.setQueryData<{ farmers?: ApiFarmerItem[]; pagination?: FarmersPagination }>(
+        queryKey,
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            farmers: (old.farmers || []).filter(
+              (f) => f.userId !== Number(id) && String(f.userId) !== String(id),
+            ),
+            pagination: old.pagination
+              ? { ...old.pagination, total: Math.max(0, old.pagination.total - 1) }
+              : old.pagination,
+          };
+        },
+      );
+      if (
+        selectedFarmerId !== null &&
+        (String(selectedFarmerId) === String(id) || Number(selectedFarmerId) === Number(id))
+      ) {
+        clearSelectedFarmer();
+      }
+      queryClient.invalidateQueries({ queryKey: ["farmers"] });
+    },
+  });
+
   const deleteFarmer = useCallback(
     async (id: number | string): Promise<void> => {
-      setDeletingFarmerId(id);
-      try {
-        await farmerService.deleteFarmer(id);
-        // Optimistically remove from local state without refetching
-        setFarmers((prev) =>
-          prev.filter((f) => f.userId !== Number(id) && String(f.userId) !== String(id)),
-        );
-        setPagination((prev) => ({
-          ...prev,
-          total: Math.max(0, prev.total - 1),
-        }));
-        if (
-          selectedFarmerId !== null &&
-          (String(selectedFarmerId) === String(id) || Number(selectedFarmerId) === Number(id))
-        ) {
-          clearSelectedFarmer();
-        }
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Failed to delete farmer.";
-        throw new Error(msg);
-      } finally {
-        setDeletingFarmerId(null);
-      }
+      await deleteMutation.mutateAsync(id);
     },
-    [selectedFarmerId, clearSelectedFarmer],
+    [deleteMutation],
   );
 
   return {
@@ -133,8 +129,9 @@ export function useFarmers(options: UseFarmersOptions = {}) {
     totalCount: pagination.total,
     isLoading,
     isError,
-    error,
-    refetch: fetchFarmers,
+    error:
+      queryError instanceof Error ? queryError.message : isError ? "Failed to load farmers" : null,
+    refetch,
     searchQuery,
     setSearchQuery,
     page,
@@ -150,6 +147,8 @@ export function useFarmers(options: UseFarmersOptions = {}) {
     selectFarmer,
     clearSelectedFarmer,
     deleteFarmer,
-    deletingFarmerId,
+    deletingFarmerId: deleteMutation.isPending
+      ? (deleteMutation.variables as string | number)
+      : null,
   };
 }

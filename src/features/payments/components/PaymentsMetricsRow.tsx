@@ -1,4 +1,4 @@
-import { MetricCard } from "@/components/ui";
+import { MetricCard } from "@/components/common";
 import type { MetricItem } from "@/types";
 
 interface PaymentsMetricsRowProps {

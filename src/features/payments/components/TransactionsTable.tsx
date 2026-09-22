@@ -1,4 +1,4 @@
-import { StatusBadge } from "@/components/ui";
+import { StatusBadge } from "@/components/common";
 import type { Transaction } from "@/types";
 
 interface TransactionsTableProps {

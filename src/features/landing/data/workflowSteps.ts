@@ -1,9 +1,9 @@
 import { MapPin, PlaneTakeoff, Cpu, FileDown, TrendingUp, type LucideIcon } from "lucide-react";
-import step_01 from "@/Images/step_01.avif";
-import step_02 from "@/Images/step_02.avif";
-import step_03 from "@/Images/step_03.avif";
-import step_04 from "@/Images/step_04.avif";
-import step_05 from "@/Images/step_05.avif";
+import step_01 from "@/assets/images/step_01.avif";
+import step_02 from "@/assets/images/step_02.avif";
+import step_03 from "@/assets/images/step_03.avif";
+import step_04 from "@/assets/images/step_04.avif";
+import step_05 from "@/assets/images/step_05.avif";
 
 export interface WorkflowStep {
   title: string;

@@ -11,7 +11,7 @@ import {
   Trash2,
   CheckCircle2,
 } from "lucide-react";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/common";
 import { useFarmers } from "./hooks/useFarmers";
 import { FarmerProfileView } from "./FarmerProfileView";
 import { DeleteFarmerDialog } from "./components/DeleteFarmerDialog";

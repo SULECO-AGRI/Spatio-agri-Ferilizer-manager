@@ -8,7 +8,7 @@ import {
   Loader2,
   CheckCircle2,
 } from "lucide-react";
-import { PageHeader, FilterPills, TableToolbar } from "@/components/ui";
+import { PageHeader, FilterPills, TableToolbar } from "@/components/common";
 import { usePilots, pilotFilterTabs } from "./hooks/usePilots";
 import { PilotCard } from "./PilotCard";
 import { PilotDetailsView } from "./PilotDetailsView";

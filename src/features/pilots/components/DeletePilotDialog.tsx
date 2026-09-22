@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { AlertTriangle, Loader2, X } from "lucide-react";
-import type { ApiPilotItem } from "@/types/pilot";
 
 export interface PilotDeleteTarget {
   userId: number | string;

@@ -6,18 +6,15 @@ import {
   AlertCircle,
   Loader2,
   Sprout,
-  User,
-  MapPin,
   ChevronLeft,
   ChevronRight,
   Edit2,
   Trash2,
   Eye,
-  Layers,
   Map,
   CheckCircle2,
 } from "lucide-react";
-import { PageHeader, FilterPills, MetricCard } from "@/components/ui";
+import { PageHeader, FilterPills, MetricCard } from "@/components/common";
 import { useFields, cropFilterOptions } from "./hooks/useFields";
 import { FieldFormModal } from "./components/FieldFormModal";
 import { DeleteFieldDialog } from "./components/DeleteFieldDialog";

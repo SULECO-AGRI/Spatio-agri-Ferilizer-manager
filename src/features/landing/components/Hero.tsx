@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { KineticPhrase } from "./primitives/KineticPhrase";
-import HeroSprayingDrone from "../../Images/Hero_Spraying_Drone.jpg";
+import { KineticPhrase } from "../primitives/KineticPhrase";
+import HeroSprayingDrone from "@/assets/images/Hero_Spraying_Drone.jpg";
 import { ChevronDown, ArrowUpRight } from "lucide-react";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { useAuth } from "@/context/AuthContext";

@@ -543,17 +543,15 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
 
               {/* Leaflet Map Picker Component */}
               <FieldLocationMapPicker
-                coordinates={
-                  (() => {
-                    try {
-                      const parsed = JSON.parse(polygonCoordsText);
-                      if (Array.isArray(parsed)) return parsed;
-                    } catch {
-                      // ignore parse error
-                    }
-                    return [];
-                  })()
-                }
+                coordinates={(() => {
+                  try {
+                    const parsed = JSON.parse(polygonCoordsText);
+                    if (Array.isArray(parsed)) return parsed;
+                  } catch {
+                    // ignore parse error
+                  }
+                  return [];
+                })()}
                 initialDistrict={district}
                 initialCity={city}
                 onChange={(newCoords, center, calculatedAreaHa) => {
@@ -566,18 +564,26 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
                     setArea(String(calculatedAreaHa));
                   }
                 }}
-                onLocationSelect={({ city: locCity, district: locDistrict, province: locProvince }) => {
+                onLocationSelect={({
+                  city: locCity,
+                  district: locDistrict,
+                  province: locProvince,
+                }) => {
                   if (locDistrict) {
                     // Match with known districts
-                    const matchedDistrict = Object.keys(SRI_LANKA_DISTRICTS).flatMap(p => SRI_LANKA_DISTRICTS[p]).find(
-                      d => d.toLowerCase().includes(locDistrict.toLowerCase()) || locDistrict.toLowerCase().includes(d.toLowerCase())
-                    );
+                    const matchedDistrict = Object.keys(SRI_LANKA_DISTRICTS)
+                      .flatMap((p) => SRI_LANKA_DISTRICTS[p])
+                      .find(
+                        (d) =>
+                          d.toLowerCase().includes(locDistrict.toLowerCase()) ||
+                          locDistrict.toLowerCase().includes(d.toLowerCase()),
+                      );
                     if (matchedDistrict) setDistrict(matchedDistrict);
                   }
                   if (locCity) setCity(locCity);
                   if (locProvince) {
-                    const matchedProv = SRI_LANKA_PROVINCES.find(
-                      p => p.toLowerCase().includes(locProvince.toLowerCase())
+                    const matchedProv = SRI_LANKA_PROVINCES.find((p) =>
+                      p.toLowerCase().includes(locProvince.toLowerCase()),
                     );
                     if (matchedProv) setProvince(matchedProv);
                   }
@@ -596,7 +602,9 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
                         type="button"
                         onClick={() => setCoordMode("polygon")}
                         className={`px-2 py-0.5 rounded font-medium cursor-pointer ${
-                          coordMode === "polygon" ? "bg-emerald-50 text-emerald-800" : "text-slate-500"
+                          coordMode === "polygon"
+                            ? "bg-emerald-50 text-emerald-800"
+                            : "text-slate-500"
                         }`}
                       >
                         Polygon Matrix
@@ -605,7 +613,9 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
                         type="button"
                         onClick={() => setCoordMode("point")}
                         className={`px-2 py-0.5 rounded font-medium cursor-pointer ${
-                          coordMode === "point" ? "bg-emerald-50 text-emerald-800" : "text-slate-500"
+                          coordMode === "point"
+                            ? "bg-emerald-50 text-emerald-800"
+                            : "text-slate-500"
                         }`}
                       >
                         Point (Lat/Lng)

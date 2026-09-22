@@ -1,4 +1,4 @@
-import { X, MapPin, User, Sprout, Calendar, Layers, Phone, Mail, Navigation } from "lucide-react";
+import { X, MapPin, User, Sprout, Calendar, Phone, Mail, Navigation } from "lucide-react";
 import type { Field } from "@/types/field";
 import { formatDate } from "@/lib/utils";
 

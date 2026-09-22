@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { KeyRound, ShieldCheck } from "lucide-react";
-import { PageHeader, FormField } from "@/components/ui";
+import { PageHeader, FormField } from "@/components/common";
 import { useAuth } from "@/context/AuthContext";
 
 const permissionsList = [

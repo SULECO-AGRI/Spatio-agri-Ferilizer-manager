@@ -1,1 +1,1 @@
-export { SettingsView } from "@/pages/admin/settings/SettingsView";
+export { SettingsView } from "./components/SettingsView";

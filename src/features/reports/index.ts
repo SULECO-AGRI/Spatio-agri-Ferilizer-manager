@@ -1,2 +1,3 @@
-export { ReportsView } from "@/pages/admin/reports/ReportsView";
-export { useReportsAnalytics } from "@/pages/admin/reports/hooks/useReportsAnalytics";
+export { ReportsView } from "./components/ReportsView";
+export { useReportsAnalytics } from "./hooks/useReportsAnalytics";
+export type * from "@/types/analytics";

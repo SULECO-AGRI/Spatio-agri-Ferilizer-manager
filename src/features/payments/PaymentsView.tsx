@@ -1,4 +1,4 @@
-import { PageHeader, FilterPills, TableToolbar } from "@/components/ui";
+import { PageHeader, FilterPills, TableToolbar } from "@/components/common";
 import { usePayments, paymentFilterTabs } from "./hooks/usePayments";
 import { PaymentsMetricsRow } from "./components/PaymentsMetricsRow";
 import { TransactionsTable } from "./components/TransactionsTable";

@@ -2,7 +2,7 @@ import { memo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Search, Columns, CloudSun, Radio, PlayCircle, LogOut } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useDashboardStats } from "@/pages/admin/dashboard/hooks/useDashboardStats";
+import { useDashboardStats } from "@/features/dashboard/hooks/useDashboardStats";
 
 export const Topbar = memo(function Topbar() {
   const navigate = useNavigate();

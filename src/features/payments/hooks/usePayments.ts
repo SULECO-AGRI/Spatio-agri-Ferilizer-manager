@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { serviceRequestsService } from "@/services/serviceRequestsService";
 import { analyticsService } from "@/services/analyticsService";
 import type { Transaction, MetricItem, TxnStatus } from "@/types";
@@ -6,131 +7,127 @@ import type { Transaction, MetricItem, TxnStatus } from "@/types";
 export const paymentFilterTabs = ["All", "Invoices", "Pilot Payouts"] as const;
 export type PaymentFilterTab = (typeof paymentFilterTabs)[number];
 
+interface PaymentsRawData {
+  transactions: Transaction[];
+  metrics: MetricItem[];
+}
+
+const defaultPaymentsData: PaymentsRawData = {
+  transactions: [],
+  metrics: [
+    { title: "Total Invoiced", value: "LKR 0", footer: "0 Invoices" },
+    { title: "Paid Out", value: "LKR 0", footer: "0 Disbursements" },
+    { title: "Pending Invoices", value: "0", footer: "0 Overdue" },
+  ],
+};
+
+async function fetchPaymentsLedger(): Promise<PaymentsRawData> {
+  const [requestsRes] = await Promise.allSettled([
+    serviceRequestsService.getServiceRequests({ limit: 100 }),
+  ]);
+
+  const requests =
+    requestsRes.status === "fulfilled" && requestsRes.value ? requestsRes.value.requests || [] : [];
+
+  const txns: Transaction[] = [];
+
+  requests.forEach((req) => {
+    const reqCode = req.requestCode || `REQ-${req.requestId}`;
+    const costNum = Number(req.estimatedCost) || 0;
+    const dateStr = req.createdAt
+      ? new Date(req.createdAt).toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0];
+
+    let invoiceStatus: TxnStatus = "Pending";
+    if (req.status === "COMPLETED") {
+      invoiceStatus = "Paid";
+    } else if (req.status === "CANCELLED") {
+      invoiceStatus = "Overdue";
+    }
+
+    // 1. Farmer invoice entry
+    txns.push({
+      id: `INV-${reqCode}`,
+      type: "Invoice",
+      party:
+        req.farmer?.fullName || (req.farmer?.userId ? `Farmer #${req.farmer.userId}` : "Farmer"),
+      amount: `LKR ${costNum.toLocaleString()}`,
+      status: invoiceStatus,
+      date: dateStr,
+    });
+
+    // 2. Pilot payout entry (if a pilot is assigned)
+    if (req.assignedPilot || req.status === "COMPLETED" || req.status === "IN_PROGRESS") {
+      const payoutNum = Math.round(costNum * 0.75);
+      let payoutStatus: TxnStatus = "Pending";
+      if (req.status === "COMPLETED") {
+        payoutStatus = "Paid";
+      }
+
+      txns.push({
+        id: `PAY-${reqCode}`,
+        type: "Pilot Payout",
+        party:
+          req.assignedPilot?.fullName ||
+          (req.assignedPilot?.userId ? `Pilot #${req.assignedPilot.userId}` : "Assigned Pilot"),
+        amount: `LKR ${payoutNum.toLocaleString()}`,
+        status: payoutStatus,
+        date: dateStr,
+      });
+    }
+  });
+
+  // Compute real revenue and payment metrics from live ledger
+  const totalInvoicedSum = txns
+    .filter((t) => t.type === "Invoice")
+    .reduce((sum, t) => sum + (Number(t.amount.replace(/[^0-9.-]+/g, "")) || 0), 0);
+
+  const paidOutSum = txns
+    .filter((t) => t.type === "Pilot Payout" && t.status === "Paid")
+    .reduce((sum, t) => sum + (Number(t.amount.replace(/[^0-9.-]+/g, "")) || 0), 0);
+
+  const pendingInvoicesCount = txns.filter(
+    (t) => t.type === "Invoice" && t.status === "Pending",
+  ).length;
+
+  const dynamicMetrics: MetricItem[] = [
+    {
+      title: "Total Invoiced",
+      value: `LKR ${totalInvoicedSum.toLocaleString()}`,
+      footer: `${txns.filter((t) => t.type === "Invoice").length} Total Invoices Generated`,
+    },
+    {
+      title: "Paid Out",
+      value: `LKR ${paidOutSum.toLocaleString()}`,
+      footer: `${txns.filter((t) => t.type === "Pilot Payout" && t.status === "Paid").length} Pilot Disbursements Settled`,
+    },
+    {
+      title: "Pending Invoices",
+      value: `${pendingInvoicesCount}`,
+      footer: `${txns.filter((t) => t.type === "Invoice" && t.status === "Overdue").length} Overdue / Inactive`,
+    },
+  ];
+
+  return {
+    transactions: txns,
+    metrics: dynamicMetrics,
+  };
+}
+
 export function usePayments() {
   const [activeFilter, setActiveFilter] = useState<PaymentFilterTab>("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [rawTransactions, setRawTransactions] = useState<Transaction[]>([]);
-  const [metrics, setMetrics] = useState<MetricItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
 
-  const fetchPaymentsData = useCallback(async () => {
-    setIsLoading(true);
-    setIsError(false);
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["paymentsData"],
+    queryFn: fetchPaymentsLedger,
+    staleTime: 30_000,
+  });
 
-    try {
-      const [requestsRes, revenueRes] = await Promise.allSettled([
-        serviceRequestsService.getServiceRequests({ limit: 100 }),
-        analyticsService.getRevenueAnalytics(),
-      ]);
-
-      const requests =
-        requestsRes.status === "fulfilled" && requestsRes.value
-          ? requestsRes.value.requests || []
-          : [];
-
-      const txns: Transaction[] = [];
-
-      requests.forEach((req) => {
-        const reqCode = req.requestCode || `REQ-${req.requestId}`;
-        const costNum = Number(req.estimatedCost) || 0;
-        const dateStr = req.createdAt
-          ? new Date(req.createdAt).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0];
-
-        let invoiceStatus: TxnStatus = "Pending";
-        if (req.status === "COMPLETED") {
-          invoiceStatus = "Paid";
-        } else if (req.status === "CANCELLED") {
-          invoiceStatus = "Overdue";
-        }
-
-        // 1. Farmer invoice entry
-        txns.push({
-          id: `INV-${reqCode}`,
-          type: "Invoice",
-          party:
-            req.farmer?.fullName ||
-            (req.farmer?.userId ? `Farmer #${req.farmer.userId}` : "Farmer"),
-          amount: `LKR ${costNum.toLocaleString()}`,
-          status: invoiceStatus,
-          date: dateStr,
-        });
-
-        // 2. Pilot payout entry (if a pilot is assigned)
-        if (req.assignedPilot || req.status === "COMPLETED" || req.status === "IN_PROGRESS") {
-          const payoutNum = Math.round(costNum * 0.75);
-          let payoutStatus: TxnStatus = "Pending";
-          if (req.status === "COMPLETED") {
-            payoutStatus = "Paid";
-          }
-
-          txns.push({
-            id: `PAY-${reqCode}`,
-            type: "Pilot Payout",
-            party:
-              req.assignedPilot?.fullName ||
-              (req.assignedPilot?.userId ? `Pilot #${req.assignedPilot.userId}` : "Assigned Pilot"),
-            amount: `LKR ${payoutNum.toLocaleString()}`,
-            status: payoutStatus,
-            date: dateStr,
-          });
-        }
-      });
-
-      setRawTransactions(txns);
-
-      // Compute real revenue and payment metrics from live ledger
-      const totalInvoicedSum = txns
-        .filter((t) => t.type === "Invoice")
-        .reduce((sum, t) => sum + (Number(t.amount.replace(/[^0-9.-]+/g, "")) || 0), 0);
-
-      const paidOutSum = txns
-        .filter((t) => t.type === "Pilot Payout" && t.status === "Paid")
-        .reduce((sum, t) => sum + (Number(t.amount.replace(/[^0-9.-]+/g, "")) || 0), 0);
-
-      const pendingInvoicesCount = txns.filter(
-        (t) => t.type === "Invoice" && t.status === "Pending",
-      ).length;
-
-      const dynamicMetrics: MetricItem[] = [
-        {
-          title: "Total Invoiced",
-          value: `LKR ${totalInvoicedSum.toLocaleString()}`,
-          footer: `${txns.filter((t) => t.type === "Invoice").length} Total Invoices Generated`,
-        },
-        {
-          title: "Paid Out",
-          value: `LKR ${paidOutSum.toLocaleString()}`,
-          footer: `${txns.filter((t) => t.type === "Pilot Payout" && t.status === "Paid").length} Pilot Disbursements Settled`,
-        },
-        {
-          title: "Pending Invoices",
-          value: `${pendingInvoicesCount}`,
-          footer: `${txns.filter((t) => t.type === "Invoice" && t.status === "Overdue").length} Overdue / Inactive`,
-        },
-      ];
-
-      setMetrics(dynamicMetrics);
-    } catch {
-      setIsError(true);
-      setRawTransactions([]);
-      setMetrics([
-        { title: "Total Invoiced", value: "LKR 0", footer: "0 Invoices" },
-        { title: "Paid Out", value: "LKR 0", footer: "0 Disbursements" },
-        { title: "Pending Invoices", value: "0", footer: "0 Overdue" },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchPaymentsData();
-  }, [fetchPaymentsData]);
+  const rawData = data ?? defaultPaymentsData;
 
   const filteredTransactions = useMemo(() => {
-    return rawTransactions.filter((txn) => {
+    return rawData.transactions.filter((txn) => {
       let matchesTab = true;
       if (activeFilter === "Invoices") matchesTab = txn.type === "Invoice";
       if (activeFilter === "Pilot Payouts") matchesTab = txn.type === "Pilot Payout";
@@ -142,18 +139,18 @@ export function usePayments() {
 
       return matchesTab && matchesSearch;
     });
-  }, [rawTransactions, activeFilter, searchQuery]);
+  }, [rawData.transactions, activeFilter, searchQuery]);
 
   return {
     transactions: filteredTransactions,
-    totalCount: rawTransactions.length,
-    metrics,
+    totalCount: rawData.transactions.length,
+    metrics: rawData.metrics,
     activeFilter,
     setActiveFilter,
     searchQuery,
     setSearchQuery,
     isLoading,
     isError,
-    refetch: fetchPaymentsData,
+    refetch,
   };
 }

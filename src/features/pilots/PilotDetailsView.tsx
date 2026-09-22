@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Loader2, AlertCircle, Trash2 } from "lucide-react";
-import { StatusBadge } from "@/components/ui";
+import { StatusBadge } from "@/components/common";
 import { formatDate } from "@/lib/utils";
 import { pilotService } from "@/services/pilotService";
 import type { DetailedPilotInfo, PilotMission, MissionResult } from "@/types/pilot";

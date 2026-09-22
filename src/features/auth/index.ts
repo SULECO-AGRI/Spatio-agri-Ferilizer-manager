@@ -1,2 +1,3 @@
-export { AuthModal } from "@/pages/auth/AuthModal";
-export { SignInForm } from "@/pages/auth/SignInForm";
+export { AuthModal } from "./components/AuthModal";
+export { SignInForm } from "./components/SignInForm";
+export type * from "@/types/auth";

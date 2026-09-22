@@ -12,7 +12,7 @@ import {
   ChevronRight,
   X,
 } from "lucide-react";
-import { PageHeader, FilterPills, TableToolbar } from "@/components/ui";
+import { PageHeader, FilterPills, TableToolbar } from "@/components/common";
 import { useServiceRequests, requestFilterTabs } from "./hooks/useServiceRequests";
 import { RequestsTable } from "./components/RequestsTable";
 import { RequestDetailsView } from "./RequestDetailsView";

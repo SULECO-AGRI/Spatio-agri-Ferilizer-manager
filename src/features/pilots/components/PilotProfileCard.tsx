@@ -1,4 +1,4 @@
-import { Star, Phone, Mail, Award, Clock } from "lucide-react";
+import { Star, Phone, Mail, Clock } from "lucide-react";
 import type { DetailedPilotInfo } from "@/types";
 
 interface PilotProfileCardProps {

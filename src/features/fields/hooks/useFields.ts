@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo, useTransition } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fieldService } from "@/services/fieldService";
 import type {
   Field,
@@ -26,20 +27,17 @@ interface UseFieldsOptions {
   initialLimit?: number;
 }
 
-export function useFields(options: UseFieldsOptions = {}) {
-  const [fields, setFields] = useState<Field[]>([]);
-  const [pagination, setPagination] = useState<FieldsPagination>({
-    total: 0,
-    page: options.initialPage ?? 1,
-    limit: options.initialLimit ?? 10,
-    totalPages: 1,
-    hasNextPage: false,
-    hasPrevPage: false,
-  });
+const defaultPagination: FieldsPagination = {
+  total: 0,
+  page: 1,
+  limit: 10,
+  totalPages: 1,
+  hasNextPage: false,
+  hasPrevPage: false,
+};
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+export function useFields(options: UseFieldsOptions = {}) {
+  const queryClient = useQueryClient();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -51,10 +49,6 @@ export function useFields(options: UseFieldsOptions = {}) {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const [selectedField, setSelectedField] = useState<Field | null>(null);
-  const [deletingFieldId, setDeletingFieldId] = useState<number | string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  const [, startTransition] = useTransition();
 
   // Search debounce
   useEffect(() => {
@@ -65,127 +59,119 @@ export function useFields(options: UseFieldsOptions = {}) {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // Fetch fields
-  const fetchFields = useCallback(
-    async (opts: { silent?: boolean } = {}) => {
-      if (!opts.silent) {
-        setIsLoading(true);
-        setIsError(false);
-        setError(null);
-      }
-
-      try {
-        const queryParams: FieldQueryParams = {
-          page,
-          limit,
-          search: debouncedSearch || undefined,
-          cropType: cropFilter === "All" ? undefined : cropFilter,
-          district: districtFilter === "All" ? undefined : districtFilter,
-          sortBy,
-          sortOrder,
-        };
-
-        const result = await fieldService.getFields(queryParams);
-
-        startTransition(() => {
-          setFields(result.fields || []);
-          if (result.pagination) {
-            setPagination(result.pagination);
-          }
-        });
-      } catch (err: unknown) {
-        if (!opts.silent) {
-          setIsError(true);
-          setError(err instanceof Error ? err.message : "Failed to load fields from server.");
-        }
-      } finally {
-        if (!opts.silent) {
-          setIsLoading(false);
-        }
-      }
-    },
+  const queryParams: FieldQueryParams = useMemo(
+    () => ({
+      page,
+      limit,
+      search: debouncedSearch || undefined,
+      cropType: cropFilter === "All" ? undefined : cropFilter,
+      district: districtFilter === "All" ? undefined : districtFilter,
+      sortBy,
+      sortOrder,
+    }),
     [page, limit, debouncedSearch, cropFilter, districtFilter, sortBy, sortOrder],
   );
 
-  useEffect(() => {
-    fetchFields();
-  }, [fetchFields]);
+  const queryKey = useMemo(() => ["fields", queryParams], [queryParams]);
 
-  // Create Field Action - prepends newly created field and updates total count without full refetch
-  const createField = useCallback(async (data: CreateFieldDTO): Promise<Field> => {
-    setIsSubmitting(true);
-    try {
-      const newField = await fieldService.createField(data);
-      // Prepend new field to local list and increment count
-      setFields((prev) => [newField, ...prev]);
-      setPagination((prev) => ({
-        ...prev,
-        total: (prev.total || 0) + 1,
-      }));
-      return newField;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to create field.";
-      throw new Error(msg);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, []);
+  const {
+    data,
+    isLoading,
+    isError,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey,
+    queryFn: () => fieldService.getFields(queryParams),
+    staleTime: 30_000,
+  });
 
-  // Update Field Action - updates item in-place locally without full refetch
-  const updateField = useCallback(
-    async (id: number | string, data: UpdateFieldDTO): Promise<Field> => {
-      setIsSubmitting(true);
-      try {
-        const updated = await fieldService.updateField(id, data);
-        // Optimistically update locally
-        setFields((prev) =>
-          prev.map((f) =>
-            f.id === Number(id) || String(f.id) === String(id) ? { ...f, ...updated } : f,
-          ),
-        );
-        if (
-          selectedField &&
-          (selectedField.id === Number(id) || String(selectedField.id) === String(id))
-        ) {
-          setSelectedField((prev) => (prev ? { ...prev, ...updated } : null));
-        }
-        return updated;
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Failed to update field.";
-        throw new Error(msg);
-      } finally {
-        setIsSubmitting(false);
-      }
+  const fields = useMemo(() => data?.fields || [], [data?.fields]);
+  const pagination = useMemo(() => data?.pagination || defaultPagination, [data?.pagination]);
+
+  // Create Field Mutation
+  const createMutation = useMutation({
+    mutationFn: (data: CreateFieldDTO) => fieldService.createField(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["fields"] });
     },
-    [selectedField],
+  });
+
+  const createField = useCallback(
+    async (dto: CreateFieldDTO): Promise<Field> => {
+      return await createMutation.mutateAsync(dto);
+    },
+    [createMutation],
   );
 
-  // Delete Field Action - removes item locally without full refetch
+  // Update Field Mutation
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number | string; data: UpdateFieldDTO }) =>
+      fieldService.updateField(id, data),
+    onSuccess: (updatedField, { id }) => {
+      queryClient.setQueryData<{ fields?: Field[]; pagination?: FieldsPagination }>(
+        queryKey,
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            fields: (old.fields || []).map((f) =>
+              f.id === Number(id) || String(f.id) === String(id) ? { ...f, ...updatedField } : f,
+            ),
+          };
+        },
+      );
+      if (
+        selectedField &&
+        (selectedField.id === Number(id) || String(selectedField.id) === String(id))
+      ) {
+        setSelectedField((prev) => (prev ? { ...prev, ...updatedField } : null));
+      }
+      queryClient.invalidateQueries({ queryKey: ["fields"] });
+    },
+  });
+
+  const updateField = useCallback(
+    async (id: number | string, data: UpdateFieldDTO): Promise<Field> => {
+      return await updateMutation.mutateAsync({ id, data });
+    },
+    [updateMutation],
+  );
+
+  // Delete Field Mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: number | string) => fieldService.deleteField(id),
+    onSuccess: (_, id) => {
+      queryClient.setQueryData<{ fields?: Field[]; pagination?: FieldsPagination }>(
+        queryKey,
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            fields: (old.fields || []).filter(
+              (f) => f.id !== Number(id) && String(f.id) !== String(id),
+            ),
+            pagination: old.pagination
+              ? { ...old.pagination, total: Math.max(0, old.pagination.total - 1) }
+              : old.pagination,
+          };
+        },
+      );
+      if (
+        selectedField &&
+        (selectedField.id === Number(id) || String(selectedField.id) === String(id))
+      ) {
+        setSelectedField(null);
+      }
+      queryClient.invalidateQueries({ queryKey: ["fields"] });
+    },
+  });
+
   const deleteField = useCallback(
     async (id: number | string): Promise<void> => {
-      setDeletingFieldId(id);
-      try {
-        await fieldService.deleteField(id);
-        // Optimistically remove from state
-        setFields((prev) => prev.filter((f) => f.id !== Number(id) && String(f.id) !== String(id)));
-        setPagination((prev) => ({
-          ...prev,
-          total: Math.max(0, prev.total - 1),
-        }));
-        if (
-          selectedField &&
-          (selectedField.id === Number(id) || String(selectedField.id) === String(id))
-        ) {
-          setSelectedField(null);
-        }
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Failed to delete field.";
-        throw new Error(msg);
-      } finally {
-        setDeletingFieldId(null);
-      }
+      await deleteMutation.mutateAsync(id);
     },
-    [selectedField],
+    [deleteMutation],
   );
 
   // Computed summary metrics
@@ -228,9 +214,10 @@ export function useFields(options: UseFieldsOptions = {}) {
     totalCount: pagination.total,
     isLoading,
     isError,
-    error,
+    error:
+      queryError instanceof Error ? queryError.message : isError ? "Failed to load fields" : null,
     metrics,
-    refetch: fetchFields,
+    refetch,
     searchQuery,
     setSearchQuery,
     cropFilter,
@@ -250,7 +237,9 @@ export function useFields(options: UseFieldsOptions = {}) {
     createField,
     updateField,
     deleteField,
-    deletingFieldId,
-    isSubmitting,
+    deletingFieldId: deleteMutation.isPending
+      ? (deleteMutation.variables as string | number)
+      : null,
+    isSubmitting: createMutation.isPending || updateMutation.isPending || deleteMutation.isPending,
   };
 }

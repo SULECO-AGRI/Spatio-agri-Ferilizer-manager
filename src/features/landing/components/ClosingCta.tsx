@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Reveal } from "./primitives/Reveal";
-import { GlowButton } from "./primitives/GlowButton";
+import { Reveal } from "../primitives/Reveal";
+import { GlowButton } from "../primitives/GlowButton";
 
 export function ClosingCta() {
   const [email, setEmail] = useState("");

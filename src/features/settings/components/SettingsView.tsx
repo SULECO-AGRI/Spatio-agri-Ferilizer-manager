@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PageHeader, FormField } from "@/components/ui";
+import { PageHeader, FormField } from "@/components/common";
 
 const settingsTabs = [
   "Organization Settings",

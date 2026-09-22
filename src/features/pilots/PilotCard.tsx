@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Star, Phone, Mail, Clock, CheckCircle2, AlertCircle, Loader2, Trash2 } from "lucide-react";
-import { StatusBadge } from "@/components/ui";
+import { StatusBadge } from "@/components/common";
 import type { ApiPilotItem } from "@/types/pilot";
 
 interface PilotCardProps {

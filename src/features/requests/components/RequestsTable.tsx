@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronRight, Calendar, User, AlertCircle, Loader2, UserPlus } from "lucide-react";
-import { StatusBadge } from "@/components/ui";
+import { StatusBadge } from "@/components/common";
 import { formatDate, formatServiceType } from "@/lib/utils";
 import type { ApiServiceRequestItem } from "@/types/request";
 

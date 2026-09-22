@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Logo } from "./primitives/Logo";
+import { Logo } from "../primitives/Logo";
 import { Twitter, Linkedin, Youtube, Github, Mail, Send } from "lucide-react";
 
 const linkGroups = [

@@ -1,16 +1,17 @@
+import { memo } from "react";
 import { PageHeader, MetricCard } from "@/components/common";
 import { QuickActions } from "@/components/layout";
-import { RecentActivity } from "@/pages/admin/dashboard/RecentActivity";
-import { ScheduleTable } from "@/pages/admin/dashboard/ScheduleTable";
-import { LiveMissionMap } from "@/pages/admin/dashboard/LiveMissionMap";
-import { useDashboardStats } from "@/pages/admin/dashboard/hooks/useDashboardStats";
+import { RecentActivity } from "./RecentActivity";
+import { ScheduleTable } from "./ScheduleTable";
+import { LiveMissionMap } from "./LiveMissionMap";
+import { useDashboardStats } from "../hooks/useDashboardStats";
 import type { TabId } from "@/types";
 
 interface DashboardViewProps {
   onNavigate?: (tab: TabId) => void;
 }
 
-export function DashboardView({ onNavigate }: DashboardViewProps) {
+export const DashboardView = memo(function DashboardView({ onNavigate }: DashboardViewProps) {
   const { metrics, isLoading } = useDashboardStats();
 
   const todayStr = new Date().toLocaleDateString("en-US", {
@@ -28,47 +29,47 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
       />
 
       {/* Metrics Row: 5 Key Performance Indicators with Real Backend Data */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <MetricCard
           title="Pending Requests"
           value={isLoading ? "..." : metrics.pendingRequests}
-          footer="Need review"
+          footer="Awaiting operator assignment"
         />
         <MetricCard
           title="Active Missions"
           value={isLoading ? "..." : metrics.activeMissions}
-          footer="Live in flight"
+          footer="Live telemetry tracking"
         />
         <MetricCard
           title="Available Pilots"
-          value={isLoading ? "..." : metrics.availablePilots}
-          footer={`of ${metrics.totalPilots} registered`}
+          value={isLoading ? "..." : `${metrics.availablePilots} / ${metrics.totalPilots}`}
+          footer={`${metrics.onlinePilots} online`}
         />
         <MetricCard
-          title="Today's Revenue"
+          title="Total Revenue"
           value={isLoading ? "..." : metrics.todayRevenueFormatted}
           trend={metrics.revenueTrend}
         />
         <MetricCard
           title="Mission Success Rate"
           value={isLoading ? "..." : `${metrics.successRate}%`}
-          footer="Last 90 days"
+          footer="All completed flights"
         />
       </div>
 
-      {/* Live Geospatial Active Drone Missions Map */}
+      {/* Quick Action Shortcut Ribbon */}
+      {onNavigate && <QuickActions onNavigate={onNavigate} />}
+
+      {/* Main Interactive Geo-Telemetry Map */}
       <LiveMissionMap />
 
-      {/* Activity and Schedule Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
-        <RecentActivity recentRequests={metrics.recentRequests} />
+      {/* Operations Overview: Mission Schedule and Live System Feed */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ScheduleTable recentRequests={metrics.recentRequests} />
+        <RecentActivity recentRequests={metrics.recentRequests} />
       </div>
-
-      {/* Quick Actions Panel */}
-      <QuickActions onNavigate={onNavigate} />
     </div>
   );
-}
+});
 
 export default DashboardView;

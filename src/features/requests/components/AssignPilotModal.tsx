@@ -1,11 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  X,
-  Loader2,
-  AlertCircle,
-  Search,
-} from "lucide-react";
-import { StatusBadge } from "@/components/ui";
+import { X, Loader2, AlertCircle, Search } from "lucide-react";
+import { StatusBadge } from "@/components/common";
 import type { ApiServiceRequestItem, CandidatePilot } from "@/types/request";
 import { serviceRequestsService } from "@/services/serviceRequestsService";
 
@@ -160,7 +155,8 @@ export function AssignPilotModal({
               </span>
               <StatusBadge status={request.priority} />
               <span className="text-xs text-slate-500">
-                {request.field?.cropType || "Paddy"} • {request.field?.area ? `${request.field.area} Ha` : "Field"}
+                {request.field?.cropType || "Paddy"} •{" "}
+                {request.field?.area ? `${request.field.area} Ha` : "Field"}
               </span>
             </div>
 
@@ -207,9 +203,7 @@ export function AssignPilotModal({
 
           {/* Sort Selector */}
           <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-            <span className="text-xs text-slate-500 font-medium">
-              Sort by:
-            </span>
+            <span className="text-xs text-slate-500 font-medium">Sort by:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}

@@ -1,5 +1,18 @@
 export { WorkflowView } from "./WorkflowView";
+export { Hero } from "./components/Hero";
+export { Nav } from "./components/Nav";
+export { ProblemSolution } from "./components/ProblemSolution";
+export { VideoSection } from "./components/VideoSection";
+export { Partners } from "./components/Partners";
+export { ClosingCta } from "./components/ClosingCta";
+export { Footer } from "./components/Footer";
+export { VerticalNav } from "./components/VerticalNav";
 export * from "./components/WorkflowStepDesktop";
 export * from "./components/WorkflowStepMobile";
 export * from "./components/WorkflowLinearSpine";
 export * from "./data/workflowSteps";
+export * from "./primitives/GlowButton";
+export * from "./primitives/KineticPhrase";
+export * from "./primitives/Logo";
+export * from "./primitives/Reveal";
+export * from "./primitives/variants";

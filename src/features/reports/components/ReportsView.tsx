@@ -11,9 +11,9 @@ import {
   Search,
   AlertCircle,
 } from "lucide-react";
-import { PageHeader, MetricCard } from "@/components/ui";
+import { PageHeader, MetricCard } from "@/components/common";
 import { BarChart, LineChart } from "@/components/charts";
-import { useReportsAnalytics } from "./hooks/useReportsAnalytics";
+import { useReportsAnalytics } from "../hooks/useReportsAnalytics";
 
 function formatNum(val: unknown, fallback = "0"): string {
   if (typeof val === "number" && !isNaN(val)) {
@@ -239,7 +239,8 @@ export function ReportsView() {
             </div>
             <p className="text-xs text-slate-500 mt-1">
               Zero flight anomalies reported across{" "}
-              {completedMissions?.totalCompletedMissions ?? summary?.completedMissions?.value ?? 0} total missions.
+              {completedMissions?.totalCompletedMissions ?? summary?.completedMissions?.value ?? 0}{" "}
+              total missions.
             </p>
           </div>
         </div>

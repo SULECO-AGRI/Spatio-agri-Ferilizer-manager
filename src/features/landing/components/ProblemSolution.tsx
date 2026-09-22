@@ -1,5 +1,5 @@
 import { CircleCheck, TriangleAlert, Check, X } from "lucide-react";
-import { Reveal } from "./primitives/Reveal";
+import { Reveal } from "../primitives/Reveal";
 import { motion, type Variants } from "framer-motion";
 
 const comparisons = [

@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useScroll, useSpring } from "framer-motion";
-import { Reveal } from "@/pages/landing/primitives/Reveal";
+import { Reveal } from "./primitives/Reveal";
 import { workflowSteps } from "./data/workflowSteps";
 import { WorkflowLinearSpine } from "./components/WorkflowLinearSpine";
 import { WorkflowStepDesktop } from "./components/WorkflowStepDesktop";
