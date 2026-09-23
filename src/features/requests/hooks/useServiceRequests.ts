@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   useGetServiceRequestsQuery,
   useGetServiceRequestByIdQuery,
+  useDeleteServiceRequestMutation,
 } from "../api/requestApi";
 import type { ServiceRequestsSummary, PaginationMeta } from "@/types/request";
 
@@ -118,6 +119,10 @@ export function useServiceRequests(options: UseServiceRequestsOptions = {}) {
     skip: parsedRequestId === null,
   });
 
+  // Delete mutation
+  const [triggerDeleteRequest, { isLoading: isDeleting, originalArgs: deletingRequestId }] =
+    useDeleteServiceRequestMutation();
+
   const toggleSort = useCallback(() => {
     setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
   }, []);
@@ -134,6 +139,21 @@ export function useServiceRequests(options: UseServiceRequestsOptions = {}) {
     setActiveFilter(tab);
     setPage(1); // reset to page 1 on filter switch
   }, []);
+
+  const deleteRequest = useCallback(
+    async (id: number | string): Promise<void> => {
+      const idNumber: string | number =
+        typeof id === "string" ? parseInt(id.replace("REQ-", ""), 10) || id : id;
+      await triggerDeleteRequest(idNumber).unwrap();
+      if (
+        selectedRequestId !== null &&
+        (String(selectedRequestId) === String(id) || Number(selectedRequestId) === Number(id))
+      ) {
+        clearSelectedRequest();
+      }
+    },
+    [triggerDeleteRequest, selectedRequestId, clearSelectedRequest],
+  );
 
   return {
     requests,
@@ -169,5 +189,9 @@ export function useServiceRequests(options: UseServiceRequestsOptions = {}) {
     selectedRequestDetails: selectedRequestDetails ?? null,
     selectRequest,
     clearSelectedRequest,
+    deleteRequest,
+    deletingRequestId: isDeleting ? (deletingRequestId as string | number) : null,
+    isDeleting,
   };
 }
+

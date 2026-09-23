@@ -187,4 +187,27 @@ export const serviceRequestsService = {
     // Refresh and return latest full request
     return await serviceRequestsService.getServiceRequestById(requestId);
   },
+
+  /**
+   * Deletes a service request by ID via DELETE /service-requests/:id
+   */
+  async deleteServiceRequest(
+    requestId: number | string,
+  ): Promise<{ success: boolean; message?: string }> {
+    try {
+      await apiClient.delete(`/service-requests/${requestId}`);
+      return { success: true, message: "Service request deleted successfully" };
+    } catch {
+      try {
+        await apiClient.delete(`/api/service-requests/${requestId}`);
+        return { success: true, message: "Service request deleted successfully" };
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Failed to delete service request.";
+        throw new Error(message);
+      }
+    }
+  },
 };

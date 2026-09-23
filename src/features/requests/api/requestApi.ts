@@ -164,6 +164,20 @@ export const requestApi = baseApi.injectEndpoints({
         { type: "Analytics" as const },
       ],
     }),
+
+    deleteServiceRequest: builder.mutation<
+      { success: boolean; message?: string },
+      number | string
+    >({
+      query: (id) => ({
+        url: `/service-requests/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [
+        { type: "Requests" as const, id: "LIST" },
+        { type: "Analytics" as const },
+      ],
+    }),
   }),
 });
 
@@ -173,4 +187,5 @@ export const {
   useGetServiceRequestByIdQuery,
   useGetCandidatePilotsQuery,
   useAssignPilotMutation,
+  useDeleteServiceRequestMutation,
 } = requestApi;

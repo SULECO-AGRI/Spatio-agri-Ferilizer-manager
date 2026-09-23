@@ -18,9 +18,15 @@ interface RequestDetailsViewProps {
   request: ApiServiceRequestItem;
   onBack: () => void;
   onAssignPilot?: (request: ApiServiceRequestItem) => void;
+  onDelete?: (request: ApiServiceRequestItem) => void;
 }
 
-export function RequestDetailsView({ request, onBack, onAssignPilot }: RequestDetailsViewProps) {
+export function RequestDetailsView({
+  request,
+  onBack,
+  onAssignPilot,
+  onDelete,
+}: RequestDetailsViewProps) {
   return (
     <div className="space-y-6 font-sans animate-in fade-in duration-200">
       {/* Back Link */}
@@ -285,6 +291,7 @@ export function RequestDetailsView({ request, onBack, onAssignPilot }: RequestDe
             onContactFarmer={() =>
               alert(`Calling farmer ${request.farmer?.fullName} at ${request.farmer?.mobile}`)
             }
+            onDelete={onDelete ? () => onDelete(request) : undefined}
           />
         </div>
       </div>

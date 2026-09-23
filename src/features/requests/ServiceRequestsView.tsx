@@ -17,6 +17,7 @@ import { useServiceRequests, requestFilterTabs } from "./hooks/useServiceRequest
 import { RequestsTable } from "./components/RequestsTable";
 import { RequestDetailsView } from "./RequestDetailsView";
 import { AssignPilotModal } from "./components/AssignPilotModal";
+import { DeleteRequestDialog } from "./components/DeleteRequestDialog";
 import type { ApiServiceRequestItem, CandidatePilot } from "@/types/request";
 
 interface ServiceRequestsViewProps {
@@ -55,9 +56,13 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
     selectedRequestDetails,
     selectRequest,
     clearSelectedRequest,
+    deleteRequest,
+    isDeleting,
   } = useServiceRequests({ initialRequestId });
 
   const [assigningRequest, setAssigningRequest] = useState<ApiServiceRequestItem | null>(null);
+  const [requestToDelete, setRequestToDelete] = useState<ApiServiceRequestItem | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [toast, setToast] = useState<ToastNotification | null>(null);
 
   // Auto-dismiss toast
@@ -67,6 +72,26 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
       return () => clearTimeout(timer);
     }
   }, [toast]);
+
+  const handleOpenDelete = useCallback((req: ApiServiceRequestItem) => {
+    setRequestToDelete(req);
+    setIsDeleteDialogOpen(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback(
+    async (requestId: number | string) => {
+      await deleteRequest(requestId);
+      setToast({
+        id: Date.now(),
+        title: "Service Request Deleted",
+        message: `Service request was deleted successfully.`,
+        type: "success",
+      });
+      setIsDeleteDialogOpen(false);
+      setRequestToDelete(null);
+    },
+    [deleteRequest],
+  );
 
   const handleAssignSuccess = useCallback(
     (updatedRequest: ApiServiceRequestItem, candidate: CandidatePilot) => {
@@ -90,6 +115,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
           request={selectedRequestDetails}
           onBack={clearSelectedRequest}
           onAssignPilot={(req) => setAssigningRequest(req)}
+          onDelete={() => handleOpenDelete(selectedRequestDetails)}
         />
 
         {/* Candidate Pilot Assignment Modal */}
@@ -98,6 +124,18 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
           request={assigningRequest}
           onClose={() => setAssigningRequest(null)}
           onAssignSuccess={handleAssignSuccess}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <DeleteRequestDialog
+          isOpen={isDeleteDialogOpen}
+          request={requestToDelete}
+          onClose={() => {
+            setIsDeleteDialogOpen(false);
+            setRequestToDelete(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          isDeleting={isDeleting}
         />
 
         {/* Toast Notification */}
@@ -122,6 +160,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
       </>
     );
   }
+
 
   // Calculate showing range for pagination
   const startItem = pagination.total === 0 ? 0 : (page - 1) * limit + 1;
@@ -280,6 +319,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
         isLoading={isLoading}
         onSelectRequest={(id) => selectRequest(id)}
         onAssignPilot={(req) => setAssigningRequest(req)}
+        onDeleteRequest={handleOpenDelete}
       />
 
       {/* Pagination & Counter Footer */}
@@ -355,6 +395,19 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
         onClose={() => setAssigningRequest(null)}
         onAssignSuccess={handleAssignSuccess}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteRequestDialog
+        isOpen={isDeleteDialogOpen}
+        request={requestToDelete}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setRequestToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
+
 
       {/* Toast Notification */}
       {toast && (

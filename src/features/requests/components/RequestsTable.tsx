@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ChevronRight, Calendar, User, AlertCircle, Loader2, UserPlus } from "lucide-react";
+import { ChevronRight, Calendar, User, AlertCircle, Loader2, UserPlus, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/common";
 import { formatDate, formatServiceType } from "@/lib/utils";
 import type { ApiServiceRequestItem } from "@/types/request";
@@ -10,6 +10,7 @@ interface RequestsTableProps {
   isLoading?: boolean;
   onSelectRequest: (id: number) => void;
   onAssignPilot?: (request: ApiServiceRequestItem) => void;
+  onDeleteRequest?: (request: ApiServiceRequestItem) => void;
 }
 
 export function RequestsTable({
@@ -17,6 +18,7 @@ export function RequestsTable({
   isLoading = false,
   onSelectRequest,
   onAssignPilot,
+  onDeleteRequest,
 }: RequestsTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -163,6 +165,20 @@ export function RequestsTable({
                       <span>View</span>
                       <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
                     </button>
+
+                    {onDeleteRequest && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteRequest(req);
+                        }}
+                        className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                        title="Delete Request"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
