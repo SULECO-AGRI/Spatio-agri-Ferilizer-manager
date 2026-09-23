@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fieldService } from "@/services/fieldService";
+import {
+  useGetFieldsQuery,
+  useCreateFieldMutation,
+  useUpdateFieldMutation,
+  useDeleteFieldMutation,
+} from "../api/fieldApi";
+import { useAppDispatch } from "@/store/hooks";
+import { setSelectedEntity } from "@/store/slices/uiSlice";
 import type {
   Field,
   FieldsPagination,
@@ -37,7 +43,7 @@ const defaultPagination: FieldsPagination = {
 };
 
 export function useFields(options: UseFieldsOptions = {}) {
-  const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -48,7 +54,7 @@ export function useFields(options: UseFieldsOptions = {}) {
   const [sortBy, setSortBy] = useState<string>("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const [selectedField, setSelectedField] = useState<Field | null>(null);
+  const [selectedField, setSelectedFieldState] = useState<Field | null>(null);
 
   // Search debounce
   useEffect(() => {
@@ -72,106 +78,67 @@ export function useFields(options: UseFieldsOptions = {}) {
     [page, limit, debouncedSearch, cropFilter, districtFilter, sortBy, sortOrder],
   );
 
-  const queryKey = useMemo(() => ["fields", queryParams], [queryParams]);
-
   const {
     data,
     isLoading,
+    isFetching,
     isError,
     error: queryError,
     refetch,
-  } = useQuery({
-    queryKey,
-    queryFn: () => fieldService.getFields(queryParams),
-    staleTime: 30_000,
-  });
+  } = useGetFieldsQuery(queryParams);
 
   const fields = useMemo(() => data?.fields || [], [data?.fields]);
   const pagination = useMemo(() => data?.pagination || defaultPagination, [data?.pagination]);
 
-  // Create Field Mutation
-  const createMutation = useMutation({
-    mutationFn: (data: CreateFieldDTO) => fieldService.createField(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["fields"] });
+  // RTK Query Mutations
+  const [triggerCreateField, { isLoading: isCreating }] = useCreateFieldMutation();
+  const [triggerUpdateField, { isLoading: isUpdating }] = useUpdateFieldMutation();
+  const [triggerDeleteField, { isLoading: isDeleting, originalArgs: deletingFieldId }] =
+    useDeleteFieldMutation();
+
+  const setSelectedField = useCallback(
+    (field: Field | null | ((prev: Field | null) => Field | null)) => {
+      setSelectedFieldState((prev) => {
+        const next = typeof field === "function" ? field(prev) : field;
+        if (next) {
+          dispatch(setSelectedEntity({ type: "FIELD", id: next.id }));
+        } else {
+          dispatch(setSelectedEntity(null));
+        }
+        return next;
+      });
     },
-  });
+    [dispatch],
+  );
 
   const createField = useCallback(
     async (dto: CreateFieldDTO): Promise<Field> => {
-      return await createMutation.mutateAsync(dto);
+      return await triggerCreateField(dto).unwrap();
     },
-    [createMutation],
+    [triggerCreateField],
   );
-
-  // Update Field Mutation
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number | string; data: UpdateFieldDTO }) =>
-      fieldService.updateField(id, data),
-    onSuccess: (updatedField, { id }) => {
-      queryClient.setQueryData<{ fields?: Field[]; pagination?: FieldsPagination }>(
-        queryKey,
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            fields: (old.fields || []).map((f) =>
-              f.id === Number(id) || String(f.id) === String(id) ? { ...f, ...updatedField } : f,
-            ),
-          };
-        },
-      );
-      if (
-        selectedField &&
-        (selectedField.id === Number(id) || String(selectedField.id) === String(id))
-      ) {
-        setSelectedField((prev) => (prev ? { ...prev, ...updatedField } : null));
-      }
-      queryClient.invalidateQueries({ queryKey: ["fields"] });
-    },
-  });
 
   const updateField = useCallback(
-    async (id: number | string, data: UpdateFieldDTO): Promise<Field> => {
-      return await updateMutation.mutateAsync({ id, data });
-    },
-    [updateMutation],
-  );
-
-  // Delete Field Mutation
-  const deleteMutation = useMutation({
-    mutationFn: (id: number | string) => fieldService.deleteField(id),
-    onSuccess: (_, id) => {
-      queryClient.setQueryData<{ fields?: Field[]; pagination?: FieldsPagination }>(
-        queryKey,
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            fields: (old.fields || []).filter(
-              (f) => f.id !== Number(id) && String(f.id) !== String(id),
-            ),
-            pagination: old.pagination
-              ? { ...old.pagination, total: Math.max(0, old.pagination.total - 1) }
-              : old.pagination,
-          };
-        },
+    async (id: number | string, updateDto: UpdateFieldDTO): Promise<Field> => {
+      const result = await triggerUpdateField({ id, data: updateDto }).unwrap();
+      setSelectedFieldState((prev) =>
+        prev && (prev.id === Number(id) || String(prev.id) === String(id))
+          ? { ...prev, ...result }
+          : prev,
       );
-      if (
-        selectedField &&
-        (selectedField.id === Number(id) || String(selectedField.id) === String(id))
-      ) {
-        setSelectedField(null);
-      }
-      queryClient.invalidateQueries({ queryKey: ["fields"] });
+      return result;
     },
-  });
+    [triggerUpdateField],
+  );
 
   const deleteField = useCallback(
     async (id: number | string): Promise<void> => {
-      await deleteMutation.mutateAsync(id);
+      await triggerDeleteField(id).unwrap();
+      setSelectedFieldState((prev) =>
+        prev && (prev.id === Number(id) || String(prev.id) === String(id)) ? null : prev,
+      );
     },
-    [deleteMutation],
+    [triggerDeleteField],
   );
 
   // Computed summary metrics
@@ -212,10 +179,15 @@ export function useFields(options: UseFieldsOptions = {}) {
     fields,
     pagination,
     totalCount: pagination.total,
-    isLoading,
+    isLoading: isLoading && !data,
+    isFetching,
     isError,
     error:
-      queryError instanceof Error ? queryError.message : isError ? "Failed to load fields" : null,
+      queryError && "data" in queryError
+        ? ((queryError.data as any)?.message ?? "Failed to load fields")
+        : isError
+          ? "Failed to load fields"
+          : null,
     metrics,
     refetch,
     searchQuery,
@@ -237,9 +209,7 @@ export function useFields(options: UseFieldsOptions = {}) {
     createField,
     updateField,
     deleteField,
-    deletingFieldId: deleteMutation.isPending
-      ? (deleteMutation.variables as string | number)
-      : null,
-    isSubmitting: createMutation.isPending || updateMutation.isPending || deleteMutation.isPending,
+    deletingFieldId: isDeleting ? (deletingFieldId as string | number) : null,
+    isSubmitting: isCreating || isUpdating || isDeleting,
   };
 }

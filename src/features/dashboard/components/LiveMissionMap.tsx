@@ -21,6 +21,8 @@ import { farmerService } from "@/services/farmerService";
 import type { ApiServiceRequestItem } from "@/types/request";
 import type { ActiveMission } from "@/types";
 import { useLeaflet, type LeafletTileStyle } from "@/hooks/useLeaflet";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setSelectedEntity, selectSelectedEntity } from "@/store/slices/uiSlice";
 
 // Extended ActiveMission interface with database metadata
 export interface ActiveMissionDisplay extends ActiveMission {
@@ -167,6 +169,9 @@ function transformRequestToActiveMission(
 }
 
 export function LiveMissionMap() {
+  const dispatch = useAppDispatch();
+  const reduxSelectedEntity = useAppSelector(selectSelectedEntity);
+
   const [missionsList, setMissionsList] = useState<ActiveMissionDisplay[]>([]);
   const [isLoadingDb, setIsLoadingDb] = useState(true);
   const [lastSyncTime, setLastSyncTime] = useState<string>("");
@@ -180,6 +185,29 @@ export function LiveMissionMap() {
     zoom: 9,
     tileStyle: mapStyle,
   });
+
+  // Synchronize external Redux selection to map view
+  useEffect(() => {
+    if (reduxSelectedEntity?.id && missionsList.length > 0) {
+      const target = missionsList.find(
+        (m) =>
+          m.id === String(reduxSelectedEntity.id) ||
+          m.id === `REQ-${reduxSelectedEntity.id}` ||
+          m.id === `FLD-${reduxSelectedEntity.id}`,
+      );
+      if (target) {
+        setSelectedMissionId(target.id);
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.flyTo(
+            [target.coordinates.lat, target.coordinates.lng],
+            Math.max(mapInstanceRef.current.getZoom(), 12),
+            { duration: 0.8 },
+          );
+        }
+      }
+    }
+  }, [reduxSelectedEntity, missionsList, mapInstanceRef]);
+
 
   // Fetch real active requests and registered fields from database API
   const fetchRealMissions = useCallback(async () => {
@@ -412,6 +440,7 @@ export function LiveMissionMap() {
 
       marker.on("click", () => {
         setSelectedMissionId(mission.id);
+        dispatch(setSelectedEntity({ type: "MISSION", id: mission.id }));
         mapInstanceRef.current?.flyTo(latLng, Math.max(mapInstanceRef.current.getZoom(), 12), {
           duration: 0.8,
         });

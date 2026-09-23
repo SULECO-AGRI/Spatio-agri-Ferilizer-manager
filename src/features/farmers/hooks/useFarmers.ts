@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { farmerService } from "@/services/farmerService";
+import {
+  useGetFarmersQuery,
+  useDeleteFarmerMutation,
+} from "../api/farmerApi";
 import type { ApiFarmerItem, FarmersPagination } from "@/types/farmer";
 
 interface UseFarmersOptions {
@@ -19,8 +21,6 @@ const defaultPagination: FarmersPagination = {
 };
 
 export function useFarmers(options: UseFarmersOptions = {}) {
-  const queryClient = useQueryClient();
-
   const [selectedFarmerId, setSelectedFarmerId] = useState<string | number | null>(
     options.initialFarmerId ?? null,
   );
@@ -43,30 +43,25 @@ export function useFarmers(options: UseFarmersOptions = {}) {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // TanStack Query for farmers list
-  const queryKey = useMemo(
-    () => ["farmers", { page, limit, search: debouncedSearch, sortBy, sortOrder }],
+  const queryParams = useMemo(
+    () => ({
+      page,
+      limit,
+      search: debouncedSearch || undefined,
+      sortBy,
+      sortOrder,
+    }),
     [page, limit, debouncedSearch, sortBy, sortOrder],
   );
 
   const {
     data,
     isLoading,
+    isFetching,
     isError,
     error: queryError,
     refetch,
-  } = useQuery({
-    queryKey,
-    queryFn: () =>
-      farmerService.getFarmers({
-        page,
-        limit,
-        search: debouncedSearch || undefined,
-        sortBy,
-        sortOrder,
-      }),
-    staleTime: 30_000,
-  });
+  } = useGetFarmersQuery(queryParams);
 
   const farmers = useMemo(() => data?.farmers || [], [data?.farmers]);
   const pagination = useMemo(() => data?.pagination || defaultPagination, [data?.pagination]);
@@ -87,50 +82,35 @@ export function useFarmers(options: UseFarmersOptions = {}) {
     setSelectedFarmerDetails(null);
   }, []);
 
-  // Delete mutation with optimistic updates and invalidation
-  const deleteMutation = useMutation({
-    mutationFn: (id: number | string) => farmerService.deleteFarmer(id),
-    onSuccess: (_, id) => {
-      queryClient.setQueryData<{ farmers?: ApiFarmerItem[]; pagination?: FarmersPagination }>(
-        queryKey,
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            farmers: (old.farmers || []).filter(
-              (f) => f.userId !== Number(id) && String(f.userId) !== String(id),
-            ),
-            pagination: old.pagination
-              ? { ...old.pagination, total: Math.max(0, old.pagination.total - 1) }
-              : old.pagination,
-          };
-        },
-      );
+  const [triggerDeleteFarmer, { isLoading: isDeleting, originalArgs: deletingFarmerId }] =
+    useDeleteFarmerMutation();
+
+  const deleteFarmer = useCallback(
+    async (id: number | string): Promise<void> => {
+      await triggerDeleteFarmer(id).unwrap();
       if (
         selectedFarmerId !== null &&
         (String(selectedFarmerId) === String(id) || Number(selectedFarmerId) === Number(id))
       ) {
         clearSelectedFarmer();
       }
-      queryClient.invalidateQueries({ queryKey: ["farmers"] });
     },
-  });
-
-  const deleteFarmer = useCallback(
-    async (id: number | string): Promise<void> => {
-      await deleteMutation.mutateAsync(id);
-    },
-    [deleteMutation],
+    [triggerDeleteFarmer, selectedFarmerId, clearSelectedFarmer],
   );
 
   return {
     farmers,
     pagination,
     totalCount: pagination.total,
-    isLoading,
+    isLoading: isLoading && !data,
+    isFetching,
     isError,
     error:
-      queryError instanceof Error ? queryError.message : isError ? "Failed to load farmers" : null,
+      queryError && "data" in queryError
+        ? ((queryError.data as any)?.message ?? "Failed to load farmers")
+        : isError
+          ? "Failed to load farmers"
+          : null,
     refetch,
     searchQuery,
     setSearchQuery,
@@ -147,8 +127,6 @@ export function useFarmers(options: UseFarmersOptions = {}) {
     selectFarmer,
     clearSelectedFarmer,
     deleteFarmer,
-    deletingFarmerId: deleteMutation.isPending
-      ? (deleteMutation.variables as string | number)
-      : null,
+    deletingFarmerId: isDeleting ? (deletingFarmerId as string | number) : null,
   };
 }

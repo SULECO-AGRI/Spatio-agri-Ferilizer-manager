@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { pilotService } from "@/services/pilotService";
+import {
+  useGetPilotsQuery,
+  useGetPilotByIdQuery,
+  useUpdatePilotStatusMutation,
+  useDeletePilotMutation,
+} from "../api/pilotApi";
 import { formatDate } from "@/lib/utils";
 import type {
   ApiPilotItem,
@@ -9,6 +13,7 @@ import type {
   PilotProfileDetailDTO,
   PilotMission,
   MissionResult,
+  PilotStatus,
 } from "@/types/pilot";
 
 export const pilotFilterTabs = ["All", "Active", "On Mission", "Inactive", "Suspended"] as const;
@@ -147,8 +152,6 @@ export const transformToDetailedInfo = (
 };
 
 export function usePilots(options: UsePilotsOptions = {}) {
-  const queryClient = useQueryClient();
-
   const [selectedPilotId, setSelectedPilotId] = useState<string | number | null>(
     options.initialPilotId ?? null,
   );
@@ -173,79 +176,47 @@ export function usePilots(options: UsePilotsOptions = {}) {
 
   const apiStatus = TAB_STATUS_MAP[activeFilter];
 
-  const queryKey = useMemo(
-    () => [
-      "pilots",
-      { page, limit, status: apiStatus, search: debouncedSearch, sortBy, sortOrder },
-    ],
+  const queryParams = useMemo(
+    () => ({
+      page,
+      limit,
+      status: apiStatus,
+      search: debouncedSearch || undefined,
+      sortBy,
+      sortOrder,
+    }),
     [page, limit, apiStatus, debouncedSearch, sortBy, sortOrder],
   );
 
+  // RTK Query hooks
   const {
     data,
     isLoading,
+    isFetching,
     isError,
     error: queryError,
     refetch,
-  } = useQuery({
-    queryKey,
-    queryFn: () =>
-      pilotService.getPilots({
-        page,
-        limit,
-        status: apiStatus,
-        search: debouncedSearch || undefined,
-        sortBy,
-        sortOrder,
-      }),
-    staleTime: 30_000,
-  });
+  } = useGetPilotsQuery(queryParams);
 
   const pilots = useMemo(() => data?.pilots || [], [data?.pilots]);
   const pagination = useMemo(() => data?.pagination || defaultPagination, [data?.pagination]);
 
   // Query for single pilot details when selected
-  const detailQuery = useQuery({
-    queryKey: ["pilotDetail", selectedPilotId],
-    queryFn: async () => {
-      if (selectedPilotId === null || selectedPilotId === undefined) return null;
-      try {
-        const detail = await pilotService.getPilotById(selectedPilotId);
-        const basic = pilots.find((p) => p.userId === Number(selectedPilotId));
-        return transformToDetailedInfo(detail, basic);
-      } catch (err) {
-        console.error("Failed to load pilot details:", err);
-        const basic = pilots.find((p) => p.userId === Number(selectedPilotId));
-        if (basic) {
-          return {
-            pilotId: basic.userId,
-            name: basic.fullName,
-            initials: `${basic.firstName?.[0] || ""}${basic.lastName?.[0] || ""}`.toUpperCase(),
-            status: basic.status,
-            license: basic.licenceNumber,
-            experience: "Active Pilot",
-            phone: basic.mobile,
-            email: basic.email,
-            rating:
-              basic.ratings ??
-              basic.rating ??
-              basic.averageRatings ??
-              (basic as any)?.profile?.rating ??
-              0,
-            reviewsCount: basic.completedMissions,
-            missionsCount: basic.completedMissions,
-            flightHours: `${basic.totalFlightHours} hrs`,
-            activeMissionsCount: basic.activeMissionsCount,
-            performanceData: [],
-            missionHistory: [],
-          } as DetailedPilotInfo;
-        }
-        throw err;
-      }
-    },
-    enabled: selectedPilotId !== null && selectedPilotId !== undefined,
-    staleTime: 60_000,
+  const {
+    data: rawDetailData,
+    isLoading: isDetailsLoading,
+  } = useGetPilotByIdQuery(selectedPilotId!, {
+    skip: selectedPilotId === null || selectedPilotId === undefined,
   });
+
+  const selectedPilotDetails = useMemo(() => {
+    if (!rawDetailData) return null;
+    const basic = pilots.find(
+      (p) =>
+        p.userId === Number(selectedPilotId) || String(p.userId) === String(selectedPilotId),
+    );
+    return transformToDetailedInfo(rawDetailData, basic);
+  }, [rawDetailData, pilots, selectedPilotId]);
 
   const selectPilot = useCallback((id: string | number | null) => {
     setSelectedPilotId(id);
@@ -260,47 +231,27 @@ export function usePilots(options: UsePilotsOptions = {}) {
     setPage(1);
   }, []);
 
-  // Update Status Mutation
+  // RTK Query Mutations
+  const [triggerUpdateStatus] = useUpdatePilotStatusMutation();
+  const [triggerDeletePilot, { isLoading: isDeleting, originalArgs: deletingPilotId }] =
+    useDeletePilotMutation();
+
   const [updatingPilotIds, setUpdatingPilotIds] = useState<Set<number | string>>(new Set());
 
-  const statusMutation = useMutation({
-    mutationFn: ({ pilotId, newStatus }: { pilotId: number | string; newStatus: string }) =>
-      pilotService.updatePilotStatus(pilotId, newStatus),
-    onMutate: async ({ pilotId, newStatus }) => {
-      setUpdatingPilotIds((prev) => new Set(prev).add(pilotId));
-    },
-    onSuccess: (updatedPilot, { pilotId, newStatus }) => {
-      queryClient.setQueryData<{ pilots?: ApiPilotItem[]; pagination?: PilotsPagination }>(
-        queryKey,
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            pilots: (old.pilots || []).map((p) =>
-              p.userId === Number(pilotId) || String(p.userId) === String(pilotId)
-                ? { ...p, ...(updatedPilot || {}), status: updatedPilot?.status || newStatus }
-                : p,
-            ),
-          };
-        },
-      );
-      queryClient.invalidateQueries({ queryKey: ["pilotDetail", pilotId] });
-      queryClient.invalidateQueries({ queryKey: ["pilots"] });
-    },
-    onSettled: (_, __, { pilotId }) => {
-      setUpdatingPilotIds((prev) => {
-        const next = new Set(prev);
-        next.delete(pilotId);
-        return next;
-      });
-    },
-  });
-
   const updateStatus = useCallback(
-    async (pilotId: number | string, newStatus: string) => {
-      await statusMutation.mutateAsync({ pilotId, newStatus });
+    async (pilotId: number | string, newStatus: PilotStatus) => {
+      setUpdatingPilotIds((prev) => new Set(prev).add(pilotId));
+      try {
+        await triggerUpdateStatus({ id: pilotId, status: newStatus }).unwrap();
+      } finally {
+        setUpdatingPilotIds((prev) => {
+          const next = new Set(prev);
+          next.delete(pilotId);
+          return next;
+        });
+      }
     },
-    [statusMutation],
+    [triggerUpdateStatus],
   );
 
   const isPilotUpdating = useCallback(
@@ -311,50 +262,32 @@ export function usePilots(options: UsePilotsOptions = {}) {
     [updatingPilotIds],
   );
 
-  // Delete Pilot Mutation
-  const deleteMutation = useMutation({
-    mutationFn: (id: number | string) => pilotService.deletePilot(id),
-    onSuccess: (_, id) => {
-      queryClient.setQueryData<{ pilots?: ApiPilotItem[]; pagination?: PilotsPagination }>(
-        queryKey,
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            pilots: (old.pilots || []).filter(
-              (p) => p.userId !== Number(id) && String(p.userId) !== String(id),
-            ),
-            pagination: old.pagination
-              ? { ...old.pagination, total: Math.max(0, old.pagination.total - 1) }
-              : old.pagination,
-          };
-        },
-      );
+  const deletePilot = useCallback(
+    async (id: number | string): Promise<void> => {
+      await triggerDeletePilot(id).unwrap();
       if (
         selectedPilotId !== null &&
         (String(selectedPilotId) === String(id) || Number(selectedPilotId) === Number(id))
       ) {
         clearSelectedPilot();
       }
-      queryClient.invalidateQueries({ queryKey: ["pilots"] });
     },
-  });
-
-  const deletePilot = useCallback(
-    async (id: number | string): Promise<void> => {
-      await deleteMutation.mutateAsync(id);
-    },
-    [deleteMutation],
+    [triggerDeletePilot, selectedPilotId, clearSelectedPilot],
   );
 
   return {
     pilots,
     pagination,
     totalCount: pagination.total,
-    isLoading,
+    isLoading: isLoading && !data,
+    isFetching,
     isError,
     error:
-      queryError instanceof Error ? queryError.message : isError ? "Failed to load pilots" : null,
+      queryError && "data" in queryError
+        ? ((queryError.data as any)?.message ?? "Failed to load pilots")
+        : isError
+          ? "Failed to load pilots"
+          : null,
     refetch,
     activeFilter,
     setActiveFilter: handleFilterChange,
@@ -369,16 +302,14 @@ export function usePilots(options: UsePilotsOptions = {}) {
     sortOrder,
     setSortOrder,
     selectedPilotId,
-    selectedPilotDetails: detailQuery.data ?? null,
-    isDetailsLoading: detailQuery.isLoading,
+    selectedPilotDetails,
+    isDetailsLoading,
     selectPilot,
     clearSelectedPilot,
     updateStatus,
     updatingPilotIds,
     isPilotUpdating,
     deletePilot,
-    deletingPilotId: deleteMutation.isPending
-      ? (deleteMutation.variables as string | number)
-      : null,
+    deletingPilotId: isDeleting ? (deletingPilotId as string | number) : null,
   };
 }

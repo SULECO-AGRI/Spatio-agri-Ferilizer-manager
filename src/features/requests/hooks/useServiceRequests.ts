@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { serviceRequestsService } from "@/services/serviceRequestsService";
+import {
+  useGetServiceRequestsQuery,
+  useGetServiceRequestByIdQuery,
+} from "../api/requestApi";
 import type { ServiceRequestsSummary, PaginationMeta } from "@/types/request";
 
 export const requestFilterTabs = [
@@ -75,60 +77,45 @@ export function useServiceRequests(options: UseServiceRequestsOptions = {}) {
 
   const apiStatus = TAB_STATUS_MAP[activeFilter];
 
-  const queryKey = useMemo(
-    () => [
-      "serviceRequests",
-      {
-        page,
-        limit,
-        status: apiStatus,
-        priority: priorityFilter !== "ALL" ? priorityFilter : undefined,
-        sortBy,
-        sortOrder,
-        search: debouncedSearch || undefined,
-      },
-    ],
+  const queryParams = useMemo(
+    () => ({
+      page,
+      limit,
+      status: apiStatus,
+      priority: priorityFilter !== "ALL" ? priorityFilter : undefined,
+      sortBy,
+      sortOrder,
+      search: debouncedSearch || undefined,
+    }),
     [page, limit, apiStatus, priorityFilter, sortBy, sortOrder, debouncedSearch],
   );
 
   const {
     data,
     isLoading,
+    isFetching,
     isError,
     error: queryError,
     refetch,
-  } = useQuery({
-    queryKey,
-    queryFn: () =>
-      serviceRequestsService.getServiceRequests({
-        page,
-        limit,
-        status: apiStatus,
-        priority: priorityFilter !== "ALL" ? priorityFilter : undefined,
-        sortBy,
-        sortOrder,
-        search: debouncedSearch || undefined,
-      }),
-    staleTime: 30_000,
-  });
+  } = useGetServiceRequestsQuery(queryParams);
 
   const requests = useMemo(() => data?.requests || [], [data?.requests]);
   const summary = useMemo(() => data?.summary || defaultSummary, [data?.summary]);
   const pagination = useMemo(() => data?.pagination || defaultPagination, [data?.pagination]);
 
   // Query for single request details
-  const detailQuery = useQuery({
-    queryKey: ["serviceRequestDetail", selectedRequestId],
-    queryFn: async () => {
-      if (selectedRequestId === null || selectedRequestId === undefined) return null;
-      const idNumber: string | number =
-        typeof selectedRequestId === "string"
-          ? parseInt(selectedRequestId.replace("REQ-", ""), 10) || selectedRequestId
-          : selectedRequestId;
-      return await serviceRequestsService.getServiceRequestById(idNumber);
-    },
-    enabled: selectedRequestId !== null && selectedRequestId !== undefined,
-    staleTime: 60_000,
+  const parsedRequestId = useMemo(() => {
+    if (selectedRequestId === null || selectedRequestId === undefined) return null;
+    return typeof selectedRequestId === "string"
+      ? parseInt(selectedRequestId.replace("REQ-", ""), 10) || selectedRequestId
+      : selectedRequestId;
+  }, [selectedRequestId]);
+
+  const {
+    data: selectedRequestDetails,
+    isLoading: isDetailsLoading,
+  } = useGetServiceRequestByIdQuery(parsedRequestId!, {
+    skip: parsedRequestId === null,
   });
 
   const toggleSort = useCallback(() => {
@@ -152,10 +139,16 @@ export function useServiceRequests(options: UseServiceRequestsOptions = {}) {
     requests,
     summary,
     pagination,
-    isLoading,
+    isLoading: isLoading && !data,
+    isFetching,
+    isDetailsLoading,
     isError,
     error:
-      queryError instanceof Error ? queryError.message : isError ? "Failed to load requests" : null,
+      queryError && "data" in queryError
+        ? ((queryError.data as any)?.message ?? "Failed to load requests")
+        : isError
+          ? "Failed to load requests"
+          : null,
     refetch,
     activeFilter,
     setActiveFilter: handleFilterChange,
@@ -173,7 +166,7 @@ export function useServiceRequests(options: UseServiceRequestsOptions = {}) {
     setSortOrder,
     toggleSort,
     selectedRequestId,
-    selectedRequestDetails: detailQuery.data ?? null,
+    selectedRequestDetails: selectedRequestDetails ?? null,
     selectRequest,
     clearSelectedRequest,
   };
