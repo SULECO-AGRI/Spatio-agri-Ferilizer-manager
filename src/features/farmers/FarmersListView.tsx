@@ -11,7 +11,7 @@ import {
   Trash2,
   CheckCircle2,
 } from "lucide-react";
-import { PageHeader } from "@/components/common";
+import { PageHeader, RefreshButton } from "@/components/common";
 import { useFarmers } from "./hooks/useFarmers";
 import { FarmerProfileView } from "./FarmerProfileView";
 import { DeleteFarmerDialog } from "./components/DeleteFarmerDialog";
@@ -28,6 +28,7 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
     pagination,
     totalCount,
     isLoading,
+    isFetching,
     isError,
     error,
     refetch,
@@ -119,15 +120,13 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
             />
           </div>
 
-          <button
-            type="button"
-            onClick={() => refetch()}
-            disabled={isLoading}
+          <RefreshButton
+            variant="iconOnly"
+            onRefresh={() => refetch()}
+            isLoading={isLoading}
+            isFetching={isFetching}
             title="Refresh farmers directory"
-            className="p-2 bg-white border border-slate-200/80 hover:bg-slate-50 rounded-xl text-slate-500 hover:text-slate-700 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-emerald-600" : ""}`} />
-          </button>
+          />
         </div>
       </div>
 

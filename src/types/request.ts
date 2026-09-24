@@ -91,6 +91,12 @@ export interface ServiceRequestDetailsResponse {
   };
 }
 
+export interface ScoreBreakdown {
+  distanceScore?: number;
+  ratingScore?: number;
+  experienceScore?: number;
+}
+
 export interface CandidatePilot {
   pilotId: number;
   fullName: string;
@@ -99,22 +105,42 @@ export interface CandidatePilot {
   licenceNumber?: string;
   rating: number;
   totalMissions: number;
+  completedMissions?: number;
+  totalFlightHours?: number;
   distanceKm: number;
   matchScore: number;
   status?: string;
   availabilityStatus?: string;
+  coverageType?: string;
+  recommendationBadge?: string;
+  scoreBreakdown?: ScoreBreakdown;
+}
+
+export interface CandidatePilotsData {
+  requestId?: number;
+  requestCode?: string;
+  preferredDate?: string;
+  field?: {
+    id: number;
+    fieldName: string;
+    cropType: string;
+    area: number;
+    district: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  };
+  totalCandidates?: number;
+  candidates?: CandidatePilot[];
+  candidatePilots?: CandidatePilot[];
+  pilots?: CandidatePilot[];
 }
 
 export interface CandidatePilotsResponse {
   status: "success" | string;
-  data:
-    | {
-        candidates?: CandidatePilot[];
-        candidatePilots?: CandidatePilot[];
-        pilots?: CandidatePilot[];
-        serviceRequest?: ApiServiceRequestItem;
-      }
-    | CandidatePilot[];
+  message?: string;
+  data: CandidatePilotsData | CandidatePilot[];
 }
 
 export interface AssignPilotResponse {

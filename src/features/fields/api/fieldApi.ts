@@ -61,16 +61,9 @@ export const fieldApi = baseApi.injectEndpoints({
         url: `/fields/${id}`,
         method: "GET",
       }),
-      transformResponse: (
-        response: { status: string; data: { field: Field } } | { field: Field } | Field,
-      ) => {
-        if ("data" in response && response.data && "field" in response.data) {
-          return normalizeField(response.data.field);
-        }
-        if ("field" in response) {
-          return normalizeField(response.field);
-        }
-        return normalizeField(response);
+      transformResponse: (response: any) => {
+        const raw = response?.data?.field ?? response?.data ?? response?.field ?? response;
+        return normalizeField(raw);
       },
       providesTags: (_result, _error, id) => [{ type: "Fields" as const, id }],
     }),
@@ -81,26 +74,24 @@ export const fieldApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      transformResponse: (
-        response: { status: string; data: { field: Field } } | { field: Field } | Field,
-      ) => {
-        if ("data" in response && response.data && "field" in response.data) {
-          return normalizeField(response.data.field);
-        }
-        if ("field" in response) {
-          return normalizeField(response.field);
-        }
-        return normalizeField(response);
+      transformResponse: (response: any) => {
+        const raw = response?.data?.field ?? response?.data ?? response?.field ?? response;
+        return normalizeField(raw);
       },
       invalidatesTags: [
         { type: "Fields" as const, id: "LIST" },
         { type: "Analytics" as const },
         { type: "Farmers" as const },
       ],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled, getState }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled, getState }) {
         try {
           const { data: createdRaw } = await queryFulfilled;
-          const normalized = normalizeField(createdRaw);
+          const merged = {
+            ...arg,
+            ...createdRaw,
+            farmer: createdRaw?.farmer || arg.farmer,
+          };
+          const normalized = normalizeField(merged);
 
           // Eagerly update all cached getFields entries in the RTK Query cache
           const state = getState() as any;
@@ -115,14 +106,18 @@ export const fieldApi = baseApi.injectEndpoints({
                     originalArgs,
                     (draft: any) => {
                       if (draft && Array.isArray(draft.fields)) {
-                        const exists = draft.fields.some(
-                          (f: any) => f.id === normalized.id || (normalized.id && String(f.id) === String(normalized.id)),
+                        const existsIndex = draft.fields.findIndex(
+                          (f: any) =>
+                            f.id === normalized.id ||
+                            (normalized.id && String(f.id) === String(normalized.id)),
                         );
-                        if (!exists) {
+                        if (existsIndex === -1) {
                           draft.fields.unshift(normalized);
                           if (draft.pagination) {
                             draft.pagination.total = (draft.pagination.total || 0) + 1;
                           }
+                        } else {
+                          draft.fields[existsIndex] = normalized;
                         }
                       }
                     },
@@ -143,26 +138,23 @@ export const fieldApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      transformResponse: (
-        response: { status: string; data: { field: Field } } | { field: Field } | Field,
-      ) => {
-        if ("data" in response && response.data && "field" in response.data) {
-          return normalizeField(response.data.field);
-        }
-        if ("field" in response) {
-          return normalizeField(response.field);
-        }
-        return normalizeField(response);
+      transformResponse: (response: any) => {
+        const raw = response?.data?.field ?? response?.data ?? response?.field ?? response;
+        return normalizeField(raw);
       },
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Fields" as const, id },
         { type: "Fields" as const, id: "LIST" },
         { type: "Analytics" as const },
       ],
-      async onQueryStarted({ id }, { dispatch, queryFulfilled, getState }) {
+      async onQueryStarted({ id, data }, { dispatch, queryFulfilled, getState }) {
         try {
           const { data: updatedRaw } = await queryFulfilled;
-          const normalized = normalizeField(updatedRaw);
+          const merged = {
+            ...data,
+            ...updatedRaw,
+          };
+          const normalized = normalizeField(merged);
 
           const state = getState() as any;
           const apiState = state.api || state[baseApi.reducerPath];

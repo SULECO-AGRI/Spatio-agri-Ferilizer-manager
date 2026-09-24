@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
+import { pilotService } from "./pilotService";
 import type {
   ApiServiceRequestItem,
   ServiceRequestsListResponse,
@@ -42,31 +43,16 @@ export const serviceRequestsService = {
   },
 
   /**
-   * Fetches ranked candidate pilots for a specific service request from GET /admin/service-requests/:id/candidate-pilots
+   * Fetches ranked candidate pilots for a specific service request from GET /service-requests/:id/candidate-pilots
    */
   async getCandidatePilots(requestId: number | string): Promise<CandidatePilot[]> {
-    let rawData: unknown = null;
+    const response = await apiClient.get<CandidatePilotsResponse>(
+      `/service-requests/${requestId}/candidate-pilots`,
+    );
 
-    try {
-      const response = await apiClient.get<CandidatePilotsResponse>(
-        `/admin/service-requests/${requestId}/candidate-pilots`,
-      );
-      rawData = response.data;
-    } catch {
-      try {
-        const fallbackResponse = await apiClient.get<CandidatePilotsResponse>(
-          `/service-requests/${requestId}/candidate-pilots`,
-        );
-        rawData = fallbackResponse.data;
-      } catch {
-        const altResponse = await apiClient.get<CandidatePilotsResponse>(
-          `/api/admin/service-requests/${requestId}/candidate-pilots`,
-        );
-        rawData = altResponse.data;
-      }
-    }
-
+    const rawData = response.data;
     let list: unknown[] = [];
+
     if (Array.isArray(rawData)) {
       list = rawData;
     } else if (rawData && typeof rawData === "object") {
@@ -80,7 +66,7 @@ export const serviceRequestsService = {
       }
     }
 
-    // Normalize candidate items
+    // Direct mapping from backend suggestion engine
     const normalized: CandidatePilot[] = list.map((item: unknown, index: number) => {
       const c = (item || {}) as Record<string, unknown>;
       const user = (c.user || {}) as Record<string, unknown>;
@@ -102,33 +88,35 @@ export const serviceRequestsService = {
         c.licenceNumber || c.licenseNumber || profile.licenceNumber || c.license || "N/A",
       );
 
-      // Raw distance in km
       const rawDistance = Number(c.distanceKm ?? c.distance_km ?? c.distance ?? 0);
-      const distanceKm =
-        !isNaN(rawDistance) && rawDistance > 0 ? Number(rawDistance.toFixed(1)) : 0;
+      const distanceKm = !isNaN(rawDistance) ? Number(rawDistance.toFixed(2)) : 0;
 
-      // Rating
       const rawRating = Number(c.rating ?? c.starRating ?? profile.rating ?? c.ratings ?? 0);
-      const rating = !isNaN(rawRating) && rawRating > 0 ? Number(rawRating.toFixed(1)) : 0;
+      const rating = !isNaN(rawRating) ? Number(rawRating.toFixed(1)) : 0;
 
-      // Total completed missions
       const rawMissions = Number(
-        c.totalMissions ??
-          c.completedMissions ??
-          profile.totalMissions ??
+        c.completedMissions ??
+          c.totalMissions ??
           profile.completedMissions ??
+          profile.totalMissions ??
           0,
       );
-      const totalMissions = !isNaN(rawMissions) ? rawMissions : 0;
+      const completedMissions = !isNaN(rawMissions) ? rawMissions : 0;
+      const totalFlightHours = Number(c.totalFlightHours ?? profile.totalFlightHours ?? 0);
 
-      // Overall match score
-      let matchScore = Number(c.matchScore ?? c.matchPercentage ?? c.match ?? 0);
-      if (matchScore > 0 && matchScore <= 1) {
-        matchScore = Math.round(matchScore * 100);
-      }
-      if (isNaN(matchScore) || matchScore < 0) {
-        matchScore = 0;
-      }
+      const rawMatchScore = Number(c.matchScore ?? c.matchPercentage ?? c.match ?? 0);
+      const matchScore = !isNaN(rawMatchScore) ? Math.min(100, Math.max(0, rawMatchScore)) : 0;
+
+      const recommendationBadge = c.recommendationBadge
+        ? String(c.recommendationBadge)
+        : undefined;
+
+      const coverageType = c.coverageType ? String(c.coverageType) : undefined;
+
+      const scoreBreakdown =
+        c.scoreBreakdown && typeof c.scoreBreakdown === "object"
+          ? (c.scoreBreakdown as any)
+          : undefined;
 
       return {
         pilotId,
@@ -138,21 +126,23 @@ export const serviceRequestsService = {
         licenceNumber,
         distanceKm,
         rating,
-        totalMissions,
-        matchScore: Math.round(matchScore),
-        status: String(c.status || "AVAILABLE"),
+        totalMissions: completedMissions,
+        completedMissions,
+        totalFlightHours,
+        matchScore: Math.round(matchScore * 100) / 100,
+        coverageType,
+        recommendationBadge,
+        scoreBreakdown,
+        status: String(c.status || "ACTIVE"),
         availabilityStatus: String(c.availabilityStatus || "READY"),
       };
     });
-
-    // Sort strictly by highest match score first
-    normalized.sort((a, b) => b.matchScore - a.matchScore);
 
     return normalized;
   },
 
   /**
-   * Assigns a candidate pilot to a service request via POST /admin/service-requests/:id/assign
+   * Assigns a candidate pilot to a service request via POST /service-requests/:id/assign
    */
   async assignPilot(
     requestId: number | string,
@@ -162,7 +152,7 @@ export const serviceRequestsService = {
 
     try {
       const response = await apiClient.post<AssignPilotResponse>(
-        `/admin/service-requests/${requestId}/assign`,
+        `/service-requests/${requestId}/assign`,
         payload,
       );
       const req = response.data?.serviceRequest || response.data?.request;
@@ -170,7 +160,7 @@ export const serviceRequestsService = {
     } catch {
       try {
         const fallback = await apiClient.post<AssignPilotResponse>(
-          `/service-requests/${requestId}/assign`,
+          `/admin/service-requests/${requestId}/assign`,
           payload,
         );
         const req = fallback.data?.serviceRequest || fallback.data?.request;

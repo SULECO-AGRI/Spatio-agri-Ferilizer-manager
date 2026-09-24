@@ -142,11 +142,25 @@ export function RequestDetailsView({
 
             {/* Field Boundary OpenStreetMap */}
             <FieldPolygonMap
-              fieldName={request.field?.fieldName || "Field Alpha"}
-              locationCoordinates={request.field?.locationCoordinates}
-              cropType={request.field?.cropType}
+              fieldName={
+                request.field?.fieldName ||
+                (request.field as any)?.field_name ||
+                "Field Parcel"
+              }
+              locationCoordinates={
+                request.field?.locationCoordinates ||
+                (request.field as any)?.location_coordinates
+              }
+              cropType={
+                request.field?.cropType ||
+                (request.field as any)?.crop_type ||
+                "Tea"
+              }
               area={request.field?.area}
               district={request.field?.district}
+              city={request.field?.city}
+              province={request.field?.province}
+              village={request.field?.village}
             />
 
             {/* Field Specs Grid */}

@@ -118,7 +118,7 @@ export function usePayments() {
   const [activeFilter, setActiveFilter] = useState<PaymentFilterTab>("All");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ["paymentsData"],
     queryFn: fetchPaymentsLedger,
     staleTime: 30_000,
@@ -150,6 +150,7 @@ export function usePayments() {
     searchQuery,
     setSearchQuery,
     isLoading,
+    isFetching,
     isError,
     refetch,
   };

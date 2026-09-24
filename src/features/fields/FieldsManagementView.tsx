@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PageHeader, FilterPills, MetricCard } from "@/components/common";
+import { PageHeader, FilterPills, MetricCard, RefreshButton } from "@/components/common";
 import { useFields, cropFilterOptions } from "./hooks/useFields";
 import { FieldFormModal } from "./components/FieldFormModal";
 import { DeleteFieldDialog } from "./components/DeleteFieldDialog";
@@ -42,6 +42,7 @@ export function FieldsManagementView() {
     pagination,
     totalCount,
     isLoading,
+    isFetching,
     isError,
     error,
     metrics,
@@ -112,6 +113,7 @@ export function FieldsManagementView() {
       }
     } catch (err: any) {
       showToast(err?.data?.message || err?.message || "Failed to save field.", "error");
+      throw err;
     }
   };
 
@@ -166,18 +168,13 @@ export function FieldsManagementView() {
         description="Agricultural land parcels, crop allocations, GPS boundaries, and farmer ownership"
         actions={
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => refetch()}
-              disabled={isLoading}
-              className="flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 rounded-xl bg-white text-slate-700 text-xs font-normal hover:bg-slate-50 disabled:opacity-50 transition-all cursor-pointer shadow-2xs"
-              title="Refresh fields"
-            >
-              <RefreshCw
-                className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-emerald-600" : ""}`}
-              />
-              <span>Refresh</span>
-            </button>
+            <RefreshButton
+              onRefresh={() => refetch()}
+              isLoading={isLoading}
+              isFetching={isFetching}
+              label="Refresh"
+              title="Refresh agricultural fields list"
+            />
 
             <button
               type="button"

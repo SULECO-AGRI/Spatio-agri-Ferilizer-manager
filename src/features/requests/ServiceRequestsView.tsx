@@ -12,7 +12,7 @@ import {
   ChevronRight,
   X,
 } from "lucide-react";
-import { PageHeader, FilterPills, TableToolbar } from "@/components/common";
+import { PageHeader, FilterPills, TableToolbar, RefreshButton } from "@/components/common";
 import { useServiceRequests, requestFilterTabs } from "./hooks/useServiceRequests";
 import { RequestsTable } from "./components/RequestsTable";
 import { RequestDetailsView } from "./RequestDetailsView";
@@ -37,6 +37,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
     summary,
     pagination,
     isLoading,
+    isFetching,
     isError,
     error,
     refetch,
@@ -175,17 +176,14 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
           description="All farmer requests awaiting validation, pilot assignment or field execution"
         />
 
-        <button
-          type="button"
-          onClick={() => refetch()}
-          disabled={isLoading}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium shadow-2xs transition-colors cursor-pointer disabled:opacity-60 self-start sm:self-auto"
-        >
-          <RefreshCw
-            className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-emerald-600" : ""}`}
-          />
-          <span>Refresh</span>
-        </button>
+        <RefreshButton
+          onRefresh={() => refetch()}
+          isLoading={isLoading}
+          isFetching={isFetching}
+          label="Refresh"
+          title="Refresh service requests"
+          className="self-start sm:self-auto"
+        />
       </div>
 
       {/* Summary KPI Metric Counters */}

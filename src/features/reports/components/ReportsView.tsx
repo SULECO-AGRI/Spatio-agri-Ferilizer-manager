@@ -11,7 +11,7 @@ import {
   Search,
   AlertCircle,
 } from "lucide-react";
-import { PageHeader, MetricCard } from "@/components/common";
+import { PageHeader, MetricCard, RefreshButton } from "@/components/common";
 import { BarChart, LineChart } from "@/components/charts";
 import { useReportsAnalytics } from "../hooks/useReportsAnalytics";
 
@@ -54,6 +54,7 @@ export function ReportsView() {
     setSearchQuery,
     isLoading,
     isTableLoading,
+    isFetching,
     isError,
     error,
     lastUpdated,
@@ -118,18 +119,13 @@ export function ReportsView() {
           <span className="text-xs text-slate-400 font-mono hidden md:inline-block">
             Updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : "Just now"}
           </span>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            disabled={isLoading}
-            className="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-medium shadow-2xs transition-all cursor-pointer disabled:opacity-60"
+          <RefreshButton
+            onRefresh={() => refetch()}
+            isLoading={isLoading || isTableLoading}
+            isFetching={isFetching}
+            label="Sync Live Data"
             title="Refresh live analytics data"
-          >
-            <RefreshCw
-              className={`w-3.5 h-3.5 text-emerald-600 ${isLoading ? "animate-spin" : ""}`}
-            />
-            <span>{isLoading ? "Syncing..." : "Sync Live Data"}</span>
-          </button>
+          />
         </div>
       </div>
 

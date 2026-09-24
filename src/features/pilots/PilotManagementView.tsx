@@ -8,7 +8,7 @@ import {
   Loader2,
   CheckCircle2,
 } from "lucide-react";
-import { PageHeader, FilterPills, TableToolbar } from "@/components/common";
+import { PageHeader, FilterPills, TableToolbar, RefreshButton } from "@/components/common";
 import { usePilots, pilotFilterTabs } from "./hooks/usePilots";
 import { PilotCard } from "./PilotCard";
 import { PilotDetailsView } from "./PilotDetailsView";
@@ -25,6 +25,7 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
     pagination,
     totalCount,
     isLoading,
+    isFetching,
     isError,
     error,
     refetch,
@@ -113,18 +114,13 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
         title="Pilot Management"
         description="All registered drone pilots, availability status, and fleet telemetry"
         actions={
-          <button
-            type="button"
-            onClick={() => refetch()}
-            disabled={isLoading}
-            className="flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 rounded-xl bg-white text-slate-700 text-xs font-normal hover:bg-slate-50 disabled:opacity-50 transition-all cursor-pointer shadow-2xs"
-            title="Refresh list"
-          >
-            <RefreshCw
-              className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-emerald-600" : ""}`}
-            />
-            <span>Refresh</span>
-          </button>
+          <RefreshButton
+            onRefresh={() => refetch()}
+            isLoading={isLoading}
+            isFetching={isFetching}
+            label="Refresh"
+            title="Refresh fleet and pilot records"
+          />
         }
       />
 

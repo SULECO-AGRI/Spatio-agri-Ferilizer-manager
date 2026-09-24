@@ -1,8 +1,8 @@
-import { PageHeader, FilterPills, TableToolbar } from "@/components/common";
+import { PageHeader, FilterPills, TableToolbar, RefreshButton } from "@/components/common";
 import { usePayments, paymentFilterTabs } from "./hooks/usePayments";
 import { PaymentsMetricsRow } from "./components/PaymentsMetricsRow";
 import { TransactionsTable } from "./components/TransactionsTable";
-import { RefreshCw, AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 export function PaymentsView() {
   const {
@@ -14,6 +14,7 @@ export function PaymentsView() {
     searchQuery,
     setSearchQuery,
     isLoading,
+    isFetching,
     isError,
     refetch,
   } = usePayments();
@@ -26,17 +27,14 @@ export function PaymentsView() {
           description="Farmer service billing, pilot payout ledgers, and dynamic accounts status"
         />
 
-        <button
-          type="button"
-          onClick={() => refetch()}
-          disabled={isLoading}
-          className="self-start sm:self-auto inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-medium shadow-2xs transition-all cursor-pointer disabled:opacity-60"
-        >
-          <RefreshCw
-            className={`w-3.5 h-3.5 text-emerald-600 ${isLoading ? "animate-spin" : ""}`}
-          />
-          <span>{isLoading ? "Syncing..." : "Sync Ledgers"}</span>
-        </button>
+        <RefreshButton
+          onRefresh={() => refetch()}
+          isLoading={isLoading}
+          isFetching={isFetching}
+          label="Sync Ledgers"
+          title="Refresh ledger and transactions data"
+          className="self-start sm:self-auto"
+        />
       </div>
 
       {isError && (
@@ -63,7 +61,7 @@ export function PaymentsView() {
       {/* Main Transactions Table */}
       {isLoading ? (
         <div className="p-12 text-center bg-white border border-slate-200/80 rounded-2xl text-xs text-slate-400">
-          <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-emerald-500" />
+          <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-emerald-500" />
           Loading transactions & payout ledgers...
         </div>
       ) : (

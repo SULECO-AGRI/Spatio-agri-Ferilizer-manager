@@ -57,7 +57,7 @@ export const requestApi = baseApi.injectEndpoints({
 
     getCandidatePilots: builder.query<CandidatePilot[], number | string>({
       query: (requestId) => ({
-        url: `/admin/service-requests/${requestId}/candidate-pilots`,
+        url: `/service-requests/${requestId}/candidate-pilots`,
         method: "GET",
       }),
       transformResponse: (response: CandidatePilotsResponse | any) => {
@@ -106,13 +106,15 @@ export const requestApi = baseApi.injectEndpoints({
           const rating = !isNaN(rawRating) && rawRating > 0 ? Number(rawRating.toFixed(1)) : 0;
 
           const rawMissions = Number(
-            c.totalMissions ??
-              c.completedMissions ??
-              profile.totalMissions ??
+            c.completedMissions ??
+              c.totalMissions ??
               profile.completedMissions ??
+              profile.totalMissions ??
               0,
           );
           const totalMissions = !isNaN(rawMissions) ? rawMissions : 0;
+          const completedMissions = totalMissions;
+          const totalFlightHours = Number(c.totalFlightHours ?? profile.totalFlightHours ?? 0);
 
           let matchScore = Number(c.matchScore ?? c.matchPercentage ?? c.match ?? 0);
           if (matchScore > 0 && matchScore <= 1) {
@@ -121,6 +123,16 @@ export const requestApi = baseApi.injectEndpoints({
           if (isNaN(matchScore) || matchScore < 0) {
             matchScore = 0;
           }
+          matchScore = Math.min(100, Math.max(0, matchScore));
+
+          const recommendationBadge = c.recommendationBadge
+            ? String(c.recommendationBadge)
+            : undefined;
+          const coverageType = c.coverageType ? String(c.coverageType) : undefined;
+          const scoreBreakdown =
+            c.scoreBreakdown && typeof c.scoreBreakdown === "object"
+              ? (c.scoreBreakdown as any)
+              : undefined;
 
           return {
             pilotId,
@@ -131,8 +143,13 @@ export const requestApi = baseApi.injectEndpoints({
             distanceKm,
             rating,
             totalMissions,
-            matchScore: Math.round(matchScore),
-            status: String(c.status || "AVAILABLE"),
+            completedMissions,
+            totalFlightHours,
+            matchScore: Math.round(matchScore * 10) / 10,
+            coverageType,
+            recommendationBadge,
+            scoreBreakdown,
+            status: String(c.status || "ACTIVE"),
             availabilityStatus: String(c.availabilityStatus || "READY"),
           };
         });
@@ -150,12 +167,17 @@ export const requestApi = baseApi.injectEndpoints({
       { requestId: number | string; pilotId: number | string }
     >({
       query: ({ requestId, pilotId }) => ({
-        url: `/admin/service-requests/${requestId}/assign`,
+        url: `/service-requests/${requestId}/assign`,
         method: "POST",
         body: { pilotId: Number(pilotId) },
       }),
       transformResponse: (response: AssignPilotResponse | any) => {
-        return response?.data?.serviceRequest || response?.data?.request || response?.data || response;
+        return (
+          response?.data?.serviceRequest ||
+          response?.data?.request ||
+          response?.data ||
+          response
+        );
       },
       invalidatesTags: (_result, _error, { requestId }) => [
         { type: "Requests" as const, id: requestId },

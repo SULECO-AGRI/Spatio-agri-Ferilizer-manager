@@ -49,13 +49,14 @@ export function AssignPilotModal({
   }, []);
 
   useEffect(() => {
-    if (isOpen && request?.requestId) {
-      fetchCandidates(request.requestId);
+    const reqId = request?.requestId || (request as any)?.id;
+    if (isOpen && reqId) {
+      fetchCandidates(reqId);
       setSearchQuery("");
       setSortBy("match");
       setAssigningPilotId(null);
     }
-  }, [isOpen, request?.requestId, fetchCandidates]);
+  }, [isOpen, request, fetchCandidates]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -266,16 +267,15 @@ export function AssignPilotModal({
                 return (
                   <div
                     key={pilot.pilotId}
-                    className={`relative p-4 rounded-xl border transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                      isTopMatch
+                    className={`relative p-4 rounded-xl border transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-4 ${isTopMatch
                         ? "bg-emerald-50/50 border-emerald-300/80 shadow-xs"
                         : "bg-white border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xs"
-                    }`}
+                      }`}
                   >
                     {/* Left details */}
                     <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
-                      {/* Rank & Initials */}
-                      <div className="relative shrink-0">
+                      {/* Avatar with Initials */}
+                      <div className="shrink-0">
                         <div
                           className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm ${
                             isTopMatch
@@ -285,46 +285,41 @@ export function AssignPilotModal({
                         >
                           {initials}
                         </div>
-                        <span className="absolute -top-1.5 -left-1.5 px-1.5 py-0.2 rounded-full bg-slate-700 text-[9px] font-mono text-white font-bold shadow-2xs">
-                          #{index + 1}
-                        </span>
                       </div>
 
                       {/* Pilot Info */}
                       <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-2">
                           <h4 className="text-sm font-semibold text-slate-900 truncate">
                             {pilot.fullName}
                           </h4>
                           {isTopMatch && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold border border-emerald-300/50">
-                              Best Match
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-medium border border-emerald-200">
+                              Top Match
                             </span>
                           )}
                         </div>
 
-                        {/* Badges / Metrics Row */}
-                        <div className="flex items-center gap-3 text-xs text-slate-500 flex-wrap pt-0.5">
-                          {/* Distance */}
-                          <div className="text-slate-600 font-medium">
-                            <span>{pilot.distanceKm} km away</span>
-                          </div>
-
-                          {/* Star Rating */}
-                          <div className="text-amber-700 font-semibold font-mono">
-                            <span>Rating: {pilot.rating.toFixed(1)} / 5.0</span>
-                          </div>
-
-                          {/* Completed Missions Experience */}
-                          <div className="text-slate-600">
-                            <span>{pilot.totalMissions} missions</span>
-                          </div>
-
-                          {/* Contact Info (if available) */}
+                        {/* Clean Metadata Line */}
+                        <div className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
+                          <span className="text-slate-700 font-medium">
+                            {pilot.distanceKm} km away
+                          </span>
+                          <span className="text-slate-300">•</span>
+                          <span className="text-slate-600">
+                            Rating {pilot.rating.toFixed(1)}
+                          </span>
+                          <span className="text-slate-300">•</span>
+                          <span className="text-slate-500">
+                            {pilot.completedMissions ?? pilot.totalMissions} missions
+                          </span>
                           {pilot.mobile && (
-                            <div className="text-slate-400 text-[11px] hidden sm:block">
-                              <span>{pilot.mobile}</span>
-                            </div>
+                            <>
+                              <span className="text-slate-300">•</span>
+                              <span className="text-slate-500 font-mono text-[11px]">
+                                {pilot.mobile}
+                              </span>
+                            </>
                           )}
                         </div>
                       </div>
@@ -334,17 +329,25 @@ export function AssignPilotModal({
                     <div className="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
                       {/* Overall Match Percentage Badge */}
                       <div className="text-right">
-                        <div
-                          className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold font-mono tracking-tight ${
-                            pilot.matchScore >= 90
-                              ? "bg-emerald-100 text-emerald-800 border border-emerald-300/60"
-                              : pilot.matchScore >= 75
-                                ? "bg-blue-100 text-blue-800 border border-blue-200"
-                                : "bg-slate-100 text-slate-700 border border-slate-200"
-                          }`}
-                        >
-                          <span>{pilot.matchScore}% Match</span>
-                        </div>
+                        {(() => {
+                          const displayScore = Math.min(
+                            100,
+                            Math.max(0, Math.round(pilot.matchScore)),
+                          );
+                          return (
+                            <div
+                              className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold font-mono tracking-tight ${
+                                displayScore >= 90
+                                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                                  : displayScore >= 75
+                                    ? "bg-blue-50 text-blue-800 border border-blue-200"
+                                    : "bg-slate-100 text-slate-700 border border-slate-200"
+                              }`}
+                            >
+                              <span>{displayScore}% Match</span>
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       {/* Assign CTA Button */}
@@ -352,11 +355,10 @@ export function AssignPilotModal({
                         type="button"
                         onClick={() => handleAssign(pilot)}
                         disabled={Boolean(assigningPilotId)}
-                        className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer shadow-xs disabled:opacity-60 ${
-                          isTopMatch
+                        className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer shadow-xs disabled:opacity-60 ${isTopMatch
                             ? "bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-semibold"
                             : "bg-[#062419] hover:bg-[#0c3c2b] text-white"
-                        }`}
+                          }`}
                       >
                         {isAssigning ? (
                           <>

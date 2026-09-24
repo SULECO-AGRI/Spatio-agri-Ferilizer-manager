@@ -66,6 +66,7 @@ export function useReportsAnalytics(options: UseReportsAnalyticsOptions = {}) {
   const {
     data: overviewData,
     isLoading: isOverviewLoading,
+    isFetching: isOverviewFetching,
     isError: isOverviewError,
     error: overviewError,
     refetch: refetchOverview,
@@ -84,6 +85,7 @@ export function useReportsAnalytics(options: UseReportsAnalyticsOptions = {}) {
   const {
     data: tableData,
     isLoading: isTableLoading,
+    isFetching: isTableFetching,
     refetch: refetchTable,
   } = useQuery({
     queryKey: tableQueryKey,
@@ -184,6 +186,7 @@ export function useReportsAnalytics(options: UseReportsAnalyticsOptions = {}) {
     setSearchQuery,
     isLoading: isOverviewLoading,
     isTableLoading,
+    isFetching: isOverviewFetching || isTableFetching,
     isError: isOverviewError,
     error:
       overviewError instanceof Error

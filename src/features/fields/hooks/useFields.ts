@@ -116,14 +116,10 @@ export function useFields(options: UseFieldsOptions = {}) {
   const createField = useCallback(
     async (dto: CreateFieldDTO): Promise<Field> => {
       const result = await triggerCreateField(dto).unwrap();
-      try {
-        await refetch();
-      } catch {
-        // refetch error ignored
-      }
+      setPage(1);
       return result;
     },
-    [triggerCreateField, refetch],
+    [triggerCreateField],
   );
 
   const updateField = useCallback(
@@ -134,14 +130,9 @@ export function useFields(options: UseFieldsOptions = {}) {
           ? { ...prev, ...result }
           : prev,
       );
-      try {
-        await refetch();
-      } catch {
-        // refetch error ignored
-      }
       return result;
     },
-    [triggerUpdateField, refetch],
+    [triggerUpdateField],
   );
 
   const deleteField = useCallback(
