@@ -24,11 +24,12 @@ export function DeleteRequestDialog({
 
   const handleConfirm = async () => {
     setErrorMsg(null);
+    const id = request.requestId;
+    onClose();
     try {
-      await onConfirm(request.requestId);
-      onClose();
+      await onConfirm(id);
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "Failed to delete service request.");
+      console.error("Failed to delete service request:", err);
     }
   };
 

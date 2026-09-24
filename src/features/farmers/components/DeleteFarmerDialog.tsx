@@ -35,11 +35,12 @@ export function DeleteFarmerDialog({
 
   const handleConfirm = async () => {
     setErrorMsg(null);
+    const id = farmer.userId;
+    onClose();
     try {
-      await onConfirm(farmer.userId);
-      onClose();
+      await onConfirm(id);
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "Failed to delete farmer.");
+      console.error("Failed to delete farmer:", err);
     }
   };
 

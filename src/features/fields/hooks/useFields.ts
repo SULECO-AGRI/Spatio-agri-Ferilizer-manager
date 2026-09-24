@@ -85,7 +85,9 @@ export function useFields(options: UseFieldsOptions = {}) {
     isError,
     error: queryError,
     refetch,
-  } = useGetFieldsQuery(queryParams);
+  } = useGetFieldsQuery(queryParams, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const fields = useMemo(() => data?.fields || [], [data?.fields]);
   const pagination = useMemo(() => data?.pagination || defaultPagination, [data?.pagination]);
@@ -113,9 +115,15 @@ export function useFields(options: UseFieldsOptions = {}) {
 
   const createField = useCallback(
     async (dto: CreateFieldDTO): Promise<Field> => {
-      return await triggerCreateField(dto).unwrap();
+      const result = await triggerCreateField(dto).unwrap();
+      try {
+        await refetch();
+      } catch {
+        // refetch error ignored
+      }
+      return result;
     },
-    [triggerCreateField],
+    [triggerCreateField, refetch],
   );
 
   const updateField = useCallback(
@@ -126,19 +134,27 @@ export function useFields(options: UseFieldsOptions = {}) {
           ? { ...prev, ...result }
           : prev,
       );
+      try {
+        await refetch();
+      } catch {
+        // refetch error ignored
+      }
       return result;
     },
-    [triggerUpdateField],
+    [triggerUpdateField, refetch],
   );
 
   const deleteField = useCallback(
     async (id: number | string): Promise<void> => {
-      await triggerDeleteField(id).unwrap();
       setSelectedFieldState((prev) =>
         prev && (prev.id === Number(id) || String(prev.id) === String(id)) ? null : prev,
       );
+      if (fields.length === 1 && page > 1) {
+        setPage((prev) => Math.max(1, prev - 1));
+      }
+      await triggerDeleteField(id).unwrap();
     },
-    [triggerDeleteField],
+    [triggerDeleteField, fields.length, page],
   );
 
   // Computed summary metrics

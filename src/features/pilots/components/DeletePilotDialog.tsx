@@ -34,11 +34,12 @@ export function DeletePilotDialog({
 
   const handleConfirm = async () => {
     setErrorMsg(null);
+    const id = pilot.userId;
+    onClose();
     try {
-      await onConfirm(pilot.userId);
-      onClose();
+      await onConfirm(id);
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "Failed to delete pilot.");
+      console.error("Failed to delete pilot:", err);
     }
   };
 

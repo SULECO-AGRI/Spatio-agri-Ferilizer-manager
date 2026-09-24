@@ -1,4 +1,5 @@
 import { baseApi } from "@/store/api/baseApi";
+import { normalizeField } from "@/services/fieldService";
 import type {
   Field,
   FieldsListResponse,
@@ -32,7 +33,17 @@ export const fieldApi = baseApi.injectEndpoints({
       },
       transformResponse: (response: FieldsListResponse | { data: FieldsListResponse["data"] }) => {
         if ("data" in response && response.data) {
-          return response.data;
+          const rawFields = Array.isArray(response.data.fields) ? response.data.fields : [];
+          return {
+            ...response.data,
+            fields: rawFields.map(normalizeField),
+          };
+        }
+        if ("fields" in response && Array.isArray(response.fields)) {
+          return {
+            ...response,
+            fields: response.fields.map(normalizeField),
+          } as unknown as FieldsListResponse["data"];
         }
         return response as unknown as FieldsListResponse["data"];
       },
@@ -50,14 +61,16 @@ export const fieldApi = baseApi.injectEndpoints({
         url: `/fields/${id}`,
         method: "GET",
       }),
-      transformResponse: (response: { status: string; data: { field: Field } } | { field: Field } | Field) => {
+      transformResponse: (
+        response: { status: string; data: { field: Field } } | { field: Field } | Field,
+      ) => {
         if ("data" in response && response.data && "field" in response.data) {
-          return response.data.field;
+          return normalizeField(response.data.field);
         }
         if ("field" in response) {
-          return response.field;
+          return normalizeField(response.field);
         }
-        return response as Field;
+        return normalizeField(response);
       },
       providesTags: (_result, _error, id) => [{ type: "Fields" as const, id }],
     }),
@@ -68,20 +81,60 @@ export const fieldApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      transformResponse: (response: { status: string; data: { field: Field } } | { field: Field } | Field) => {
+      transformResponse: (
+        response: { status: string; data: { field: Field } } | { field: Field } | Field,
+      ) => {
         if ("data" in response && response.data && "field" in response.data) {
-          return response.data.field;
+          return normalizeField(response.data.field);
         }
         if ("field" in response) {
-          return response.field;
+          return normalizeField(response.field);
         }
-        return response as Field;
+        return normalizeField(response);
       },
       invalidatesTags: [
         { type: "Fields" as const, id: "LIST" },
         { type: "Analytics" as const },
         { type: "Farmers" as const },
       ],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled, getState }) {
+        try {
+          const { data: createdRaw } = await queryFulfilled;
+          const normalized = normalizeField(createdRaw);
+
+          // Eagerly update all cached getFields entries in the RTK Query cache
+          const state = getState() as any;
+          const apiState = state.api || state[baseApi.reducerPath];
+          if (apiState?.queries) {
+            Object.keys(apiState.queries).forEach((key) => {
+              if (key.startsWith("getFields(")) {
+                const originalArgs = apiState.queries[key]?.originalArgs;
+                dispatch(
+                  fieldApi.util.updateQueryData(
+                    "getFields" as any,
+                    originalArgs,
+                    (draft: any) => {
+                      if (draft && Array.isArray(draft.fields)) {
+                        const exists = draft.fields.some(
+                          (f: any) => f.id === normalized.id || (normalized.id && String(f.id) === String(normalized.id)),
+                        );
+                        if (!exists) {
+                          draft.fields.unshift(normalized);
+                          if (draft.pagination) {
+                            draft.pagination.total = (draft.pagination.total || 0) + 1;
+                          }
+                        }
+                      }
+                    },
+                  ),
+                );
+              }
+            });
+          }
+        } catch {
+          // Ignore failed mutation cache updates
+        }
+      },
     }),
 
     updateField: builder.mutation<Field, { id: number | string; data: UpdateFieldDTO }>({
@@ -90,20 +143,56 @@ export const fieldApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      transformResponse: (response: { status: string; data: { field: Field } } | { field: Field } | Field) => {
+      transformResponse: (
+        response: { status: string; data: { field: Field } } | { field: Field } | Field,
+      ) => {
         if ("data" in response && response.data && "field" in response.data) {
-          return response.data.field;
+          return normalizeField(response.data.field);
         }
         if ("field" in response) {
-          return response.field;
+          return normalizeField(response.field);
         }
-        return response as Field;
+        return normalizeField(response);
       },
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Fields" as const, id },
         { type: "Fields" as const, id: "LIST" },
         { type: "Analytics" as const },
       ],
+      async onQueryStarted({ id }, { dispatch, queryFulfilled, getState }) {
+        try {
+          const { data: updatedRaw } = await queryFulfilled;
+          const normalized = normalizeField(updatedRaw);
+
+          const state = getState() as any;
+          const apiState = state.api || state[baseApi.reducerPath];
+          if (apiState?.queries) {
+            Object.keys(apiState.queries).forEach((key) => {
+              if (key.startsWith("getFields(")) {
+                const originalArgs = apiState.queries[key]?.originalArgs;
+                dispatch(
+                  fieldApi.util.updateQueryData(
+                    "getFields" as any,
+                    originalArgs,
+                    (draft: any) => {
+                      if (draft && Array.isArray(draft.fields)) {
+                        const idx = draft.fields.findIndex(
+                          (f: any) => f.id === Number(id) || String(f.id) === String(id),
+                        );
+                        if (idx !== -1) {
+                          draft.fields[idx] = { ...draft.fields[idx], ...normalized };
+                        }
+                      }
+                    },
+                  ),
+                );
+              }
+            });
+          }
+        } catch {
+          // Ignore
+        }
+      },
     }),
 
     deleteField: builder.mutation<{ success: boolean; message?: string }, number | string>({
@@ -116,6 +205,46 @@ export const fieldApi = baseApi.injectEndpoints({
         { type: "Analytics" as const },
         { type: "Farmers" as const },
       ],
+      async onQueryStarted(id, { dispatch, queryFulfilled, getState }) {
+        const patches: Array<{ undo: () => void }> = [];
+        const state = getState() as any;
+        const queries = state?.api?.queries || state?.[baseApi.reducerPath]?.queries || {};
+
+        // Optimistically remove the deleted field from all cached getFields queries immediately
+        Object.keys(queries).forEach((queryKey) => {
+          if (queryKey.startsWith("getFields(")) {
+            const originalArgs = queries[queryKey]?.originalArgs;
+            const patch = dispatch(
+              fieldApi.util.updateQueryData(
+                "getFields" as any,
+                originalArgs,
+                (draft: any) => {
+                  if (draft && Array.isArray(draft.fields)) {
+                    draft.fields = draft.fields.filter(
+                      (f: any) =>
+                        f.id !== Number(id) &&
+                        String(f.id) !== String(id) &&
+                        f.field_id !== Number(id) &&
+                        String(f.field_id) !== String(id),
+                    );
+                    if (draft.pagination && draft.pagination.total > 0) {
+                      draft.pagination.total = draft.pagination.total - 1;
+                    }
+                  }
+                },
+              ),
+            );
+            patches.push(patch);
+          }
+        });
+
+        try {
+          await queryFulfilled;
+        } catch {
+          // Revert optimistic updates if server deletion fails
+          patches.forEach((patch) => patch.undo());
+        }
+      },
     }),
   }),
 });
@@ -128,3 +257,4 @@ export const {
   useUpdateFieldMutation,
   useDeleteFieldMutation,
 } = fieldApi;
+

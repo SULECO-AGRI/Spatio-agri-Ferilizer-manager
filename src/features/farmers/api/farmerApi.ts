@@ -67,6 +67,44 @@ export const farmerApi = baseApi.injectEndpoints({
         { type: "Fields" as const, id: "LIST" },
         { type: "Analytics" as const },
       ],
+      async onQueryStarted(farmerId, { dispatch, queryFulfilled, getState }) {
+        const patches: Array<{ undo: () => void }> = [];
+        const state = getState() as any;
+        const queries = state?.api?.queries || state?.[baseApi.reducerPath]?.queries || {};
+
+        Object.keys(queries).forEach((queryKey) => {
+          if (queryKey.startsWith("getFarmers(")) {
+            const originalArgs = queries[queryKey]?.originalArgs;
+            const patch = dispatch(
+              farmerApi.util.updateQueryData(
+                "getFarmers" as any,
+                originalArgs,
+                (draft: any) => {
+                  if (draft && Array.isArray(draft.farmers)) {
+                    draft.farmers = draft.farmers.filter(
+                      (f: any) =>
+                        f.userId !== Number(farmerId) &&
+                        String(f.userId) !== String(farmerId) &&
+                        f.id !== Number(farmerId) &&
+                        String(f.id) !== String(farmerId),
+                    );
+                    if (draft.pagination && draft.pagination.total > 0) {
+                      draft.pagination.total = draft.pagination.total - 1;
+                    }
+                  }
+                },
+              ),
+            );
+            patches.push(patch);
+          }
+        });
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patches.forEach((p) => p.undo());
+        }
+      },
     }),
   }),
 });

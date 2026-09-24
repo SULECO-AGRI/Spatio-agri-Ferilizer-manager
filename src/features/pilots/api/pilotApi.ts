@@ -113,6 +113,44 @@ export const pilotApi = baseApi.injectEndpoints({
         method: "DELETE",
       }),
       invalidatesTags: [{ type: "Pilots" as const, id: "LIST" }],
+      async onQueryStarted(id, { dispatch, queryFulfilled, getState }) {
+        const patches: Array<{ undo: () => void }> = [];
+        const state = getState() as any;
+        const queries = state?.api?.queries || state?.[baseApi.reducerPath]?.queries || {};
+
+        Object.keys(queries).forEach((queryKey) => {
+          if (queryKey.startsWith("getPilots(")) {
+            const originalArgs = queries[queryKey]?.originalArgs;
+            const patch = dispatch(
+              pilotApi.util.updateQueryData(
+                "getPilots" as any,
+                originalArgs,
+                (draft: any) => {
+                  if (draft && Array.isArray(draft.pilots)) {
+                    draft.pilots = draft.pilots.filter(
+                      (p: any) =>
+                        p.userId !== Number(id) &&
+                        String(p.userId) !== String(id) &&
+                        p.id !== Number(id) &&
+                        String(p.id) !== String(id),
+                    );
+                    if (draft.pagination && draft.pagination.total > 0) {
+                      draft.pagination.total = draft.pagination.total - 1;
+                    }
+                  }
+                },
+              ),
+            );
+            patches.push(patch);
+          }
+        });
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patches.forEach((p) => p.undo());
+        }
+      },
     }),
   }),
 });

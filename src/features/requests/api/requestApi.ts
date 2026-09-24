@@ -177,6 +177,44 @@ export const requestApi = baseApi.injectEndpoints({
         { type: "Requests" as const, id: "LIST" },
         { type: "Analytics" as const },
       ],
+      async onQueryStarted(id, { dispatch, queryFulfilled, getState }) {
+        const patches: Array<{ undo: () => void }> = [];
+        const state = getState() as any;
+        const queries = state?.api?.queries || state?.[baseApi.reducerPath]?.queries || {};
+
+        Object.keys(queries).forEach((queryKey) => {
+          if (queryKey.startsWith("getServiceRequests(")) {
+            const originalArgs = queries[queryKey]?.originalArgs;
+            const patch = dispatch(
+              requestApi.util.updateQueryData(
+                "getServiceRequests" as any,
+                originalArgs,
+                (draft: any) => {
+                  if (draft && Array.isArray(draft.requests)) {
+                    draft.requests = draft.requests.filter(
+                      (r: any) =>
+                        r.requestId !== Number(id) &&
+                        String(r.requestId) !== String(id) &&
+                        r.id !== Number(id) &&
+                        String(r.id) !== String(id),
+                    );
+                    if (draft.pagination && draft.pagination.total > 0) {
+                      draft.pagination.total = draft.pagination.total - 1;
+                    }
+                  }
+                },
+              ),
+            );
+            patches.push(patch);
+          }
+        });
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patches.forEach((p) => p.undo());
+        }
+      },
     }),
   }),
 });

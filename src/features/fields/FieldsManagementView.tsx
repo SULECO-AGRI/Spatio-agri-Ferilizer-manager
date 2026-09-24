@@ -13,7 +13,9 @@ import {
   Eye,
   Map,
   CheckCircle2,
+  X,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { PageHeader, FilterPills, MetricCard } from "@/components/common";
 import { useFields, cropFilterOptions } from "./hooks/useFields";
 import { FieldFormModal } from "./components/FieldFormModal";
@@ -70,13 +72,13 @@ export function FieldsManagementView() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [fieldToView, setFieldToView] = useState<Field | null>(null);
 
-  const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  const showToast = (message: string) => {
-    setSuccessToast(message);
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type });
     setTimeout(() => {
-      setSuccessToast(null);
-    }, 4000);
+      setToast(null);
+    }, 4500);
   };
 
   const handleOpenAdd = () => {
@@ -100,18 +102,26 @@ export function FieldsManagementView() {
   };
 
   const handleFormSubmit = async (data: CreateFieldDTO | UpdateFieldDTO) => {
-    if (editingField) {
-      await updateField(editingField.id, data as UpdateFieldDTO);
-      showToast(`Field "${data.field_name}" updated successfully.`);
-    } else {
-      await createField(data as CreateFieldDTO);
-      showToast(`Field "${data.field_name}" registered successfully.`);
+    try {
+      if (editingField) {
+        await updateField(editingField.id, data as UpdateFieldDTO);
+        showToast(`Field "${data.field_name}" updated successfully.`);
+      } else {
+        await createField(data as CreateFieldDTO);
+        showToast(`Field "${data.field_name}" registered successfully.`);
+      }
+    } catch (err: any) {
+      showToast(err?.data?.message || err?.message || "Failed to save field.", "error");
     }
   };
 
   const handleDeleteConfirm = async (fieldId: number | string) => {
-    await deleteField(fieldId);
-    showToast("Field parcel deleted successfully.");
+    try {
+      await deleteField(fieldId);
+      showToast("Field parcel removed successfully.");
+    } catch (err: any) {
+      showToast(err?.data?.message || err?.message || "Failed to delete field parcel.", "error");
+    }
   };
 
   const startItem = totalCount === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
@@ -119,13 +129,36 @@ export function FieldsManagementView() {
 
   return (
     <div className="space-y-6 md:space-y-8 font-sans animate-in fade-in duration-300">
-      {/* Toast Notification */}
-      {successToast && (
-        <div className="fixed top-5 right-5 z-50 bg-[#062419] text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 text-xs font-medium animate-in slide-in-from-top-2 duration-200">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{successToast}</span>
-        </div>
-      )}
+      {/* Floating Animated Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -16, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.95 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+            className={`fixed top-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-xl backdrop-blur-md flex items-center gap-3 text-xs font-medium border ${
+              toast.type === "error"
+                ? "bg-rose-950/90 text-rose-100 border-rose-800/80 shadow-rose-950/30"
+                : "bg-[#062419]/95 text-white border-emerald-800/60 shadow-emerald-950/30"
+            }`}
+          >
+            {toast.type === "error" ? (
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            )}
+            <span>{toast.message}</span>
+            <button
+              type="button"
+              onClick={() => setToast(null)}
+              className="text-white/60 hover:text-white ml-2 p-0.5 rounded cursor-pointer transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Page Header */}
       <PageHeader
@@ -304,125 +337,143 @@ export function FieldsManagementView() {
                 </td>
               </tr>
             ) : (
-              fields.map((f) => {
-                const isBusyDeleting = deletingFieldId === f.id;
-                const initials = (f.farmer?.fullName || "FA")
-                  .split(" ")
-                  .map((w) => w[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase();
+              <AnimatePresence mode="popLayout" initial={false}>
+                {fields.map((f) => {
+                  const isBusyDeleting = deletingFieldId === f.id;
+                  const farmerDisplayName =
+                    f.farmer?.fullName ||
+                    (f.farmer_id || f.farmerId
+                      ? `Farmer #${f.farmer_id || f.farmerId}`
+                      : "Registered Farmer");
+                  const initials =
+                    farmerDisplayName
+                      .split(" ")
+                      .map((w) => w[0])
+                      .filter(Boolean)
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase() || "FA";
 
-                return (
-                  <tr
-                    key={f.id}
-                    className="hover:bg-slate-50/70 transition-colors group cursor-pointer"
-                    onClick={() => handleOpenDetails(f)}
-                  >
-                    {/* Field Identifier & Name */}
-                    <td className="py-4 px-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-800 font-semibold text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
-                          <Sprout className="w-4 h-4" />
+                  return (
+                    <motion.tr
+                      key={f.id}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{
+                        opacity: 0,
+                        x: -24,
+                        backgroundColor: "rgba(254, 242, 242, 0.75)",
+                        transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
+                      }}
+                      className="hover:bg-slate-50/70 transition-colors group cursor-pointer"
+                      onClick={() => handleOpenDetails(f)}
+                    >
+                      {/* Field Identifier & Name */}
+                      <td className="py-4 px-5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-800 font-semibold text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                            <Sprout className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-slate-900 group-hover:text-emerald-800 transition-colors">
+                              {f.field_name || f.fieldName}
+                            </p>
+                            <p className="text-[11px] text-slate-400 font-mono mt-0.5">ID #{f.id}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-slate-900 group-hover:text-emerald-800 transition-colors">
-                            {f.field_name || f.fieldName}
+                      </td>
+
+                      {/* Farmer / Owner */}
+                      <td className="py-4 px-5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-semibold text-slate-700 shrink-0 border border-slate-200">
+                            {initials}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-slate-800 font-medium truncate max-w-[140px]">
+                              {farmerDisplayName}
+                            </p>
+                            <p className="text-[10px] text-slate-400 truncate max-w-[140px]">
+                              {f.farmer?.mobile || f.farmer?.email || "No contact"}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Division / District */}
+                      <td className="py-4 px-5">
+                        <div className="space-y-0.5">
+                          <p className="text-slate-700 font-medium">{f.district || "Matara"}</p>
+                          <p className="text-[10px] text-slate-400">
+                            {f.city || f.village || f.province || "Southern"}
                           </p>
-                          <p className="text-[11px] text-slate-400 font-mono mt-0.5">ID #{f.id}</p>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Farmer / Owner */}
-                    <td className="py-4 px-5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-semibold text-slate-700 shrink-0 border border-slate-200">
-                          {initials}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-slate-800 font-medium truncate max-w-[140px]">
-                            {f.farmer?.fullName || `Farmer #${f.farmer_id}`}
-                          </p>
-                          <p className="text-[10px] text-slate-400 truncate max-w-[140px]">
-                            {f.farmer?.mobile || f.farmer?.email || "No contact"}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Division / District */}
-                    <td className="py-4 px-5">
-                      <div className="space-y-0.5">
-                        <p className="text-slate-700 font-medium">{f.district || "Matara"}</p>
-                        <p className="text-[10px] text-slate-400">
-                          {f.city || f.village || f.province || "Southern"}
-                        </p>
-                      </div>
-                    </td>
-
-                    {/* Crop Type Badge */}
-                    <td className="py-4 px-5">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-                        {f.crop_type || f.cropType}
-                      </span>
-                    </td>
-
-                    {/* Area */}
-                    <td className="py-4 px-5">
-                      <div>
-                        <span className="font-semibold text-slate-900">{f.area} ha</span>
-                        <span className="text-[10px] text-slate-400 block mt-0.5">
-                          {(f.area * 2.471).toFixed(1)} ac
+                      {/* Crop Type Badge */}
+                      <td className="py-4 px-5">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                          {f.crop_type || f.cropType}
                         </span>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Registered Date */}
-                    <td className="py-4 px-5 text-slate-500 text-[11px]">
-                      {formatDate(f.created_at || f.createdAt)}
-                    </td>
+                      {/* Area */}
+                      <td className="py-4 px-5">
+                        <div>
+                          <span className="font-semibold text-slate-900">{f.area} ha</span>
+                          <span className="text-[10px] text-slate-400 block mt-0.5">
+                            {(f.area * 2.471).toFixed(1)} ac
+                          </span>
+                        </div>
+                      </td>
 
-                    {/* Actions */}
-                    <td className="py-4 px-5 text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenDetails(f)}
-                          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                          title="View Field Details"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
+                      {/* Registered Date */}
+                      <td className="py-4 px-5 text-slate-500 text-[11px]">
+                        {formatDate(f.created_at || f.createdAt)}
+                      </td>
 
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEdit(f)}
-                          className="p-1.5 text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                          title="Edit Field"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
+                      {/* Actions */}
+                      <td className="py-4 px-5 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetails(f)}
+                            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                            title="View Field Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handleOpenDelete(f)}
-                          disabled={isBusyDeleting}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-                          title="Delete Field"
-                        >
-                          {isBusyDeleting ? (
-                            <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
-                          ) : (
-                            <Trash2 className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(f)}
+                            className="p-1.5 text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                            title="Edit Field"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDelete(f)}
+                            disabled={isBusyDeleting}
+                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                            title="Delete Field"
+                          >
+                            {isBusyDeleting ? (
+                              <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </AnimatePresence>
             )}
           </tbody>
         </table>
