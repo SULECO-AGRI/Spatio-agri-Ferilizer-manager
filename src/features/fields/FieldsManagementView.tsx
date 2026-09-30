@@ -337,11 +337,15 @@ export function FieldsManagementView() {
               <AnimatePresence mode="popLayout" initial={false}>
                 {fields.map((f) => {
                   const isBusyDeleting = deletingFieldId === f.id;
+                  const farmerObj = f.farmer || f.owner;
                   const farmerDisplayName =
-                    f.farmer?.fullName ||
+                    farmerObj?.fullName ||
+                    `${farmerObj?.firstName || ""} ${farmerObj?.lastName || ""}`.trim() ||
                     (f.farmer_id || f.farmerId
                       ? `Farmer #${f.farmer_id || f.farmerId}`
                       : "Registered Farmer");
+                  const farmerContact =
+                    farmerObj?.mobile || farmerObj?.email || "No contact";
                   const initials =
                     farmerDisplayName
                       .split(" ")
@@ -392,7 +396,7 @@ export function FieldsManagementView() {
                               {farmerDisplayName}
                             </p>
                             <p className="text-[10px] text-slate-400 truncate max-w-[140px]">
-                              {f.farmer?.mobile || f.farmer?.email || "No contact"}
+                              {farmerContact}
                             </p>
                           </div>
                         </div>

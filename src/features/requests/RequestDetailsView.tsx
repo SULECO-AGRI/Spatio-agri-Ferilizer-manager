@@ -4,7 +4,6 @@ import {
   Layers,
   Sprout,
   DollarSign,
-  UserCheck,
   Radio,
   MapPin,
 } from "lucide-react";
@@ -221,49 +220,6 @@ export function RequestDetailsView({
                 </span>
               </div>
             </div>
-          </div>
-
-          {/* Card 3: Pilot Assignment & Mission Status */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-4">
-            <h3 className="text-sm font-semibold text-slate-900 font-display">
-              Pilot & Mission Allocation
-            </h3>
-
-            {request.assignedPilot ? (
-              <div className="p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-xl flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800 font-semibold text-xs">
-                    <UserCheck className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-semibold text-emerald-950">
-                      {request.assignedPilot.fullName}
-                    </h5>
-                    <p className="text-xs text-emerald-700">
-                      Licence:{" "}
-                      <span className="font-mono">{request.assignedPilot.licenceNumber}</span> •{" "}
-                      {request.assignedPilot.mobile}
-                    </p>
-                  </div>
-                </div>
-                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                  {request.assignedPilot.status}
-                </span>
-              </div>
-            ) : (
-              <div className="p-4 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center justify-between text-xs text-slate-500">
-                <span>No pilot has been allocated to this service request yet.</span>
-                {onAssignPilot && (
-                  <button
-                    type="button"
-                    onClick={() => onAssignPilot(request)}
-                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium cursor-pointer transition-colors shadow-2xs"
-                  >
-                    Assign Pilot
-                  </button>
-                )}
-              </div>
-            )}
           </div>
         </div>
 

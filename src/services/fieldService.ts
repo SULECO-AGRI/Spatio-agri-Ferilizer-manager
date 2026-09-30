@@ -15,7 +15,14 @@ export function normalizeField(raw: any): Field {
   if (!raw || typeof raw !== "object") return raw;
 
   const id = raw.id ?? raw.fieldId ?? raw.field_id ?? 0;
-  const farmer_id = raw.farmer_id ?? raw.farmerId ?? raw.farmer?.id ?? raw.farmer?.userId ?? 0;
+  const farmer_id =
+    raw.farmer_id ??
+    raw.farmerId ??
+    raw.owner?.id ??
+    raw.owner?.userId ??
+    raw.farmer?.id ??
+    raw.farmer?.userId ??
+    0;
   const field_name = raw.field_name ?? raw.fieldName ?? raw.name ?? `Field #${id}`;
   const crop_type = raw.crop_type ?? raw.cropType ?? raw.crop ?? "General Crop";
   const area = Number(raw.area ?? raw.fieldSize ?? raw.size ?? 0) || 0;
@@ -28,23 +35,32 @@ export function normalizeField(raw: any): Field {
   const created_at = raw.created_at ?? raw.createdAt ?? new Date().toISOString();
   const updated_at = raw.updated_at ?? raw.updatedAt ?? new Date().toISOString();
 
-  let farmer = raw.farmer;
-  if (!farmer && raw.farmerName) {
+  const farmerSource = raw.owner || raw.farmer;
+  let farmer: any = undefined;
+
+  if (farmerSource && typeof farmerSource === "object") {
+    farmer = {
+      id: farmerSource.id ?? farmerSource.userId ?? farmer_id,
+      userId: farmerSource.userId ?? farmerSource.id ?? farmer_id,
+      fullName:
+        farmerSource.fullName ||
+        `${farmerSource.firstName || ""} ${farmerSource.lastName || ""}`.trim() ||
+        farmerSource.name ||
+        `Farmer #${farmer_id}`,
+      firstName: farmerSource.firstName,
+      lastName: farmerSource.lastName,
+      email: farmerSource.email || "",
+      mobile: farmerSource.mobile || farmerSource.phone || farmerSource.phoneNumber || "",
+      nic: farmerSource.nic || "",
+      address: farmerSource.address || "",
+    };
+  } else if (raw.farmerName || raw.ownerName) {
     farmer = {
       id: farmer_id,
-      fullName: raw.farmerName,
-      email: raw.farmerEmail || "",
-      mobile: raw.farmerMobile || "",
-    };
-  } else if (farmer) {
-    farmer = {
-      id: farmer.id ?? farmer.userId ?? farmer_id,
-      fullName:
-        farmer.fullName ?? `${farmer.firstName || ""} ${farmer.lastName || ""}`.trim() ?? "Farmer",
-      firstName: farmer.firstName,
-      lastName: farmer.lastName,
-      email: farmer.email || "",
-      mobile: farmer.mobile || "",
+      userId: farmer_id,
+      fullName: raw.farmerName || raw.ownerName,
+      email: raw.farmerEmail || raw.ownerEmail || "",
+      mobile: raw.farmerMobile || raw.ownerMobile || raw.farmerPhone || "",
     };
   }
 
@@ -62,6 +78,7 @@ export function normalizeField(raw: any): Field {
     created_at,
     updated_at,
     farmer,
+    owner: farmer,
     // Camelcase aliases
     farmerId: Number(farmer_id),
     fieldName: field_name,
@@ -69,6 +86,9 @@ export function normalizeField(raw: any): Field {
     locationCoordinates: location_coordinates,
     createdAt: created_at,
     updatedAt: updated_at,
+    totalServiceRequests: raw.totalServiceRequests,
+    activeRequests: raw.activeRequests,
+    completedRequests: raw.completedRequests,
   };
 }
 

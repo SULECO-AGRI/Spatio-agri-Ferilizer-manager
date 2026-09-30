@@ -152,7 +152,9 @@ export function useFields(options: UseFieldsOptions = {}) {
   const metrics = useMemo(() => {
     const totalCount = pagination.total || fields.length;
     const totalArea = fields.reduce((acc, f) => acc + (Number(f.area) || 0), 0);
-    const uniqueFarmers = new Set(fields.map((f) => f.farmer_id || f.farmer?.id)).size;
+    const uniqueFarmers = new Set(
+      fields.map((f) => f.farmer_id || f.farmerId || f.farmer?.id || f.owner?.id).filter(Boolean),
+    ).size;
 
     const cropCounts: Record<string, number> = {};
     fields.forEach((f) => {

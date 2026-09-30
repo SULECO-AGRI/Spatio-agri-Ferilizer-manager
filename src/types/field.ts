@@ -1,10 +1,13 @@
 export interface FieldFarmer {
   id: number;
+  userId?: number;
   fullName?: string;
   firstName?: string;
   lastName?: string;
   email?: string;
   mobile?: string;
+  nic?: string;
+  address?: string;
 }
 
 export interface Field {
@@ -21,6 +24,7 @@ export interface Field {
   created_at?: string;
   updated_at?: string;
   farmer?: FieldFarmer;
+  owner?: FieldFarmer;
 
   // Camelcase aliases for convenience
   farmerId?: number;
@@ -29,6 +33,9 @@ export interface Field {
   locationCoordinates?: any;
   createdAt?: string;
   updatedAt?: string;
+  totalServiceRequests?: number;
+  activeRequests?: number;
+  completedRequests?: number;
 }
 
 export interface FieldsPagination {

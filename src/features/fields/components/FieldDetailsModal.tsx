@@ -12,7 +12,7 @@ interface FieldDetailsModalProps {
 export function FieldDetailsModal({ isOpen, field, onClose, onEdit }: FieldDetailsModalProps) {
   if (!isOpen || !field) return null;
 
-  const farmer = field.farmer;
+  const farmer = field.farmer || field.owner;
   const coords = field.location_coordinates || field.locationCoordinates;
   let lat: number | null = null;
   let lng: number | null = null;

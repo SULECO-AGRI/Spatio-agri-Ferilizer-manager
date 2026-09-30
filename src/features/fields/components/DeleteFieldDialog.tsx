@@ -96,7 +96,11 @@ export function DeleteFieldDialog({
                     Farmer:
                   </span>
                   <span className="font-medium text-slate-800">
-                    {field.farmer?.fullName || `Farmer #${field.farmer_id}`}
+                    {field.farmer?.fullName ||
+                      field.owner?.fullName ||
+                      (field.farmer_id || field.farmerId
+                        ? `Farmer #${field.farmer_id || field.farmerId}`
+                        : "Registered Farmer")}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
