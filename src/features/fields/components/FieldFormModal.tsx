@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Loader2, MapPin, Sprout, User, Layers, Check, AlertCircle } from "lucide-react";
+import { X, Loader2, MapPin, User, Layers, Check, AlertCircle } from "lucide-react";
 import { farmerService } from "@/services/farmerService";
 import type { Field, CreateFieldDTO, UpdateFieldDTO } from "@/types/field";
 import type { ApiFarmerItem } from "@/types/farmer";
@@ -301,20 +301,15 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
       <div className="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-800">
-              <Sprout className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-slate-900 font-display">
-                {isEditing ? "Edit Agricultural Field" : "Register New Field Parcel"}
-              </h3>
-              <p className="text-xs text-slate-500 font-normal">
-                {isEditing
-                  ? "Modify field boundary parameters, crop profile, or location"
-                  : "Associate a new precision polygon with an active farmer"}
-              </p>
-            </div>
+          <div>
+            <h3 className="text-base font-semibold text-slate-900 font-display">
+              {isEditing ? "Edit Agricultural Field" : "Register New Field Parcel"}
+            </h3>
+            <p className="text-xs text-slate-500 font-normal">
+              {isEditing
+                ? "Modify field boundary parameters, crop profile, or location"
+                : "Associate a new precision polygon with an active farmer"}
+            </p>
           </div>
           <button
             type="button"
@@ -326,7 +321,7 @@ export function FieldFormModal({ isOpen, field, onClose, onSubmit }: FieldFormMo
         </div>
 
         {/* Modal Body / Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto no-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden p-6 space-y-6">
           {/* Validation Alert */}
           {validationError && (
             <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-700">

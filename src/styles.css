@@ -145,6 +145,14 @@
   border: 1px solid color-mix(in oklab, var(--color-foreground) 8%, transparent);
 }
 
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @utility glass-dark {
   background: color-mix(in oklab, var(--color-accent) 85%, transparent);
   backdrop-filter: blur(14px) saturate(140%);
