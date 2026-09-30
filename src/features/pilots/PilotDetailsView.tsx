@@ -9,6 +9,7 @@ import {
   MissionHistoryCard,
   PilotPerformanceCard,
   PilotMetricsRow,
+  PilotServiceAreaMap,
   DeletePilotDialog,
   type PilotDeleteTarget,
 } from "./components";
@@ -130,6 +131,7 @@ export function PilotDetailsView({ pilotId, onBack, onDelete }: PilotDetailsProp
             reviewsCount: data.stats?.totalReviews ?? completedMissions,
             missionsCount: completedMissions,
             flightHours: `${totalFlightHours} hrs`,
+            serviceArea: data.serviceArea ?? (data as any)?.service_area ?? null,
             activeMissionsCount: data.stats?.inProgressMissions ?? 0,
             performanceData,
             missionHistory,
@@ -286,6 +288,16 @@ export function PilotDetailsView({ pilotId, onBack, onDelete }: PilotDetailsProp
         <div className="space-y-6">
           <PilotPerformanceCard data={details.performanceData || []} />
         </div>
+      </div>
+
+      {/* Flight Perimeter & Designated Service Area Map */}
+      <div className="pt-2">
+        <PilotServiceAreaMap
+          pilotName={details.name}
+          pilotStatus={details.status}
+          mobile={details.phone}
+          serviceArea={details.serviceArea}
+        />
       </div>
 
       {/* Mission History (Real Dynamic History or Clean Empty State) */}

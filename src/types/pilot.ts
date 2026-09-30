@@ -13,6 +13,7 @@ export interface ApiPilotItem {
   fullName: string;
   mobile: string;
   licenceNumber: string;
+  serviceArea?: [number, number][] | [number, number] | any;
   status: PilotStatus;
   ratings?: number | null;
   rating?: number | null;
@@ -77,6 +78,7 @@ export interface PilotProfileDetailDTO {
   fullName: string;
   mobile: string;
   licenceNumber: string;
+  serviceArea?: [number, number][] | [number, number] | any;
   status: string;
   role: string;
   stats: PilotStatsDTO;
@@ -136,6 +138,7 @@ export interface DetailedPilotInfo {
   reviewsCount: number;
   missionsCount: number;
   flightHours: string;
+  serviceArea?: [number, number][] | [number, number] | any;
   activeMissionsCount?: number;
   certificates?: string[];
   performanceData?: { label: string; value: number }[];
