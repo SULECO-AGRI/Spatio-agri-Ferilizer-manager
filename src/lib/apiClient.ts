@@ -1,7 +1,9 @@
 import type { ApiErrorResponse } from "@/types/auth";
 
-export const API_BASE_URL =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) || "http://localhost:5000";
+export const API_BASE_URL = (
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
+  "https://spatio-agri-ferilizer-manager-backend-1.onrender.com"
+).replace(/\/+$/, "");
 
 export const AUTH_TOKEN_KEY = "spatioagri_auth_token";
 export const AUTH_USER_KEY = "spatioagri_auth_user";

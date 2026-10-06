@@ -179,6 +179,49 @@ export const serviceRequestsService = {
   },
 
   /**
+   * Fetches real-time dynamic cost estimation breakdown from GET /service-requests/estimate-cost
+   */
+  async estimateCost(
+    params: import("@/types/request").CostEstimationParams,
+  ): Promise<import("@/types/request").CostEstimationBreakdown> {
+    const queryParams: Record<string, string | number | boolean | undefined> = {};
+    if (params.fieldId !== undefined) queryParams.fieldId = params.fieldId;
+    if (params.area !== undefined) queryParams.area = params.area;
+    if (params.cropType) queryParams.cropType = params.cropType;
+    if (params.serviceType) queryParams.serviceType = params.serviceType;
+    if (params.priority) queryParams.priority = params.priority;
+
+    try {
+      const response = await apiClient.get<any>(
+        "/service-requests/estimate-cost",
+        { params: queryParams },
+      );
+      return response?.data ?? response;
+    } catch {
+      const alt = await apiClient.get<any>(
+        "/api/service-requests/estimate-cost",
+        { params: queryParams },
+      );
+      return alt?.data ?? alt;
+    }
+  },
+
+  /**
+   * Creates a new service request via POST /service-requests
+   */
+  async createServiceRequest(
+    data: import("@/types/request").CreateServiceRequestDTO,
+  ): Promise<ApiServiceRequestItem> {
+    try {
+      const response = await apiClient.post<any>("/service-requests", data);
+      return response?.data?.serviceRequest || response?.data?.request || response?.data || response;
+    } catch {
+      const alt = await apiClient.post<any>("/api/service-requests", data);
+      return alt?.data?.serviceRequest || alt?.data?.request || alt?.data || alt;
+    }
+  },
+
+  /**
    * Deletes a service request by ID via DELETE /service-requests/:id
    */
   async deleteServiceRequest(

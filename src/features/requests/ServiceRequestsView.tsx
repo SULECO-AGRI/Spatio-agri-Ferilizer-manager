@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  Plus,
 } from "lucide-react";
 import { PageHeader, FilterPills, TableToolbar, RefreshButton } from "@/components/common";
 import { useServiceRequests, requestFilterTabs } from "./hooks/useServiceRequests";
@@ -18,6 +19,7 @@ import { RequestsTable } from "./components/RequestsTable";
 import { RequestDetailsView } from "./RequestDetailsView";
 import { AssignPilotModal } from "./components/AssignPilotModal";
 import { DeleteRequestDialog } from "./components/DeleteRequestDialog";
+import { CreateServiceRequestModal } from "./components/CreateServiceRequestModal";
 import type { ApiServiceRequestItem, CandidatePilot } from "@/types/request";
 
 interface ServiceRequestsViewProps {
@@ -61,6 +63,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
     isDeleting,
   } = useServiceRequests({ initialRequestId });
 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   const [assigningRequest, setAssigningRequest] = useState<ApiServiceRequestItem | null>(null);
   const [requestToDelete, setRequestToDelete] = useState<ApiServiceRequestItem | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -104,6 +107,20 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
       });
 
       // Refetch live list & counters
+      refetch();
+    },
+    [refetch],
+  );
+
+  const handleCreateSuccess = useCallback(
+    (newRequest: any) => {
+      setToast({
+        id: Date.now(),
+        title: "Service Request Created",
+        message: `Service request ${newRequest?.requestCode || ""} registered with real-time cost calculation.`,
+        type: "success",
+      });
+      setIsCreateModalOpen(false);
       refetch();
     },
     [refetch],
@@ -176,14 +193,24 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
           description="All farmer requests awaiting validation, pilot assignment or field execution"
         />
 
-        <RefreshButton
-          onRefresh={() => refetch()}
-          isLoading={isLoading}
-          isFetching={isFetching}
-          label="Refresh"
-          title="Refresh service requests"
-          className="self-start sm:self-auto"
-        />
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          <RefreshButton
+            onRefresh={() => refetch()}
+            isLoading={isLoading}
+            isFetching={isFetching}
+            label="Refresh"
+            title="Refresh service requests"
+          />
+
+          <button
+            type="button"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#062419] hover:bg-[#0a3828] text-white rounded-xl text-xs font-medium transition-all cursor-pointer shadow-xs active:scale-[0.99]"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Request</span>
+          </button>
+        </div>
       </div>
 
       {/* Summary KPI Metric Counters */}
@@ -385,6 +412,13 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
           </select>
         </div>
       </div>
+
+      {/* Create New Service Request Modal */}
+      <CreateServiceRequestModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
 
       {/* Candidate Pilot Assignment Modal */}
       <AssignPilotModal

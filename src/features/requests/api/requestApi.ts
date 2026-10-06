@@ -7,6 +7,10 @@ import type {
   CandidatePilot,
   CandidatePilotsResponse,
   AssignPilotResponse,
+  CostEstimationParams,
+  CostEstimationBreakdown,
+  CostEstimationResponse,
+  CreateServiceRequestDTO,
 } from "@/types/request";
 
 export const requestApi = baseApi.injectEndpoints({
@@ -53,6 +57,52 @@ export const requestApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: ServiceRequestDetailsResponse) => response.data.serviceRequest,
       providesTags: (_result, _error, id) => [{ type: "Requests" as const, id }],
+    }),
+
+    estimateCost: builder.query<CostEstimationBreakdown, CostEstimationParams>({
+      query: (params) => {
+        const queryParams: Record<string, string | number | undefined> = {};
+        if (params.fieldId !== undefined) queryParams.fieldId = params.fieldId;
+        if (params.area !== undefined) queryParams.area = params.area;
+        if (params.cropType) queryParams.cropType = params.cropType;
+        if (params.serviceType) queryParams.serviceType = params.serviceType;
+        if (params.priority) queryParams.priority = params.priority;
+
+        return {
+          url: "/service-requests/estimate-cost",
+          method: "GET",
+          params: queryParams,
+        };
+      },
+      transformResponse: (
+        response: CostEstimationResponse | { data: CostEstimationBreakdown } | CostEstimationBreakdown,
+      ) => {
+        if ("data" in response && response.data) {
+          return response.data;
+        }
+        return response as CostEstimationBreakdown;
+      },
+    }),
+
+    createServiceRequest: builder.mutation<ApiServiceRequestItem, CreateServiceRequestDTO>({
+      query: (body) => ({
+        url: "/service-requests",
+        method: "POST",
+        body,
+      }),
+      transformResponse: (response: any) => {
+        return (
+          response?.data?.serviceRequest ||
+          response?.data?.request ||
+          response?.data ||
+          response
+        );
+      },
+      invalidatesTags: [
+        { type: "Requests" as const, id: "LIST" },
+        { type: "Analytics" as const },
+        { type: "Fields" as const, id: "LIST" },
+      ],
     }),
 
     getCandidatePilots: builder.query<CandidatePilot[], number | string>({
@@ -245,6 +295,9 @@ export const {
   useGetServiceRequestsQuery,
   useLazyGetServiceRequestsQuery,
   useGetServiceRequestByIdQuery,
+  useEstimateCostQuery,
+  useLazyEstimateCostQuery,
+  useCreateServiceRequestMutation,
   useGetCandidatePilotsQuery,
   useAssignPilotMutation,
   useDeleteServiceRequestMutation,

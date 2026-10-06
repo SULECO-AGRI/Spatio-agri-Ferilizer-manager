@@ -1,7 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const API_BASE_URL =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) || "http://localhost:5000";
+const API_BASE_URL = (
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
+  "https://spatio-agri-ferilizer-manager-backend-1.onrender.com"
+).replace(/\/+$/, "");
 
 const AUTH_TOKEN_KEY = "spatioagri_auth_token";
 

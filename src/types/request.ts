@@ -152,6 +152,48 @@ export interface AssignPilotResponse {
   };
 }
 
+export interface CostEstimationParams {
+  fieldId?: number;
+  area?: number;
+  cropType?: string;
+  serviceType?: "FERTILIZING" | "PRECISION_SPRAYING" | "PEST_CONTROL_SPRAY" | "SEED_BROADCASTING" | string;
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" | string;
+}
+
+export interface CostEstimationBreakdown {
+  area: number;
+  cropType: string;
+  cropCategory: string;
+  serviceType: string;
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  baseRatePerAcre: number;
+  cropMultiplier: number;
+  areaDiscountPercent: number;
+  areaDiscountAmount: number;
+  priorityMultiplier: number;
+  minimumFee: number;
+  isMinimumFeeApplied: boolean;
+  rawCalculatedCost: number;
+  totalEstimatedCost: number;
+  currency: string;
+  breakdownSummary: string;
+}
+
+export interface CostEstimationResponse {
+  status: "success" | string;
+  data: CostEstimationBreakdown;
+}
+
+export interface CreateServiceRequestDTO {
+  fieldId: number;
+  farmerId?: number;
+  serviceType: string;
+  preferredDate: string;
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" | string;
+  notes?: string;
+  estimatedCost?: number;
+}
+
 export interface ServiceRequestQueryParams {
   page?: number;
   limit?: number;

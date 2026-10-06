@@ -7,4 +7,7 @@ export * from "./components/RequestSummaryCard";
 export * from "./components/RequestActionsPanel";
 export * from "./components/RequestsTable";
 export * from "./components/AssignPilotModal";
+export * from "./components/CostEstimationCard";
+export * from "./components/CreateServiceRequestModal";
 export * from "./hooks/useServiceRequests";
+export * from "./hooks/useCostEstimation";
