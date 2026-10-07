@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { AlertTriangle, Loader2, X, MapPin, User, Sprout } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "@/context/LanguageContext";
 import type { Field } from "@/types/field";
 
 interface DeleteFieldDialogProps {
@@ -18,6 +19,8 @@ export function DeleteFieldDialog({
   onConfirm,
   isDeleting = false,
 }: DeleteFieldDialogProps) {
+  const { isSinhala } = useLanguage();
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen && !isDeleting) {
@@ -42,7 +45,7 @@ export function DeleteFieldDialog({
   return (
     <AnimatePresence>
       {isOpen && field && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 font-sans">
+        <div className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 font-sans ${isSinhala ? "font-sinhala" : ""}`}>
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -68,14 +71,26 @@ export function DeleteFieldDialog({
                 </div>
                 <div className="flex-1 min-w-0 pt-0.5">
                   <h3 className="text-base font-semibold text-slate-900 font-display">
-                    Delete Field Parcel?
+                    {isSinhala ? "ක්ෂේත්‍රය මකා දමන්නද?" : "Delete Field Parcel?"}
                   </h3>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Are you sure you want to delete{" "}
-                    <strong className="text-slate-800 font-semibold font-sans">
-                      {field.field_name || field.fieldName}
-                    </strong>
-                    ? This will remove the parcel record and crop allocations.
+                    {isSinhala ? (
+                      <>
+                        ඔබට{" "}
+                        <strong className="text-slate-800 font-semibold font-sans">
+                          {field.field_name || field.fieldName}
+                        </strong>{" "}
+                        ක්ෂේත්‍රය මකා දැමීමට අවශ්‍ය බව සහතිකද? මෙයින් එම වාර්තාව ඉවත් කරනු ඇත.
+                      </>
+                    ) : (
+                      <>
+                        Are you sure you want to delete{" "}
+                        <strong className="text-slate-800 font-semibold font-sans">
+                          {field.field_name || field.fieldName}
+                        </strong>
+                        ? This will remove the parcel record and crop allocations.
+                      </>
+                    )}
                   </p>
                 </div>
                 <button
@@ -88,12 +103,12 @@ export function DeleteFieldDialog({
                 </button>
               </div>
 
-              {/* Field Info Card */}
+              {/* Field Info Card - Names and places preserved raw */}
               <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-100 text-xs space-y-2 text-slate-600">
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400 flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-slate-400" />
-                    Farmer:
+                    {isSinhala ? "ගොවියා:" : "Farmer:"}
                   </span>
                   <span className="font-medium text-slate-800">
                     {field.farmer?.fullName ||
@@ -106,7 +121,7 @@ export function DeleteFieldDialog({
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400 flex items-center gap-1.5">
                     <Sprout className="w-3.5 h-3.5 text-slate-400" />
-                    Crop & Area:
+                    {isSinhala ? "බෝගය සහ ප්‍රමාණය:" : "Crop & Area:"}
                   </span>
                   <span className="font-medium text-slate-800">
                     {field.crop_type || field.cropType} • {field.area} ha (
@@ -116,7 +131,7 @@ export function DeleteFieldDialog({
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400 flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                    Location:
+                    {isSinhala ? "පිහිටුම:" : "Location:"}
                   </span>
                   <span className="text-slate-700">
                     {field.district}, {field.province}
@@ -132,7 +147,7 @@ export function DeleteFieldDialog({
                 disabled={isDeleting}
                 className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer disabled:opacity-50"
               >
-                Cancel
+                {isSinhala ? "අවලංගු කරන්න" : "Cancel"}
               </button>
               <button
                 type="button"
@@ -143,10 +158,10 @@ export function DeleteFieldDialog({
                 {isDeleting ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Deleting...</span>
+                    <span>{isSinhala ? "මකමින්..." : "Deleting..."}</span>
                   </>
                 ) : (
-                  <span>Delete Parcel</span>
+                  <span>{isSinhala ? "ක්ෂේත්‍රය මකන්න" : "Delete Parcel"}</span>
                 )}
               </button>
             </div>

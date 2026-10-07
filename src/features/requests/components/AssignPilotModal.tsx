@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { X, Loader2, AlertCircle, Search } from "lucide-react";
 import { StatusBadge } from "@/components/common";
+import { useLanguage } from "@/context/LanguageContext";
 import type { ApiServiceRequestItem, CandidatePilot } from "@/types/request";
 import { serviceRequestsService } from "@/services/serviceRequestsService";
 
@@ -19,6 +20,7 @@ export function AssignPilotModal({
   onClose,
   onAssignSuccess,
 }: AssignPilotModalProps) {
+  const { isSinhala } = useLanguage();
   const [candidates, setCandidates] = useState<CandidatePilot[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
@@ -99,7 +101,9 @@ export function AssignPilotModal({
         return b.rating - a.rating;
       }
       if (sortBy === "missions") {
-        return b.totalMissions - a.totalMissions;
+        const aMissions = a.completedMissions ?? a.totalMissions ?? 0;
+        const bMissions = b.completedMissions ?? b.totalMissions ?? 0;
+        return bMissions - aMissions;
       }
       return 0;
     });
@@ -107,26 +111,18 @@ export function AssignPilotModal({
     return list;
   }, [candidates, searchQuery, sortBy]);
 
-  const handleAssign = async (candidate: CandidatePilot) => {
+  const handleAssign = async (pilot: CandidatePilot) => {
     if (!request) return;
-    setAssigningPilotId(candidate.pilotId);
+    const reqId = request.requestId || (request as any).id;
+    setAssigningPilotId(pilot.pilotId);
 
     try {
-      const updatedRequest = await serviceRequestsService.assignPilot(
-        request.requestId,
-        candidate.pilotId,
-      );
-
-      // Notify parent view
-      onAssignSuccess(updatedRequest, candidate);
+      const updated = await serviceRequestsService.assignPilot(reqId, pilot.pilotId);
+      onAssignSuccess(updated, pilot);
       onClose();
     } catch (err: unknown) {
-      console.error("Failed to assign pilot:", err);
-      alert(
-        err instanceof Error
-          ? err.message
-          : "Failed to assign pilot to the service request. Please try again.",
-      );
+      console.error("Assignment failed:", err);
+      alert(err instanceof Error ? err.message : "Failed to assign pilot. Please try again.");
     } finally {
       setAssigningPilotId(null);
     }
@@ -135,7 +131,7 @@ export function AssignPilotModal({
   if (!isOpen || !request) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto font-sans">
+    <div className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto font-sans ${isSinhala ? "font-sinhala" : ""}`}>
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-200"
@@ -162,15 +158,16 @@ export function AssignPilotModal({
             </div>
 
             <h2 className="text-lg font-bold tracking-tight text-slate-900 mt-2">
-              Assign Candidate Pilot
+              {isSinhala ? "සුදුසු නියමුවා පවරන්න" : "Assign Candidate Pilot"}
             </h2>
 
+            {/* Field name and farmer name preserved raw */}
             <p className="text-xs text-slate-500 mt-1">
-              Field:{" "}
+              {isSinhala ? "ක්ෂේත්‍රය: " : "Field: "}
               <span className="text-slate-800 font-medium">
                 {request.field?.fieldName || "Field Parcel"}
               </span>{" "}
-              • Farmer:{" "}
+              • {isSinhala ? "ගොවියා: " : "Farmer: "}
               <span className="text-slate-800 font-medium">
                 {request.farmer?.fullName || "Client"}
               </span>
@@ -197,23 +194,25 @@ export function AssignPilotModal({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search candidate pilots..."
+              placeholder={isSinhala ? "නියමුවන් සොයන්න..." : "Search candidate pilots..."}
               className="w-full pl-9 pr-3.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 shadow-2xs transition-all"
             />
           </div>
 
           {/* Sort Selector */}
           <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-            <span className="text-xs text-slate-500 font-medium">Sort by:</span>
+            <span className="text-xs text-slate-500 font-medium">
+              {isSinhala ? "වර්ග කිරීම:" : "Sort by:"}
+            </span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shadow-2xs cursor-pointer"
             >
-              <option value="match">Match Score (Highest)</option>
-              <option value="distance">Distance (Nearest)</option>
-              <option value="rating">Rating (Highest)</option>
-              <option value="missions">Missions (Most)</option>
+              <option value="match">{isSinhala ? "ගැළපීමේ ලකුණු (ඉහළම)" : "Match Score (Highest)"}</option>
+              <option value="distance">{isSinhala ? "දුර (ආසන්නතම)" : "Distance (Nearest)"}</option>
+              <option value="rating">{isSinhala ? "ඇගයුම (ඉහළම)" : "Rating (Highest)"}</option>
+              <option value="missions">{isSinhala ? "මෙහෙයුම් (වැඩිම)" : "Missions (Most)"}</option>
             </select>
           </div>
         </div>
@@ -224,30 +223,35 @@ export function AssignPilotModal({
             <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-400">
               <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
               <p className="text-xs font-medium text-slate-600">
-                Evaluating fleet proximity & telemetry for match ranking...
+                {isSinhala
+                  ? "ගැළපීම සඳහා නියමු දත්ත සහ දුර තක්සේරු කරමින්..."
+                  : "Evaluating fleet proximity & telemetry for match ranking..."}
               </p>
             </div>
           ) : isError ? (
             <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                <span>{errorMessage || "Failed to load candidate pilots."}</span>
+                <span>{errorMessage || (isSinhala ? "නියමු දත්ත පූරණය අසාර්ථක විය." : "Failed to load candidate pilots.")}</span>
               </div>
               <button
                 type="button"
                 onClick={() => fetchCandidates(request.requestId)}
                 className="px-3 py-1 bg-white border border-rose-200 hover:bg-rose-100/50 rounded-lg text-rose-700 font-medium transition-colors cursor-pointer text-[11px]"
               >
-                Retry
+                {isSinhala ? "නැවත උත්සාහ කරන්න" : "Retry"}
               </button>
             </div>
           ) : filteredAndSortedCandidates.length === 0 ? (
             <div className="py-12 text-center text-slate-400 flex flex-col items-center justify-center gap-2">
               <AlertCircle className="w-8 h-8 text-slate-300" />
-              <p className="text-sm font-medium text-slate-700">No candidate pilots found</p>
+              <p className="text-sm font-medium text-slate-700">
+                {isSinhala ? "සුදුසු නියමුවන් හමු නොවීය" : "No candidate pilots found"}
+              </p>
               <p className="text-xs text-slate-400 max-w-sm">
-                No active pilots match the current search or region. Try adjusting your query or
-                check fleet availability.
+                {isSinhala
+                  ? "වත්මන් සෙවුමට හෝ කලාපයට ගැළපෙන සක්‍රීය නියමුවන් නැත."
+                  : "No active pilots match the current search or region. Try adjusting your query or check fleet availability."}
               </p>
             </div>
           ) : (
@@ -287,7 +291,7 @@ export function AssignPilotModal({
                         </div>
                       </div>
 
-                      {/* Pilot Info */}
+                      {/* Pilot Info - Person name kept raw */}
                       <div className="space-y-1 min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <h4 className="text-sm font-semibold text-slate-900 truncate">
@@ -295,7 +299,7 @@ export function AssignPilotModal({
                           </h4>
                           {isTopMatch && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-medium border border-emerald-200">
-                              Top Match
+                              {isSinhala ? "ඉහළම ගැළපීම" : "Top Match"}
                             </span>
                           )}
                         </div>
@@ -303,15 +307,15 @@ export function AssignPilotModal({
                         {/* Clean Metadata Line */}
                         <div className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
                           <span className="text-slate-700 font-medium">
-                            {pilot.distanceKm} km away
+                            {isSinhala ? `${pilot.distanceKm} කි.මී. දුරින්` : `${pilot.distanceKm} km away`}
                           </span>
                           <span className="text-slate-300">•</span>
                           <span className="text-slate-600">
-                            Rating {pilot.rating.toFixed(1)}
+                            {isSinhala ? `ඇගයුම ${pilot.rating.toFixed(1)}` : `Rating ${pilot.rating.toFixed(1)}`}
                           </span>
                           <span className="text-slate-300">•</span>
                           <span className="text-slate-500">
-                            {pilot.completedMissions ?? pilot.totalMissions} missions
+                            {pilot.completedMissions ?? pilot.totalMissions} {isSinhala ? "මෙහෙයුම්" : "missions"}
                           </span>
                           {pilot.mobile && (
                             <>
@@ -344,7 +348,7 @@ export function AssignPilotModal({
                                     : "bg-slate-100 text-slate-700 border border-slate-200"
                               }`}
                             >
-                              <span>{displayScore}% Match</span>
+                              <span>{isSinhala ? `${displayScore}% ගැළපේ` : `${displayScore}% Match`}</span>
                             </div>
                           );
                         })()}
@@ -363,10 +367,10 @@ export function AssignPilotModal({
                         {isAssigning ? (
                           <>
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            <span>Assigning...</span>
+                            <span>{isSinhala ? "පවරමින්..." : "Assigning..."}</span>
                           </>
                         ) : (
-                          <span>Assign</span>
+                          <span>{isSinhala ? "පවරන්න" : "Assign"}</span>
                         )}
                       </button>
                     </div>
@@ -380,8 +384,15 @@ export function AssignPilotModal({
         {/* Footer */}
         <div className="p-4 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-500 shrink-0">
           <span>
-            Showing <strong className="text-slate-800">{filteredAndSortedCandidates.length}</strong>{" "}
-            available pilots
+            {isSinhala ? (
+              <>
+                ලබාගත හැකි නියමුවන් <strong className="text-slate-800">{filteredAndSortedCandidates.length}</strong> ක් පෙන්වයි
+              </>
+            ) : (
+              <>
+                Showing <strong className="text-slate-800">{filteredAndSortedCandidates.length}</strong> available pilots
+              </>
+            )}
           </span>
           <button
             type="button"
@@ -389,10 +400,12 @@ export function AssignPilotModal({
             disabled={Boolean(assigningPilotId)}
             className="px-4 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer disabled:opacity-50"
           >
-            Cancel
+            {isSinhala ? "අවලංගු කරන්න" : "Cancel"}
           </button>
         </div>
       </div>
     </div>
   );
 }
+
+export default AssignPilotModal;

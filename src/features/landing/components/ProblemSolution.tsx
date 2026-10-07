@@ -1,6 +1,7 @@
 import { CircleCheck, TriangleAlert, Check, X } from "lucide-react";
 import { Reveal } from "../primitives/Reveal";
 import { motion, type Variants } from "framer-motion";
+import { useLanguage } from "@/context/LanguageContext";
 
 const comparisons = [
   {
@@ -66,6 +67,27 @@ const cardVariants: Variants = {
 };
 
 export function ProblemSolution() {
+  const { dict, isSinhala } = useLanguage();
+
+  const localizedComparisons = [
+    {
+      ...comparisons[0],
+      title: dict.problemSolution.traditionalTitle,
+      body: dict.problemSolution.traditionalDesc,
+      bullets: isSinhala
+        ? ["ජල මූලාශ්‍ර වෙත අධික රසායනික ගලායාම", "අධික පොහොර හා ඉන්ධන වියදම්"]
+        : ["Runoff into local watersheds", "Skyrocketing input costs"],
+    },
+    {
+      ...comparisons[1],
+      title: dict.problemSolution.precisionTitle,
+      body: dict.problemSolution.precisionDesc,
+      bullets: isSinhala
+        ? ["25% දක්වා අස්වැන්න වර්ධනය වීම", "ස්වයංක්‍රීය VRA අපනයන සිතියම්"]
+        : ["Up to 25% yield increase", "Automated VRA export files"],
+    },
+  ];
+
   return (
     <section id="roi" className="mx-auto max-w-6xl px-6 py-24 md:py-32 relative overflow-hidden">
       {/* Decorative blurred background elements for the section */}
@@ -73,12 +95,23 @@ export function ProblemSolution() {
       <div className="absolute bottom-1/4 right-1/10 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <Reveal className="mb-16 text-center">
-        <h2 className="font-display text-4xl font-bold tracking-tight text-foreground md:text-5xl max-w-3xl mx-auto leading-[1.15]">
-          Precision is the Difference Between Profit and Loss
+        <span className="text-xs font-semibold tracking-wider uppercase text-emerald-600 mb-2 block">
+          {dict.problemSolution.badge}
+        </span>
+        <h2
+          className={`font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground max-w-3xl mx-auto ${
+            isSinhala ? "leading-[1.38] font-sinhala" : "leading-[1.15]"
+          }`}
+        >
+          {dict.problemSolution.heading}{" "}
+          <span className="text-emerald-700">{dict.problemSolution.headingHighlight}</span>
         </h2>
-        <p className="mt-4 text-muted-foreground max-w-xl mx-auto text-base md:text-lg">
-          Stop guessing. Traditional farming blankets fields blindly, while Fertilizer manager
-          delivers surgical accuracy to every square foot.
+        <p
+          className={`mt-4 text-muted-foreground max-w-2xl mx-auto text-sm md:text-base ${
+            isSinhala ? "leading-relaxed font-sinhala" : ""
+          }`}
+        >
+          {dict.problemSolution.description}
         </p>
       </Reveal>
 
@@ -89,7 +122,7 @@ export function ProblemSolution() {
         viewport={{ once: false, amount: 0.2 }}
         className="grid gap-8 md:grid-cols-2 lg:gap-10"
       >
-        {comparisons.map((item) => (
+        {localizedComparisons.map((item) => (
           <motion.article
             key={item.title}
             variants={cardVariants}
@@ -125,7 +158,9 @@ export function ProblemSolution() {
                   <item.icon className="h-6 w-6" />
                 </div>
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide border uppercase backdrop-blur-md ${item.badgeClass}`}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide border uppercase backdrop-blur-md ${item.badgeClass} ${
+                    isSinhala ? "font-sinhala" : ""
+                  }`}
                 >
                   {item.badge}
                 </span>
@@ -133,10 +168,18 @@ export function ProblemSolution() {
 
               {/* Text: Title & Description */}
               <div className="mb-8">
-                <h3 className="mb-3 font-display text-2xl font-bold text-white tracking-tight leading-tight">
+                <h3
+                  className={`mb-3 font-display text-2xl font-bold text-white tracking-tight ${
+                    isSinhala ? "leading-snug font-sinhala" : "leading-tight"
+                  }`}
+                >
                   {item.title}
                 </h3>
-                <p className="text-zinc-300 leading-relaxed text-sm md:text-base font-sans">
+                <p
+                  className={`text-zinc-300 text-sm md:text-base font-sans ${
+                    isSinhala ? "leading-relaxed font-sinhala" : "leading-relaxed"
+                  }`}
+                >
                   {item.body}
                 </p>
               </div>

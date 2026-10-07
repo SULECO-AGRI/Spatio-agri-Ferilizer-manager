@@ -41,6 +41,7 @@
   --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sinhala: "Noto Sans Sinhala", "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
@@ -136,6 +137,81 @@
 
   button:disabled {
     cursor: not-allowed;
+  }
+
+  /* ==========================================================================
+     Sinhala Localization & Diacritics Accommodation
+     Sinhala script has extensive vertical ascenders/descenders (kombuwas, pilli,
+     al-lakunu, etc.). These rules guarantee ample vertical breathing room,
+     prevent glyph clipping in buttons/inputs, and enforce Noto Sans Sinhala.
+     ========================================================================== */
+  :root[lang="si"],
+  html[lang="si"],
+  [lang="si"],
+  .font-sinhala {
+    font-family: var(--font-sinhala);
+  }
+
+  :root[lang="si"] body,
+  html[lang="si"] body,
+  body.font-sinhala,
+  [lang="si"] {
+    line-height: 1.68;
+    word-break: break-word;
+  }
+
+  :root[lang="si"] h1,
+  :root[lang="si"] h2,
+  :root[lang="si"] h3,
+  :root[lang="si"] h4,
+  :root[lang="si"] h5,
+  :root[lang="si"] h6,
+  html[lang="si"] h1,
+  html[lang="si"] h2,
+  html[lang="si"] h3,
+  html[lang="si"] h4,
+  .font-sinhala h1,
+  .font-sinhala h2,
+  .font-sinhala h3 {
+    font-family: var(--font-sinhala);
+    line-height: 1.38;
+    letter-spacing: normal;
+  }
+
+  /* Prevent vertical clipping of upper and lower diacritics in dense UI controls */
+  :root[lang="si"] button,
+  :root[lang="si"] input,
+  :root[lang="si"] select,
+  :root[lang="si"] textarea,
+  [lang="si"] button,
+  [lang="si"] input {
+    line-height: 1.5;
+  }
+
+  :root[lang="si"] .leading-none,
+  [lang="si"] .leading-none {
+    line-height: 1.35 !important;
+  }
+
+  :root[lang="si"] .leading-tight,
+  [lang="si"] .leading-tight {
+    line-height: 1.45 !important;
+  }
+
+  :root[lang="si"] .leading-snug,
+  [lang="si"] .leading-snug {
+    line-height: 1.55 !important;
+  }
+
+  /* Ensure badges and small labels provide vertical headroom for vowel signs */
+  :root[lang="si"] .badge,
+  :root[lang="si"] [class*="text-[10px]"],
+  :root[lang="si"] [class*="text-[11px]"],
+  :root[lang="si"] [class*="text-xs"],
+  [lang="si"] .badge,
+  [lang="si"] [class*="text-xs"] {
+    padding-top: max(0.125rem, 2px);
+    padding-bottom: max(0.125rem, 2px);
   }
 }
 

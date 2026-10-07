@@ -6,12 +6,15 @@ import HeroSprayingDrone from "@/assets/images/Hero_Spraying_Drone.jpg";
 import { ChevronDown, ArrowUpRight } from "lucide-react";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { open: openAuth } = useAuthModal();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { dict, isSinhala } = useLanguage();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
@@ -212,31 +215,31 @@ export function Hero() {
               href="#hero"
               className="text-white hover:text-emerald-300 transition-colors duration-200 drop-shadow-sm"
             >
-              Home
+              {dict.nav.home}
             </a>
             <a
               href="#roi"
               className="hover:text-emerald-300 transition-colors duration-200 drop-shadow-sm"
             >
-              Approach
+              {dict.nav.approach}
             </a>
             <a
               href="#how-it-works"
               className="hover:text-emerald-300 transition-colors duration-200 drop-shadow-sm"
             >
-              Process
+              {dict.nav.process}
             </a>
             <a
               href="#demo"
               className="hover:text-emerald-300 transition-colors duration-200 drop-shadow-sm"
             >
-              Demo
+              {dict.nav.demo}
             </a>
             <a
               href="#cta"
               className="hover:text-emerald-300 transition-colors duration-200 drop-shadow-sm"
             >
-              Contact
+              {dict.nav.contact}
             </a>
           </nav>
 
@@ -299,7 +302,7 @@ export function Hero() {
                           role="menuitem"
                           className="w-full flex items-center px-3 py-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors"
                         >
-                          <span>Admin Dashboard</span>
+                          <span>{dict.common.adminDashboard}</span>
                         </Link>
                       )}
 
@@ -315,7 +318,7 @@ export function Hero() {
                         role="menuitem"
                         className="w-full flex items-center px-3 py-2 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer"
                       >
-                        <span>Sign Out</span>
+                        <span>{dict.common.logout}</span>
                       </button>
                     </motion.div>
                   )}
@@ -327,7 +330,7 @@ export function Hero() {
                 onClick={() => openAuth()}
                 className="text-xs sm:text-sm font-semibold text-white/90 hover:text-white px-3 py-1.5 transition-colors cursor-pointer hidden sm:block"
               >
-                Login
+                {dict.common.login}
               </button>
             )}
 
@@ -335,11 +338,14 @@ export function Hero() {
               href="#cta"
               className="group flex items-center gap-2 bg-white hover:bg-zinc-100 text-zinc-950 font-semibold text-xs sm:text-sm pl-4 pr-1.5 py-1.5 rounded-full shadow-lg transition-all duration-200"
             >
-              <span>Contact Us</span>
+              <span>{dict.common.contactUs}</span>
               <div className="w-7 h-7 rounded-full bg-[#0d140e] text-white flex items-center justify-center group-hover:scale-105 transition-transform">
                 <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </div>
             </a>
+
+            {/* Language Switcher */}
+            <LanguageSwitcher variant="glass" />
           </div>
         </div>
 
@@ -352,25 +358,17 @@ export function Hero() {
           className="relative z-20 mx-auto flex flex-col items-center justify-center text-center px-4 sm:px-6 my-auto py-4 max-w-4xl w-full will-change-transform"
         >
           {/* Main Display Headline */}
-          <h1 className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-[64px] font-bold tracking-tight text-white leading-[1.12] drop-shadow-md">
-            The Next Generation of
+          <h1 className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-[64px] font-bold tracking-tight text-white drop-shadow-md leading-[1.12]">
+            {dict.hero.titlePrefix}
             <br />
             <span className="text-white font-extrabold">
-              <KineticPhrase
-                phrases={[
-                  "Farming is Here",
-                  "Spray by the square.",
-                  "Fertilize by the foot.",
-                  "Seed by the zone.",
-                ]}
-              />
+              <KineticPhrase phrases={dict.hero.phrases} />
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="mt-4 sm:mt-5 text-zinc-200 text-xs sm:text-sm md:text-base max-w-xl text-center leading-relaxed font-sans drop-shadow">
-            Precision fertilizing powered by drone images. Apply only what your crops need, exactly
-            where they need it.
+          <p className="mt-4 sm:mt-5 text-zinc-200 text-xs sm:text-sm md:text-base max-w-xl text-center font-sans drop-shadow leading-relaxed">
+            {dict.hero.subtitle}
           </p>
         </motion.div>
 

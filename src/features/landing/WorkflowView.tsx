@@ -5,9 +5,11 @@ import { workflowSteps } from "./data/workflowSteps";
 import { WorkflowLinearSpine } from "./components/WorkflowLinearSpine";
 import { WorkflowStepDesktop } from "./components/WorkflowStepDesktop";
 import { WorkflowStepMobile } from "./components/WorkflowStepMobile";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function WorkflowView() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { isSinhala } = useLanguage();
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -38,12 +40,26 @@ export function WorkflowView() {
       <div className="relative max-w-6xl mx-auto px-6 z-10">
         {/* Section Header */}
         <Reveal className="mb-20 text-center max-w-3xl mx-auto">
-          <h2 className="font-display text-4xl font-bold tracking-tight text-slate-900 md:text-5xl leading-tight">
-            From Sky to Soil in 5 Simple Steps
+          <span className="text-xs font-semibold tracking-wider uppercase text-emerald-600 mb-2 block">
+            {isSinhala ? "ක්‍රියාකාරීත්වය" : "HOW IT WORKS"}
+          </span>
+          <h2
+            className={`font-display text-4xl font-bold tracking-tight text-slate-900 md:text-5xl ${
+              isSinhala ? "leading-[1.38] font-sinhala" : "leading-tight"
+            }`}
+          >
+            {isSinhala
+              ? "ගුවන් මිනුම්කරණයේ සිට නිවැරදි පොහොර ඉසීම දක්වා"
+              : "From Sky to Soil in 5 Simple Steps"}
           </h2>
-          <p className="mt-4 text-slate-500 max-w-xl mx-auto text-base md:text-lg">
-            A seamless digital pipeline designed for speed, sub-inch accuracy, and automated crop
-            analytics.
+          <p
+            className={`mt-4 text-slate-500 max-w-xl mx-auto text-base md:text-lg ${
+              isSinhala ? "leading-relaxed font-sinhala" : ""
+            }`}
+          >
+            {isSinhala
+              ? "නිරවද්‍යතාව, වේගය සහ ස්වයංක්‍රීය බෝග විශ්ලේෂණය සඳහා සකසන ලද ඒකාබද්ධ ඩිජිටල් පද්ධතිය."
+              : "A seamless digital pipeline designed for speed, sub-inch accuracy, and automated crop analytics."}
           </p>
         </Reveal>
 

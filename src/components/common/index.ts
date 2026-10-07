@@ -7,3 +7,4 @@ export * from "./FormField";
 export * from "./EmptyState";
 export * from "./SkeletonLoader";
 export * from "./RefreshButton";
+export * from "./LanguageSwitcher";

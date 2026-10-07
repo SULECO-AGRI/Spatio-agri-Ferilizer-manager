@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Logo } from "../primitives/Logo";
 import { Twitter, Linkedin, Youtube, Github, Mail, Send } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 
 const linkGroups = [
   {
@@ -48,6 +50,7 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const { isSinhala } = useLanguage();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
@@ -58,9 +61,10 @@ export function Footer() {
           {/* Brand column */}
           <div className="col-span-2 pr-6">
             <Logo className="scale-90 origin-left text-white" />
-            <p className="mt-2 max-w-xs text-xs leading-relaxed text-zinc-500">
-              Spatial intelligence for the next generation of farms. Drone and satellite telemetry
-              turned into tractor-ready, variable-rate prescriptions.
+            <p className={`mt-2 max-w-xs text-xs text-zinc-500 ${isSinhala ? "leading-relaxed font-sinhala" : "leading-relaxed"}`}>
+              {isSinhala
+                ? "කෘෂිකාර්මික අනාගතය සඳහා අවකාශීය බුද්ධිය. ඩ්‍රෝන සහ චන්ද්‍රිකා ටෙලිමෙට්‍රි දත්ත නිරවද්‍ය විචල්‍ය අනුපාත පොහොර නිර්දේශ බවට පත් කිරීම."
+                : "Spatial intelligence for the next generation of farms. Drone and satellite telemetry turned into tractor-ready, variable-rate prescriptions."}
             </p>
 
             <form
@@ -133,9 +137,13 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Bottom bar: contact + legal + copyright, all in one row */}
+        {/* Bottom bar: contact + legal + copyright + LanguageSwitcher */}
         <div className="mt-5 flex flex-col items-center justify-between gap-3 border-t border-zinc-900 pt-4 text-xs text-zinc-600 md:flex-row">
-          <p>© {new Date().getFullYear()} Fertilizer manager. All rights reserved.</p>
+          <p className={isSinhala ? "font-sinhala" : ""}>
+            {isSinhala
+              ? `© ${new Date().getFullYear()} පොහොර කළමනාකරු. සියලු හිමිකම් ඇවිරිණි.`
+              : `© ${new Date().getFullYear()} Fertilizer manager. All rights reserved.`}
+          </p>
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             <a
               href="mailto:hello@spatioagri.com"
@@ -145,14 +153,12 @@ export function Footer() {
               hello@spatioagri.com
             </a>
             <a href="#" className="transition-colors hover:text-zinc-400">
-              Privacy
+              {isSinhala ? "පෞද්ගලිකත්වය" : "Privacy"}
             </a>
             <a href="#" className="transition-colors hover:text-zinc-400">
-              Terms
+              {isSinhala ? "කොන්දේසි" : "Terms"}
             </a>
-            <a href="#" className="transition-colors hover:text-zinc-400">
-              Sitemap
-            </a>
+            <LanguageSwitcher variant="compact" />
           </div>
         </div>
       </div>

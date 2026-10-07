@@ -20,6 +20,7 @@ import { RequestDetailsView } from "./RequestDetailsView";
 import { AssignPilotModal } from "./components/AssignPilotModal";
 import { DeleteRequestDialog } from "./components/DeleteRequestDialog";
 import { CreateServiceRequestModal } from "./components/CreateServiceRequestModal";
+import { useLanguage } from "@/context/LanguageContext";
 import type { ApiServiceRequestItem, CandidatePilot } from "@/types/request";
 
 interface ServiceRequestsViewProps {
@@ -180,17 +181,19 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
   }
 
 
+  const { dict, isSinhala } = useLanguage();
+
   // Calculate showing range for pagination
   const startItem = pagination.total === 0 ? 0 : (page - 1) * limit + 1;
   const endItem = Math.min(page * limit, pagination.total);
 
   return (
-    <div className="space-y-6 font-sans">
+    <div className={`space-y-6 font-sans ${isSinhala ? "font-sinhala" : ""}`}>
       {/* Title & Description */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <PageHeader
-          title="Service Requests"
-          description="All farmer requests awaiting validation, pilot assignment or field execution"
+          title={dict.admin.requests.title}
+          description={dict.admin.requests.description}
         />
 
         <div className="flex items-center gap-2.5 self-start sm:self-auto">
@@ -198,8 +201,8 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
             onRefresh={() => refetch()}
             isLoading={isLoading}
             isFetching={isFetching}
-            label="Refresh"
-            title="Refresh service requests"
+            label={dict.common.refresh}
+            title={dict.common.refresh}
           />
 
           <button
@@ -208,7 +211,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
             className="flex items-center gap-1.5 px-4 py-2 bg-[#062419] hover:bg-[#0a3828] text-white rounded-xl text-xs font-medium transition-all cursor-pointer shadow-xs active:scale-[0.99]"
           >
             <Plus className="w-4 h-4" />
-            <span>New Request</span>
+            <span>{dict.admin.requests.newRequest}</span>
           </button>
         </div>
       </div>
@@ -220,7 +223,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
             <Clock className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[11px] text-amber-800 font-normal block">Pending</span>
+            <span className="text-[11px] text-amber-800 font-normal block">{dict.admin.requests.pending}</span>
             <span className="text-lg font-semibold text-amber-950 font-mono">
               {summary.totalPending}
             </span>
@@ -232,7 +235,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
             <UserCheck className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[11px] text-blue-800 font-normal block">Assigned</span>
+            <span className="text-[11px] text-blue-800 font-normal block">{dict.admin.requests.assigned}</span>
             <span className="text-lg font-semibold text-blue-950 font-mono">
               {summary.totalAssigned}
             </span>
@@ -244,7 +247,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
             <PlayCircle className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[11px] text-purple-800 font-normal block">In Progress</span>
+            <span className="text-[11px] text-purple-800 font-normal block">{dict.admin.requests.inProgress}</span>
             <span className="text-lg font-semibold text-purple-950 font-mono">
               {summary.totalInProgress}
             </span>
@@ -256,7 +259,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
             <CheckCircle2 className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[11px] text-emerald-800 font-normal block">Completed</span>
+            <span className="text-[11px] text-emerald-800 font-normal block">{dict.admin.requests.completed}</span>
             <span className="text-lg font-semibold text-emerald-950 font-mono">
               {summary.totalCompleted}
             </span>
@@ -268,7 +271,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
             <XCircle className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[11px] text-rose-800 font-normal block">Cancelled</span>
+            <span className="text-[11px] text-rose-800 font-normal block">{dict.admin.requests.cancelled}</span>
             <span className="text-lg font-semibold text-rose-950 font-mono">
               {summary.totalCancelled}
             </span>
@@ -288,7 +291,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
             onClick={() => refetch()}
             className="font-medium underline hover:text-rose-900 cursor-pointer"
           >
-            Try again
+            {dict.common.retry}
           </button>
         </div>
       )}
@@ -310,10 +313,10 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
             className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-normal text-slate-700 outline-none focus:border-emerald-500 transition-colors cursor-pointer shadow-2xs"
             aria-label="Filter by priority"
           >
-            <option value="ALL">All Priorities</option>
-            <option value="HIGH">High Priority</option>
-            <option value="MEDIUM">Medium Priority</option>
-            <option value="LOW">Low Priority</option>
+            <option value="ALL">{isSinhala ? "සියලු ප්‍රමුඛතා" : "All Priorities"}</option>
+            <option value="HIGH">{isSinhala ? "ඉහළ ප්‍රමුඛතාව" : "High Priority"}</option>
+            <option value="MEDIUM">{isSinhala ? "මධ්‍යම ප්‍රමුඛතාව" : "Medium Priority"}</option>
+            <option value="LOW">{isSinhala ? "අඩු ප්‍රමුඛතාව" : "Low Priority"}</option>
           </select>
 
           {/* Search Box */}
@@ -323,7 +326,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
               setSearchQuery(q);
               setPage(1);
             }}
-            searchPlaceholder="Search requests..."
+            searchPlaceholder={dict.admin.requests.searchPlaceholder}
             actions={
               <button
                 type="button"
@@ -331,7 +334,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
                 className="flex items-center gap-2 px-3.5 py-2 border border-slate-200 rounded-xl bg-white text-slate-800 text-xs font-normal hover:bg-slate-50 transition-colors cursor-pointer shrink-0 shadow-2xs"
               >
                 <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
-                <span>Sort ({sortOrder === "asc" ? "Date ↑" : "Date ↓"})</span>
+                <span>{isSinhala ? `දිනය (${sortOrder === "asc" ? "ආරෝහණ ↑" : "අවරෝහණ ↓"})` : `Sort (${sortOrder === "asc" ? "Date ↑" : "Date ↓"})`}</span>
               </button>
             }
           />
@@ -350,9 +353,19 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
       {/* Pagination & Counter Footer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-slate-500 font-normal">
         <div>
-          Showing <span className="font-medium text-slate-800">{startItem}</span> to{" "}
-          <span className="font-medium text-slate-800">{endItem}</span> of{" "}
-          <span className="font-medium text-slate-800">{pagination.total}</span> requests
+          {isSinhala ? (
+            <>
+              ඉල්ලීම් <span className="font-medium text-slate-800">{pagination.total}</span> න්{" "}
+              <span className="font-medium text-slate-800">{startItem}</span> සිට{" "}
+              <span className="font-medium text-slate-800">{endItem}</span> දක්වා පෙන්වයි
+            </>
+          ) : (
+            <>
+              Showing <span className="font-medium text-slate-800">{startItem}</span> to{" "}
+              <span className="font-medium text-slate-800">{endItem}</span> of{" "}
+              <span className="font-medium text-slate-800">{pagination.total}</span> requests
+            </>
+          )}
         </div>
 
         {/* Page controls */}
@@ -397,7 +410,7 @@ export function ServiceRequestsView({ initialRequestId }: ServiceRequestsViewPro
 
         {/* Rows per page selector */}
         <div className="flex items-center gap-2">
-          <span className="text-slate-400">Rows:</span>
+          <span className="text-slate-400">{isSinhala ? "පේළි:" : "Rows:"}</span>
           <select
             value={limit}
             onChange={(e) => {

@@ -21,6 +21,7 @@ import { useFields, cropFilterOptions } from "./hooks/useFields";
 import { FieldFormModal } from "./components/FieldFormModal";
 import { DeleteFieldDialog } from "./components/DeleteFieldDialog";
 import { FieldDetailsModal } from "./components/FieldDetailsModal";
+import { useLanguage } from "@/context/LanguageContext";
 import type { Field, CreateFieldDTO, UpdateFieldDTO } from "@/types/field";
 import { formatDate } from "@/lib/utils";
 
@@ -37,6 +38,7 @@ const DISTRICT_FILTER_OPTIONS = [
 ];
 
 export function FieldsManagementView() {
+  const { dict, isSinhala } = useLanguage();
   const {
     fields,
     pagination,
@@ -164,16 +166,16 @@ export function FieldsManagementView() {
 
       {/* Page Header */}
       <PageHeader
-        title="Fields Management"
-        description="Agricultural land parcels, crop allocations, GPS boundaries, and farmer ownership"
+        title={dict.admin.fields.title}
+        description={dict.admin.fields.description}
         actions={
           <div className="flex items-center gap-3">
             <RefreshButton
               onRefresh={() => refetch()}
               isLoading={isLoading}
               isFetching={isFetching}
-              label="Refresh"
-              title="Refresh agricultural fields list"
+              label={dict.common.refresh}
+              title={dict.common.refresh}
             />
 
             <button
@@ -182,7 +184,7 @@ export function FieldsManagementView() {
               className="flex items-center gap-1.5 px-4 py-2 bg-[#062419] hover:bg-[#0a3828] text-white rounded-xl text-xs font-medium transition-all cursor-pointer shadow-xs active:scale-[0.99]"
             >
               <Plus className="w-4 h-4" />
-              <span>Add Field</span>
+              <span>{dict.admin.fields.addField}</span>
             </button>
           </div>
         }
@@ -191,24 +193,24 @@ export function FieldsManagementView() {
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <MetricCard
-          title="Total Registered Fields"
+          title={dict.admin.fields.totalFields}
           value={isLoading ? "..." : metrics.totalFields}
-          footer="Active precision parcels"
+          footer={isSinhala ? "ක්‍රියාකාරී නිරවද්‍ය බිම් කොටස්" : "Active precision parcels"}
         />
         <MetricCard
-          title="Total Managed Land"
+          title={dict.admin.fields.totalAcreage}
           value={isLoading ? "..." : `${metrics.totalAreaManaged} ha`}
-          footer={`≈ ${(metrics.totalAreaManaged * 2.471).toFixed(1)} acres`}
+          footer={`≈ ${(metrics.totalAreaManaged * 2.471).toFixed(1)} ${dict.common.acres}`}
         />
         <MetricCard
-          title="Farming Clients"
+          title={dict.admin.farmers.title}
           value={isLoading ? "..." : metrics.uniqueFarmers}
-          footer="Unique registered owners"
+          footer={isSinhala ? "ලියාපදිංචි ගොවි හිමිකරුවන්" : "Unique registered owners"}
         />
         <MetricCard
-          title="Dominant Crop Profile"
+          title={dict.admin.fields.activeCrops}
           value={isLoading ? "..." : metrics.dominantCrop}
-          footer="Top cultivated variety"
+          footer={isSinhala ? "ප්‍රධාන වගා ප්‍රභේදය" : "Top cultivated variety"}
         />
       </div>
 
@@ -227,7 +229,7 @@ export function FieldsManagementView() {
             onClick={() => refetch()}
             className="px-3 py-1 bg-white border border-rose-200 hover:bg-rose-100 rounded-lg text-rose-700 font-medium transition-colors cursor-pointer text-[11px]"
           >
-            Retry
+            {dict.common.retry}
           </button>
         </div>
       )}
@@ -243,7 +245,7 @@ export function FieldsManagementView() {
 
         {/* Search Input & District Dropdown */}
         <div className="flex items-center gap-3">
-          {/* District Selector */}
+          {/* District Selector (Names of districts stay raw as places) */}
           <select
             value={districtFilter}
             onChange={(e) => setDistrictFilter(e.target.value)}
@@ -251,7 +253,7 @@ export function FieldsManagementView() {
           >
             {DISTRICT_FILTER_OPTIONS.map((d) => (
               <option key={d} value={d}>
-                {d === "All" ? "All Districts" : d}
+                {d === "All" ? (isSinhala ? "සියලු දිස්ත්‍රික්ක" : "All Districts") : d}
               </option>
             ))}
           </select>
@@ -263,7 +265,7 @@ export function FieldsManagementView() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search field, farmer, city..."
+              placeholder={dict.admin.fields.searchPlaceholder}
               className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200/80 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-xs"
             />
           </div>
@@ -275,13 +277,13 @@ export function FieldsManagementView() {
         <table className="w-full text-left border-collapse min-w-[840px]">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-normal text-slate-400 uppercase tracking-wider">
-              <th className="py-3.5 px-5">Field Name / ID</th>
-              <th className="py-3.5 px-5">Farmer / Owner</th>
-              <th className="py-3.5 px-5">Location / Division</th>
-              <th className="py-3.5 px-5">Crop Type</th>
-              <th className="py-3.5 px-5">Area</th>
-              <th className="py-3.5 px-5">Registered</th>
-              <th className="py-3.5 px-5 text-right">Actions</th>
+              <th className="py-3.5 px-5">{dict.admin.fields.fieldName}</th>
+              <th className="py-3.5 px-5">{dict.admin.fields.farmer}</th>
+              <th className="py-3.5 px-5">{dict.admin.fields.district}</th>
+              <th className="py-3.5 px-5">{dict.admin.fields.crop}</th>
+              <th className="py-3.5 px-5">{dict.admin.fields.area}</th>
+              <th className="py-3.5 px-5">{dict.common.date}</th>
+              <th className="py-3.5 px-5 text-right">{dict.common.actions}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-xs">
@@ -483,9 +485,19 @@ export function FieldsManagementView() {
       {/* Pagination Footer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-slate-500 font-normal">
         <div>
-          Showing <span className="font-medium text-slate-800">{startItem}</span> to{" "}
-          <span className="font-medium text-slate-800">{endItem}</span> of{" "}
-          <span className="font-medium text-slate-800">{totalCount}</span> fields
+          {isSinhala ? (
+            <>
+              ක්ෂේත්‍ර <span className="font-medium text-slate-800">{totalCount}</span> න්{" "}
+              <span className="font-medium text-slate-800">{startItem}</span> සිට{" "}
+              <span className="font-medium text-slate-800">{endItem}</span> දක්වා පෙන්වයි
+            </>
+          ) : (
+            <>
+              Showing <span className="font-medium text-slate-800">{startItem}</span> to{" "}
+              <span className="font-medium text-slate-800">{endItem}</span> of{" "}
+              <span className="font-medium text-slate-800">{totalCount}</span> fields
+            </>
+          )}
         </div>
 
         {/* Page controls */}
@@ -496,7 +508,7 @@ export function FieldsManagementView() {
               disabled={!pagination.hasPrevPage || isLoading}
               onClick={() => setPage(page - 1)}
               className="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer text-slate-600"
-              title="Previous Page"
+              title={isSinhala ? "පෙර පිටුව" : "Previous Page"}
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
@@ -521,7 +533,7 @@ export function FieldsManagementView() {
               disabled={!pagination.hasNextPage || isLoading}
               onClick={() => setPage(page + 1)}
               className="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer text-slate-600"
-              title="Next Page"
+              title={isSinhala ? "මීළඟ පිටුව" : "Next Page"}
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
@@ -530,7 +542,7 @@ export function FieldsManagementView() {
 
         {/* Rows per page selector */}
         <div className="flex items-center gap-2">
-          <span className="text-slate-400">Rows per page:</span>
+          <span className="text-slate-400">{isSinhala ? "පිටුවකට පේළි:" : "Rows per page:"}</span>
           <select
             value={limit}
             onChange={(e) => {

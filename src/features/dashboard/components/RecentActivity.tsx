@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 import type { ApiServiceRequestItem } from "@/types/request";
 
 interface RecentActivityProps {
@@ -6,29 +7,46 @@ interface RecentActivityProps {
 }
 
 export function RecentActivity({ recentRequests = [] }: RecentActivityProps) {
+  const { dict, isSinhala } = useLanguage();
+
   const activities = useMemo(() => {
     if (recentRequests && recentRequests.length > 0) {
       return recentRequests.slice(0, 5).map((req) => {
-        let timeStr = "Recent";
+        let timeStr = isSinhala ? "මෑතකදී" : "Recent";
         if (req.createdAt) {
           const d = new Date(req.createdAt);
           if (!isNaN(d.getTime())) {
-            timeStr = `${d.toLocaleDateString([], { month: "short", day: "numeric" })}, ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+            timeStr = `${d.toLocaleDateString(isSinhala ? "si-LK" : "en-US", { month: "short", day: "numeric" })}, ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
           }
         }
 
-        let title = `Mission ${req.requestCode || `REQ-${req.requestId}`}: ${req.status.replace("_", " ")}`;
-        let desc = `${req.serviceType || "Fertilizing"} on ${req.field?.fieldName || "Field Block"} (${req.farmer?.fullName || "Farmer"})`;
+        // Names (pilot, farmer) and places (field, district) remain UNTRANSLATED
+        let title = isSinhala
+          ? `මෙහෙයුම ${req.requestCode || `REQ-${req.requestId}`}`
+          : `Mission ${req.requestCode || `REQ-${req.requestId}`}: ${req.status.replace("_", " ")}`;
+        let desc = `${req.serviceType || (isSinhala ? "පොහොර ඉසීම" : "Fertilizing")} on ${req.field?.fieldName || "Field Block"} (${req.farmer?.fullName || "Farmer"})`;
 
         if (req.status === "COMPLETED") {
-          title = `Mission Completed: ${req.requestCode || `REQ-${req.requestId}`}`;
-          desc = `${req.field?.cropType || "Crop"} application finished successfully`;
+          title = isSinhala
+            ? `මෙහෙයුම නිම විය: ${req.requestCode || `REQ-${req.requestId}`}`
+            : `Mission Completed: ${req.requestCode || `REQ-${req.requestId}`}`;
+          desc = isSinhala
+            ? `${req.field?.cropType || "බෝග"} ඉසීම සාර්ථකව අවසන් විය`
+            : `${req.field?.cropType || "Crop"} application finished successfully`;
         } else if (req.status === "IN_PROGRESS") {
-          title = `In Flight: ${req.requestCode || `REQ-${req.requestId}`}`;
-          desc = `Telemetry streaming from ${req.field?.district || "Field"}`;
+          title = isSinhala
+            ? `පියාසැරියේ: ${req.requestCode || `REQ-${req.requestId}`}`
+            : `In Flight: ${req.requestCode || `REQ-${req.requestId}`}`;
+          desc = isSinhala
+            ? `ටෙලිමෙට්‍රි සජීවීව සම්බන්ධයි — ${req.field?.district || "Field"}`
+            : `Telemetry streaming from ${req.field?.district || "Field"}`;
         } else if (req.status === "ASSIGNED") {
-          title = `Pilot Assigned: ${req.assignedPilot?.fullName || "Pilot"}`;
-          desc = `Scheduled for ${req.field?.fieldName || "Field Block"}`;
+          title = isSinhala
+            ? `නියමුවෙකු පවරන ලදි: ${req.assignedPilot?.fullName || "Pilot"}`
+            : `Pilot Assigned: ${req.assignedPilot?.fullName || "Pilot"}`;
+          desc = isSinhala
+            ? `${req.field?.fieldName || "Field Block"} සඳහා වෙන් කෙරිණි`
+            : `Scheduled for ${req.field?.fieldName || "Field Block"}`;
         }
 
         return {
@@ -40,11 +58,13 @@ export function RecentActivity({ recentRequests = [] }: RecentActivityProps) {
       });
     }
     return [];
-  }, [recentRequests]);
+  }, [recentRequests, isSinhala]);
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 flex flex-col h-full font-sans shadow-xs">
-      <h3 className="text-xl font-medium text-slate-900 mb-6 font-display">Recent Activity</h3>
+    <div className={`bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 flex flex-col h-full font-sans shadow-xs ${isSinhala ? "font-sinhala" : ""}`}>
+      <h3 className="text-xl font-medium text-slate-900 mb-6 font-display">
+        {dict.admin.dashboard.recentActivityTitle}
+      </h3>
 
       <div className="flex-1 flex flex-col">
         {activities.length > 0 ? (
@@ -63,7 +83,7 @@ export function RecentActivity({ recentRequests = [] }: RecentActivityProps) {
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center text-slate-400 text-xs py-8 text-center font-normal">
-            No recent operational activity recorded.
+            {dict.admin.dashboard.noActivity}
           </div>
         )}
       </div>
@@ -72,3 +92,4 @@ export function RecentActivity({ recentRequests = [] }: RecentActivityProps) {
 }
 
 export default RecentActivity;
+

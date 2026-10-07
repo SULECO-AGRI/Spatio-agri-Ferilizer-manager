@@ -24,6 +24,7 @@ import type { ActiveMission } from "@/types";
 import { useLeaflet, type LeafletTileStyle } from "@/hooks/useLeaflet";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSelectedEntity, selectSelectedEntity } from "@/store/slices/uiSlice";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Extended ActiveMission interface with database metadata
 export interface ActiveMissionDisplay extends ActiveMission {
@@ -172,6 +173,7 @@ function transformRequestToActiveMission(
 export function LiveMissionMap() {
   const dispatch = useAppDispatch();
   const reduxSelectedEntity = useAppSelector(selectSelectedEntity);
+  const { dict, isSinhala } = useLanguage();
 
   const [missionsList, setMissionsList] = useState<ActiveMissionDisplay[]>([]);
   const [isLoadingDb, setIsLoadingDb] = useState(true);
@@ -514,16 +516,16 @@ export function LiveMissionMap() {
           <div className="flex items-center gap-2.5">
             <h2 className="text-base font-semibold text-slate-900 tracking-tight flex items-center gap-2">
               <Radio className="w-4 h-4 text-emerald-600" />
-              Live Active Missions Map
+              {dict.admin.dashboard.liveMapTitle}
             </h2>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-              {filteredMissions.length} Mission Places Active
+              {filteredMissions.length} {dict.admin.dashboard.placesActive}
             </span>
           </div>
           <p className="text-xs text-slate-500 font-normal mt-0.5 flex items-center gap-1.5">
-            <span>Real-time coordinates & pilot flight telemetry</span>
+            <span>{dict.admin.dashboard.realTimeCoords}</span>
             {lastSyncTime && (
-              <span className="text-slate-400 font-mono">• Synced: {lastSyncTime}</span>
+              <span className="text-slate-400 font-mono">• {isSinhala ? "සමමුහුර්ත කළේ" : "Synced"}: {lastSyncTime}</span>
             )}
           </p>
         </div>
@@ -534,8 +536,8 @@ export function LiveMissionMap() {
           <RefreshButton
             onRefresh={fetchRealMissions}
             isLoading={isLoadingDb}
-            label="Sync DB"
-            title="Refresh active missions telemetry from DB"
+            label={dict.admin.dashboard.syncDb}
+            title={dict.admin.dashboard.syncDb}
           />
 
           {/* OpenStreetMap Layer Mode Buttons */}
@@ -551,7 +553,7 @@ export function LiveMissionMap() {
               title="OpenStreetMap Standard Vector Map"
             >
               <MapIcon className="w-3 h-3" />
-              <span>OSM</span>
+              <span>{dict.admin.dashboard.osm}</span>
             </button>
             <button
               type="button"
@@ -563,7 +565,7 @@ export function LiveMissionMap() {
               }`}
               title="OpenTopoMap Topography & Terrain"
             >
-              <span>Terrain</span>
+              <span>{dict.admin.dashboard.terrain}</span>
             </button>
             <button
               type="button"
@@ -576,7 +578,7 @@ export function LiveMissionMap() {
               title="Esri World Satellite Imagery"
             >
               <Layers className="w-3 h-3" />
-              <span>Satellite</span>
+              <span>{dict.admin.dashboard.satellite}</span>
             </button>
           </div>
 
@@ -585,7 +587,7 @@ export function LiveMissionMap() {
             type="button"
             onClick={() => setIsExpanded((prev) => !prev)}
             className="p-2 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
-            title={isExpanded ? "Minimize Map" : "Expand Map"}
+            title={isExpanded ? dict.admin.dashboard.minimizeMap : dict.admin.dashboard.expandMap}
           >
             {isExpanded ? (
               <Minimize2 className="w-3.5 h-3.5" />
@@ -607,7 +609,7 @@ export function LiveMissionMap() {
           <div className="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur-md border border-white/10 rounded-xl px-3 py-1.5 text-white flex items-center gap-2.5 shadow-lg select-none z-[1000]">
             <div className="w-2 h-2 rounded-full bg-emerald-400" />
             <span className="text-[11px] font-medium tracking-wide">
-              Live RTK Coordinates • Centimeter Precision
+              {isSinhala ? "සජීවී RTK ඛණ්ඩාංක • නිරවද්‍ය ස්ථානගත කිරීම" : "Live RTK Coordinates • Centimeter Precision"}
             </span>
           </div>
 
@@ -616,10 +618,10 @@ export function LiveMissionMap() {
             type="button"
             onClick={handleRecenter}
             className="absolute top-3 right-3 bg-white/95 backdrop-blur-md hover:bg-white text-slate-700 border border-slate-200 p-2.5 rounded-xl shadow-md transition-all cursor-pointer z-[1000] flex items-center gap-1.5 text-xs font-semibold"
-            title="Recenter Map to Active Mission Place"
+            title={isSinhala ? "කේන්ද්‍රගත කරන්න" : "Recenter Map to Active Mission Place"}
           >
             <Crosshair className="w-4 h-4 text-emerald-600" />
-            <span className="hidden sm:inline">Focus Mission</span>
+            <span className="hidden sm:inline">{isSinhala ? "කේන්ද්‍රගත කරන්න" : "Focus Mission"}</span>
           </button>
         </div>
 
@@ -668,17 +670,17 @@ export function LiveMissionMap() {
                   <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
                     <span className="text-slate-400 block text-[10px] uppercase font-semibold flex items-center gap-1">
                       <Sprout className="w-3 h-3 text-emerald-600" />
-                      Crop Type
+                      {isSinhala ? "බෝග වර්ගය" : "Crop Type"}
                     </span>
                     <span className="font-semibold text-slate-800 text-xs mt-0.5 block truncate">
-                      {selectedMission.cropType || "Paddy"}
+                      {selectedMission.cropType || (isSinhala ? "වී" : "Paddy")}
                     </span>
                   </div>
 
                   <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
                     <span className="text-slate-400 block text-[10px] uppercase font-semibold flex items-center gap-1">
                       <Compass className="w-3 h-3 text-cyan-600" />
-                      Field Area
+                      {isSinhala ? "වගා බිමේ ප්‍රමාණය" : "Field Area"}
                     </span>
                     <span className="font-semibold text-slate-800 text-xs mt-0.5 block">
                       {selectedMission.areaHa ? `${selectedMission.areaHa} Ha` : "—"}
@@ -691,7 +693,7 @@ export function LiveMissionMap() {
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400 flex items-center gap-1.5">
                       <Plane className="w-3 h-3 text-emerald-600" />
-                      Assigned Pilot:
+                      {isSinhala ? "පැවරූ නියමුවා:" : "Assigned Pilot:"}
                     </span>
                     <span className="font-semibold text-slate-800 font-sans">
                       {selectedMission.pilotName}
@@ -702,7 +704,7 @@ export function LiveMissionMap() {
                     <div className="flex items-center justify-between pt-1.5 border-t border-slate-100">
                       <span className="text-slate-400 flex items-center gap-1.5">
                         <User className="w-3 h-3 text-sky-600" />
-                        Farmer:
+                        {isSinhala ? "ගොවියා:" : "Farmer:"}
                       </span>
                       <span className="font-semibold text-slate-800 font-sans">
                         {selectedMission.farmerName}
@@ -714,7 +716,7 @@ export function LiveMissionMap() {
                     <div className="flex items-center justify-between pt-1.5 border-t border-slate-100">
                       <span className="text-slate-400 flex items-center gap-1.5">
                         <Phone className="w-3 h-3 text-emerald-600" />
-                        Contact:
+                        {isSinhala ? "දුරකථනය:" : "Contact:"}
                       </span>
                       <span className="font-mono text-slate-700 text-[11px]">
                         {selectedMission.farmerMobile}
@@ -723,7 +725,7 @@ export function LiveMissionMap() {
                   )}
 
                   <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 font-mono text-[11px]">
-                    <span className="text-slate-400">GPS Coords:</span>
+                    <span className="text-slate-400">{isSinhala ? "GPS ඛණ්ඩාංක:" : "GPS Coords:"}</span>
                     <span className="text-emerald-700 font-semibold">
                       {selectedMission.coordinates.lat}, {selectedMission.coordinates.lng}
                     </span>
@@ -733,14 +735,16 @@ export function LiveMissionMap() {
             </AnimatePresence>
           ) : (
             <div className="flex-1 flex items-center justify-center text-xs text-slate-400 p-6 text-center">
-              Select an active mission point on the map to inspect coordinates and field details.
+              {isSinhala
+                ? "ඛණ්ඩාංක සහ ක්ෂේත්‍ර තොරතුරු බැලීමට සිතියම මත ස්ථානයක් තෝරන්න."
+                : "Select an active mission point on the map to inspect coordinates and field details."}
             </div>
           )}
 
           {/* Quick Mission Selector Pills */}
           <div className="space-y-1.5 pt-2 border-t border-slate-200/70">
             <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-              Active Database Locations ({filteredMissions.length})
+              {isSinhala ? `ක්‍රියාකාරී දත්ත ස්ථාන (${filteredMissions.length})` : `Active Database Locations (${filteredMissions.length})`}
             </span>
             <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
               {filteredMissions.map((m) => {

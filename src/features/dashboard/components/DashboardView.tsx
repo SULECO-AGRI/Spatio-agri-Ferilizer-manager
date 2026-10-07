@@ -5,6 +5,7 @@ import { RecentActivity } from "./RecentActivity";
 import { ScheduleTable } from "./ScheduleTable";
 import { LiveMissionMap } from "./LiveMissionMap";
 import { useDashboardStats } from "../hooks/useDashboardStats";
+import { useLanguage } from "@/context/LanguageContext";
 import type { TabId } from "@/types";
 
 interface DashboardViewProps {
@@ -13,47 +14,48 @@ interface DashboardViewProps {
 
 export const DashboardView = memo(function DashboardView({ onNavigate }: DashboardViewProps) {
   const { metrics, isLoading } = useDashboardStats();
+  const { dict, isSinhala } = useLanguage();
 
-  const todayStr = new Date().toLocaleDateString("en-US", {
+  const todayStr = new Date().toLocaleDateString(isSinhala ? "si-LK" : "en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-300">
+    <div className={`space-y-6 md:space-y-8 animate-in fade-in duration-300 ${isSinhala ? "font-sinhala" : ""}`}>
       {/* Header Title */}
       <PageHeader
-        title="Dashboard"
-        description={`Overview of drone service operations — Today, ${todayStr}`}
+        title={dict.admin.dashboard.title}
+        description={`${dict.admin.dashboard.description} — ${todayStr}`}
       />
 
       {/* Metrics Row: 5 Key Performance Indicators with Real Backend Data */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <MetricCard
-          title="Pending Requests"
+          title={dict.admin.dashboard.pendingRequests}
           value={isLoading ? "..." : metrics.pendingRequests}
-          footer="Awaiting operator assignment"
+          footer={dict.admin.dashboard.pendingFooter}
         />
         <MetricCard
-          title="Active Missions"
+          title={dict.admin.dashboard.activeMissions}
           value={isLoading ? "..." : metrics.activeMissions}
-          footer="Live telemetry tracking"
+          footer={dict.admin.dashboard.activeFooter}
         />
         <MetricCard
-          title="Available Pilots"
+          title={dict.admin.dashboard.availablePilots}
           value={isLoading ? "..." : `${metrics.availablePilots} / ${metrics.totalPilots}`}
-          footer={`${metrics.onlinePilots} online`}
+          footer={`${metrics.onlinePilots} ${dict.admin.dashboard.pilotsOnline}`}
         />
         <MetricCard
-          title="Total Revenue"
+          title={dict.admin.dashboard.totalRevenue}
           value={isLoading ? "..." : metrics.todayRevenueFormatted}
           trend={metrics.revenueTrend}
         />
         <MetricCard
-          title="Mission Success Rate"
+          title={dict.admin.dashboard.missionSuccessRate}
           value={isLoading ? "..." : `${metrics.successRate}%`}
-          footer="All completed flights"
+          footer={dict.admin.dashboard.successFooter}
         />
       </div>
 
@@ -73,3 +75,4 @@ export const DashboardView = memo(function DashboardView({ onNavigate }: Dashboa
 });
 
 export default DashboardView;
+

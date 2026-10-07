@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export interface FilterPillsProps<T extends string = string> {
   items: readonly T[] | T[];
@@ -11,6 +12,36 @@ export interface FilterPillsProps<T extends string = string> {
   counts?: Partial<Record<T, number>>;
 }
 
+const sinhalaPillLabels: Record<string, string> = {
+  All: "සියල්ල",
+  Pending: "පොරොත්තු",
+  Assigned: "පවරා ඇත",
+  "In Progress": "ක්‍රියාත්මක වෙමින්",
+  Completed: "නිම කළ",
+  Cancelled: "අවලංගු කළ",
+  Available: "ලබාගත හැක",
+  "On Mission": "මෙහෙයුමක",
+  Offline: "විසන්ධි",
+  Paddy: "වී",
+  Tea: "තේ",
+  Rubber: "රබර්",
+  Coconut: "පොල්",
+  Maize: "බඩඉරිඟු",
+  Vegetables: "එළවළු",
+  Sugarcane: "උක්",
+  High: "ඉහළ",
+  Medium: "මධ්‍යම",
+  Low: "අඩු",
+  Paid: "ගෙවා ඇත",
+  Failed: "අසාර්ථක",
+  Invoices: "ඉන්වොයිස්",
+  "Pilot Payouts": "නියමු ගෙවීම්",
+  Overview: "දළ විශ්ලේෂණය",
+  Pilots: "නියමුවන්",
+  Revenue: "ආදායම",
+  Farmers: "ගොවීන්",
+};
+
 export const FilterPills = memo(function FilterPills<T extends string>({
   items,
   active,
@@ -21,12 +52,20 @@ export const FilterPills = memo(function FilterPills<T extends string>({
   pillClassName = "",
   counts,
 }: FilterPillsProps<T>) {
+  const { isSinhala } = useLanguage();
+
+  const resolveLabel = (item: T): string => {
+    if (formatLabel) return formatLabel(item);
+    if (isSinhala && sinhalaPillLabels[item]) return sinhalaPillLabels[item];
+    return item;
+  };
+
   if (variant === "dark") {
     return (
       <div className={`flex flex-wrap gap-2 ${className}`}>
         {items.map((item) => {
           const isActive = active === item;
-          const label = formatLabel ? formatLabel(item) : item;
+          const label = resolveLabel(item);
           const count = counts?.[item];
           return (
             <button
@@ -61,7 +100,7 @@ export const FilterPills = memo(function FilterPills<T extends string>({
       {items.map((item) => {
         const isActive = active === item;
         const count = counts?.[item];
-        const label = formatLabel ? formatLabel(item) : item;
+        const label = resolveLabel(item);
 
         return (
           <button
@@ -92,3 +131,4 @@ export const FilterPills = memo(function FilterPills<T extends string>({
 }) as <T extends string>(props: FilterPillsProps<T>) => React.ReactElement;
 
 export default FilterPills;
+

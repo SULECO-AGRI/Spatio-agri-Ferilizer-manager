@@ -13,6 +13,7 @@ import { usePilots, pilotFilterTabs } from "./hooks/usePilots";
 import { PilotCard } from "./PilotCard";
 import { PilotDetailsView } from "./PilotDetailsView";
 import { DeletePilotDialog } from "./components/DeletePilotDialog";
+import { useLanguage } from "@/context/LanguageContext";
 import type { ApiPilotItem } from "@/types/pilot";
 
 interface PilotManagementProps {
@@ -104,22 +105,24 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
     );
   }
 
+  const { dict, isSinhala } = useLanguage();
+
   const startItem = totalCount === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
   const endItem = Math.min(pagination.page * pagination.limit, totalCount);
 
   return (
-    <div className="space-y-6 font-sans">
+    <div className={`space-y-6 font-sans ${isSinhala ? "font-sinhala" : ""}`}>
       {/* Header Info */}
       <PageHeader
-        title="Pilot Management"
-        description="All registered drone pilots, availability status, and fleet telemetry"
+        title={dict.admin.pilots.title}
+        description={dict.admin.pilots.description}
         actions={
           <RefreshButton
             onRefresh={() => refetch()}
             isLoading={isLoading}
             isFetching={isFetching}
-            label="Refresh"
-            title="Refresh fleet and pilot records"
+            label={dict.common.refresh}
+            title={dict.common.refresh}
           />
         }
       />
@@ -139,7 +142,7 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
             onClick={() => refetch()}
             className="px-3 py-1 bg-white border border-rose-200 hover:bg-rose-100/50 rounded-lg text-rose-700 font-medium transition-colors cursor-pointer text-[11px]"
           >
-            Retry
+            {dict.common.retry}
           </button>
         </div>
       )}
@@ -153,7 +156,7 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
         <TableToolbar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          searchPlaceholder="Search by name, email, mobile, license..."
+          searchPlaceholder={dict.admin.pilots.searchPlaceholder}
         />
       </div>
 
@@ -186,11 +189,11 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
                 <Users className="w-6 h-6" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-medium text-slate-700">No pilots found</h4>
+                <h4 className="text-sm font-medium text-slate-700">{dict.admin.pilots.noPilots}</h4>
                 <p className="text-xs text-slate-400 max-w-sm">
                   {searchQuery
-                    ? `No registered pilots matched "${searchQuery}".`
-                    : `No pilots available under the "${activeFilter}" filter tab.`}
+                    ? (isSinhala ? `"${searchQuery}" සෙවුමට ගැළපෙන නියමුවන් හමු නොවීය.` : `No registered pilots matched "${searchQuery}".`)
+                    : (isSinhala ? `"${activeFilter}" පෙරහන යටතේ නියමුවන් නොමැත.` : `No pilots available under the "${activeFilter}" filter tab.`)}
                 </p>
               </div>
               {(searchQuery || activeFilter !== "All") && (
@@ -202,7 +205,7 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
                   }}
                   className="mt-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-normal transition-colors cursor-pointer"
                 >
-                  Clear filters
+                  {isSinhala ? "පෙරහන් ඉවත් කරන්න" : "Clear filters"}
                 </button>
               )}
             </div>
@@ -233,9 +236,19 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
       {/* Pagination & Counter Footer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-slate-500 font-normal">
         <div>
-          Showing <span className="font-medium text-slate-800">{startItem}</span> to{" "}
-          <span className="font-medium text-slate-800">{endItem}</span> of{" "}
-          <span className="font-medium text-slate-800">{totalCount}</span> pilots
+          {isSinhala ? (
+            <>
+              නියමුවන් <span className="font-medium text-slate-800">{totalCount}</span> න්{" "}
+              <span className="font-medium text-slate-800">{startItem}</span> සිට{" "}
+              <span className="font-medium text-slate-800">{endItem}</span> දක්වා පෙන්වයි
+            </>
+          ) : (
+            <>
+              Showing <span className="font-medium text-slate-800">{startItem}</span> to{" "}
+              <span className="font-medium text-slate-800">{endItem}</span> of{" "}
+              <span className="font-medium text-slate-800">{totalCount}</span> pilots
+            </>
+          )}
         </div>
 
         {/* Page controls */}
@@ -280,7 +293,7 @@ export function PilotManagementView({ initialPilotId = null }: PilotManagementPr
 
         {/* Rows selector */}
         <div className="flex items-center gap-2">
-          <span className="text-slate-400">Cards per page:</span>
+          <span className="text-slate-400">{isSinhala ? "කාඩ්පත්:" : "Cards per page:"}</span>
           <select
             value={limit}
             onChange={(e) => {

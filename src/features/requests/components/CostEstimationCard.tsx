@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import type { CostEstimationBreakdown } from "@/types/request";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface CostEstimationCardProps {
   estimation: CostEstimationBreakdown | null;
@@ -18,6 +19,7 @@ export function CostEstimationCard({
   fieldAreaAcres,
 }: CostEstimationCardProps) {
   const [showFormulaDetails, setShowFormulaDetails] = useState<boolean>(false);
+  const { isSinhala } = useLanguage();
 
   if (isLoading && !estimation) {
     return (
@@ -39,16 +41,20 @@ export function CostEstimationCard({
 
   if (!estimation) {
     return (
-      <div className={`p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-500 ${className}`}>
-        <p className="font-medium text-slate-700">Cost Estimate</p>
+      <div className={`p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-500 ${className} ${isSinhala ? "font-sinhala" : ""}`}>
+        <p className="font-medium text-slate-700">
+          {isSinhala ? "වියදම් ඇස්තමේන්තුව" : "Cost Estimate"}
+        </p>
         <p className="text-[11px] text-slate-400 mt-0.5">
-          Select a field parcel to calculate real-time pricing breakdown.
+          {isSinhala
+            ? "මිල ගණනය කිරීම සඳහා වගා බිම් කොටසක් තෝරන්න."
+            : "Select a field parcel to calculate real-time pricing breakdown."}
         </p>
       </div>
     );
   }
 
-  const currency = estimation.currency || "LKR";
+  const currency = estimation.currency || (isSinhala ? "රු." : "LKR");
   const formattedTotal = Number(estimation.totalEstimatedCost || 0).toLocaleString("en-US", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
@@ -69,6 +75,8 @@ export function CostEstimationCard({
   return (
     <div
       className={`rounded-xl border transition-all duration-200 overflow-hidden font-sans ${
+        isSinhala ? "font-sinhala" : ""
+      } ${
         estimation.isMinimumFeeApplied
           ? "bg-amber-50/30 border-amber-200"
           : "bg-slate-50/50 border-slate-200"
@@ -78,12 +86,12 @@ export function CostEstimationCard({
       <div className="p-4">
         <div className="flex items-center justify-between gap-2 mb-2">
           <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-            Cost Estimate
+            {isSinhala ? "වියදම් ඇස්තමේන්තුව" : "Cost Estimate"}
           </span>
 
           {isFetching && (
             <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-full font-medium">
-              <Loader2 className="w-2.5 h-2.5 animate-spin" /> Recalculating...
+              <Loader2 className="w-2.5 h-2.5 animate-spin" /> {isSinhala ? "ගණනය කරමින්..." : "Recalculating..."}
             </span>
           )}
         </div>
@@ -98,9 +106,13 @@ export function CostEstimationCard({
           </div>
 
           <div className="text-right text-[11px] text-slate-500">
-            <span>Base: {currency} {formattedBaseRate} / acre</span>
+            <span>
+              {isSinhala ? "මූලික ගාස්තුව:" : "Base:"} {currency} {formattedBaseRate} {isSinhala ? "/ අක්කරයකට" : "/ acre"}
+            </span>
             <span className="text-slate-400 block text-[10px]">
-              Calculated for {estimation.area || fieldAreaAcres || 0} acres
+              {isSinhala
+                ? `අක්කර ${estimation.area || fieldAreaAcres || 0} ක් සඳහා`
+                : `Calculated for ${estimation.area || fieldAreaAcres || 0} acres`}
             </span>
           </div>
         </div>
@@ -108,7 +120,10 @@ export function CostEstimationCard({
         {/* Minimum Fee Notice Banner (if triggered) */}
         {estimation.isMinimumFeeApplied && (
           <div className="mt-2.5 p-2 bg-amber-50 border border-amber-200 rounded-lg text-[11px] text-amber-800">
-            <strong>Minimum fee applied:</strong> Baseline rate of {currency} {Number(estimation.minimumFee).toLocaleString()} for small parcel.
+            <strong>{isSinhala ? "අවම ගාස්තුව ක්‍රියාත්මකයි:" : "Minimum fee applied:"}</strong>{" "}
+            {isSinhala
+              ? `කුඩා බිම් කොටස් සඳහා අවම ගාස්තුව ${currency} ${Number(estimation.minimumFee).toLocaleString()} කි.`
+              : `Baseline rate of ${currency} ${Number(estimation.minimumFee).toLocaleString()} for small parcel.`}
           </div>
         )}
 
@@ -116,7 +131,9 @@ export function CostEstimationCard({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 pt-3 border-t border-slate-200/60 text-xs">
           {/* Crop */}
           <div className="p-2 bg-white border border-slate-200/70 rounded-lg">
-            <div className="text-[10px] text-slate-400">Crop Index</div>
+            <div className="text-[10px] text-slate-400">
+              {isSinhala ? "බෝග දර්ශකය" : "Crop Index"}
+            </div>
             <div className="font-semibold text-slate-800 mt-0.5 text-[11px]">
               {estimation.cropMultiplier}x <span className="text-[10px] font-normal text-slate-400">({estimation.cropType || "Crop"})</span>
             </div>
@@ -124,7 +141,9 @@ export function CostEstimationCard({
 
           {/* Operation */}
           <div className="p-2 bg-white border border-slate-200/70 rounded-lg">
-            <div className="text-[10px] text-slate-400">Operation</div>
+            <div className="text-[10px] text-slate-400">
+              {isSinhala ? "මෙහෙයුම" : "Operation"}
+            </div>
             <div className="font-semibold text-slate-800 mt-0.5 text-[11px] truncate">
               {estimation.serviceType?.replace(/_/g, " ") || "FERTILIZING"}
             </div>
@@ -132,7 +151,9 @@ export function CostEstimationCard({
 
           {/* Priority */}
           <div className="p-2 bg-white border border-slate-200/70 rounded-lg">
-            <div className="text-[10px] text-slate-400">Priority</div>
+            <div className="text-[10px] text-slate-400">
+              {isSinhala ? "ප්‍රමුඛතාවය" : "Priority"}
+            </div>
             <div className="font-semibold text-slate-800 mt-0.5 text-[11px]">
               {estimation.priorityMultiplier}x <span className="text-[10px] font-normal text-slate-400">({estimation.priority})</span>
             </div>
@@ -140,12 +161,14 @@ export function CostEstimationCard({
 
           {/* Discount */}
           <div className="p-2 bg-white border border-slate-200/70 rounded-lg">
-            <div className="text-[10px] text-slate-400">Discount</div>
+            <div className="text-[10px] text-slate-400">
+              {isSinhala ? "වට්ටම" : "Discount"}
+            </div>
             <div className="font-semibold text-slate-800 mt-0.5 text-[11px]">
               {hasDiscount ? (
                 <span className="text-emerald-700">-{estimation.areaDiscountPercent}% ({currency} {formattedDiscount})</span>
               ) : (
-                <span className="text-slate-400 font-normal">None</span>
+                <span className="text-slate-400 font-normal">{isSinhala ? "නැත" : "None"}</span>
               )}
             </div>
           </div>
@@ -166,32 +189,48 @@ export function CostEstimationCard({
           onClick={() => setShowFormulaDetails((prev) => !prev)}
           className="w-full px-4 py-2 text-[11px] font-medium text-slate-600 hover:text-slate-900 flex items-center justify-between transition-colors cursor-pointer"
         >
-          <span>{showFormulaDetails ? "Hide breakdown" : "View calculation breakdown"}</span>
+          <span>
+            {showFormulaDetails
+              ? isSinhala
+                ? "විස්තර සඟවන්න"
+                : "Hide breakdown"
+              : isSinhala
+                ? "ගණනය කිරීමේ විස්තර බලන්න"
+                : "View calculation breakdown"}
+          </span>
           {showFormulaDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
         </button>
 
         {showFormulaDetails && (
           <div className="px-4 pb-3 pt-1 space-y-1.5 text-xs border-t border-slate-200/60 font-mono text-[11px] text-slate-700">
             <div className="flex justify-between py-0.5">
-              <span className="text-slate-500">Base Cost ({estimation.area} ac × {currency} {formattedBaseRate}):</span>
+              <span className="text-slate-500">
+                {isSinhala ? "මූලික වියදම" : "Base Cost"} ({estimation.area} ac × {currency} {formattedBaseRate}):
+              </span>
               <span>{currency} {Number(estimation.baseRatePerAcre * estimation.area).toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
             </div>
             <div className="flex justify-between py-0.5">
-              <span className="text-slate-500">Crop Multiplier:</span>
+              <span className="text-slate-500">
+                {isSinhala ? "බෝග ගුණකය:" : "Crop Multiplier:"}
+              </span>
               <span>× {estimation.cropMultiplier}</span>
             </div>
             <div className="flex justify-between py-0.5">
-              <span className="text-slate-500">Priority Multiplier:</span>
+              <span className="text-slate-500">
+                {isSinhala ? "ප්‍රමුඛතා ගුණකය:" : "Priority Multiplier:"}
+              </span>
               <span>× {estimation.priorityMultiplier}</span>
             </div>
             {hasDiscount && (
               <div className="flex justify-between py-0.5 text-emerald-700">
-                <span>Volume Discount ({estimation.areaDiscountPercent}%):</span>
+                <span>
+                  {isSinhala ? "ප්‍රමාණ වට්ටම" : "Volume Discount"} ({estimation.areaDiscountPercent}%):
+                </span>
                 <span>- {currency} {formattedDiscount}</span>
               </div>
             )}
             <div className="flex justify-between py-1 font-semibold text-slate-900 border-t border-slate-200/60 mt-1">
-              <span>Final Estimate:</span>
+              <span>{isSinhala ? "අවසාන ඇස්තමේන්තුව:" : "Final Estimate:"}</span>
               <span className="text-emerald-800">{currency} {formattedTotal}</span>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export type BadgeVariant = "emerald" | "amber" | "rose" | "blue" | "slate" | "indigo";
 
@@ -76,7 +77,51 @@ function inferVariant(status: string): BadgeVariant {
   return "slate";
 }
 
-function formatStatusText(status: string): string {
+const sinhalaStatusMap: Record<string, string> = {
+  ACTIVE: "ක්‍රියාත්මක",
+  Active: "ක්‍රියාත්මක",
+  INACTIVE: "අක්‍රිය",
+  Inactive: "අක්‍රිය",
+  ON_MISSION: "මෙහෙයුමක",
+  "On Mission": "මෙහෙයුමක",
+  SUSPENDED: "අත්හිටුවූ",
+  Suspended: "අත්හිටුවූ",
+  IN_PROGRESS: "ක්‍රියාත්මක වෙමින්",
+  "In Progress": "ක්‍රියාත්මක වෙමින්",
+  PENDING: "පොරොත්තු",
+  Pending: "පොරොත්තු",
+  ASSIGNED: "පවරා ඇත",
+  Assigned: "පවරා ඇත",
+  COMPLETED: "නිම කළ",
+  Completed: "නිම කළ",
+  CANCELLED: "අවලංගු කළ",
+  Cancelled: "අවලංගු කළ",
+  PAID: "ගෙවා ඇත",
+  Paid: "ගෙවා ඇත",
+  FAILED: "අසාර්ථක",
+  Failed: "අසාර්ථක",
+  HIGH: "ඉහළ",
+  High: "ඉහළ",
+  MEDIUM: "මධ්‍යම",
+  Medium: "මධ්‍යම",
+  LOW: "අඩු",
+  Low: "අඩු",
+  NORMAL: "සාමාන්‍ය",
+  Normal: "සාමාන්‍ය",
+  ONLINE: "සබැඳි",
+  Online: "සබැඳි",
+  OFFLINE: "විසන්ධි",
+  Offline: "විසන්ධි",
+  AVAILABLE: "ලබාගත හැක",
+  Available: "ලබාගත හැක",
+  BUSY: "කාර්යබහුල",
+  Busy: "කාර්යබහුල",
+};
+
+function formatStatusText(status: string, isSinhala: boolean): string {
+  if (isSinhala && sinhalaStatusMap[status]) {
+    return sinhalaStatusMap[status];
+  }
   if (status === "ACTIVE") return "Active";
   if (status === "INACTIVE") return "Inactive";
   if (status === "ON_MISSION") return "On Mission";
@@ -92,6 +137,7 @@ export const StatusBadge = memo(function StatusBadge({
   dot = false,
   className = "",
 }: StatusBadgeProps) {
+  const { isSinhala } = useLanguage();
   const resolvedVariant = variant === "auto" ? inferVariant(status) : variant;
   const style = variantStyles[resolvedVariant];
   const sizeStyle = size === "sm" ? "px-2.5 py-0.5 text-[10px]" : "px-3 py-1 text-xs";
@@ -101,9 +147,10 @@ export const StatusBadge = memo(function StatusBadge({
       className={`inline-flex items-center gap-1.5 rounded-full font-normal border transition-colors ${style} ${sizeStyle} ${className}`}
     >
       {dot && <span className={`w-1.5 h-1.5 rounded-full ${dotStyles[resolvedVariant]}`} />}
-      <span>{formatStatusText(status)}</span>
+      <span>{formatStatusText(status, isSinhala)}</span>
     </span>
   );
 });
 
 export default StatusBadge;
+

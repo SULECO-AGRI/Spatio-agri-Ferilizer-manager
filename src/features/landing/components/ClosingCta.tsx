@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Reveal } from "../primitives/Reveal";
 import { GlowButton } from "../primitives/GlowButton";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function ClosingCta() {
+  const { isSinhala } = useLanguage();
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
   const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -48,13 +50,25 @@ export function ClosingCta() {
 
           <div className="relative max-w-2xl">
             <p className="mb-3 text-xs font-mono uppercase tracking-widest text-primary-glow">
-              Get Started
+              {isSinhala ? "ආරම්භ කරන්න" : "Get Started"}
             </p>
-            <h2 className="font-display text-3xl font-semibold tracking-tight md:text-5xl">
-              Ready to optimize your next yield?
+            <h2
+              className={`font-display text-3xl font-semibold tracking-tight md:text-5xl ${
+                isSinhala ? "leading-[1.35] font-sinhala" : ""
+              }`}
+            >
+              {isSinhala
+                ? "ඔබේ ඊළඟ අස්වැන්න වැඩි දියුණු කර ගැනීමට සූදානම්ද?"
+                : "Ready to optimize your next yield?"}
             </h2>
-            <p className="mt-4 max-w-lg text-white/70">
-              Tell us where and when. A pilot in your county will reach out within one business day.
+            <p
+              className={`mt-4 max-w-lg text-white/70 ${
+                isSinhala ? "leading-relaxed font-sinhala text-sm" : ""
+              }`}
+            >
+              {isSinhala
+                ? "ඔබගේ ඉඩම සහ දිනය සඳහන් කරන්න. ඔබගේ ප්‍රදේශයේ සහතික ලත් නියමුවෙකු පැය 24ක් තුළ ඔබව සම්බන්ධ කර ගනු ඇත."
+                : "Tell us where and when. A pilot in your county will reach out within one business day."}
             </p>
 
             <form
@@ -71,16 +85,28 @@ export function ClosingCta() {
               <input
                 id="cta-email"
                 type="email"
-                placeholder="you@farm.co"
+                placeholder={isSinhala ? "ඔබගේ ඊමේල් ලිපිනය" : "you@farm.co"}
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
                   setDone(false);
                 }}
-                className="flex-1 bg-transparent px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none"
+                className={`flex-1 bg-transparent px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none ${
+                  isSinhala ? "font-sinhala" : ""
+                }`}
               />
-              <GlowButton type="submit" disabled={!valid} className="disabled:opacity-60">
-                {done ? "Received ✓" : "Book a Scan"}
+              <GlowButton
+                type="submit"
+                disabled={!valid}
+                className={`disabled:opacity-60 ${isSinhala ? "font-sinhala" : ""}`}
+              >
+                {done
+                  ? isSinhala
+                    ? "ලැබුණි ✓"
+                    : "Received ✓"
+                  : isSinhala
+                    ? "වෙන්කරන්න"
+                    : "Book a Scan"}
               </GlowButton>
             </form>
           </div>

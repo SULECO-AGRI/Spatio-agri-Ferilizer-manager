@@ -3,6 +3,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronRight, Calendar, User, AlertCircle, Loader2, UserPlus, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/common";
 import { formatDate, formatServiceType } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 import type { ApiServiceRequestItem } from "@/types/request";
 
 interface RequestsTableProps {
@@ -20,6 +21,7 @@ export function RequestsTable({
   onAssignPilot,
   onDeleteRequest,
 }: RequestsTableProps) {
+  const { dict, isSinhala } = useLanguage();
   const parentRef = useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
@@ -47,20 +49,20 @@ export function RequestsTable({
   return (
     <div
       ref={parentRef}
-      className="overflow-auto max-h-[640px] bg-white border border-slate-200/80 rounded-2xl shadow-xs font-sans relative"
+      className={`overflow-auto max-h-[640px] bg-white border border-slate-200/80 rounded-2xl shadow-xs font-sans relative ${isSinhala ? "font-sinhala" : ""}`}
     >
       <table className="w-full text-left border-collapse min-w-[800px]">
         <thead className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
           <tr className="text-slate-400 text-xs font-normal">
-            <th className="p-4 pl-6">Request Code</th>
-            <th className="p-4">Farmer</th>
-            <th className="p-4">Area</th>
-            <th className="p-4">Service</th>
-            <th className="p-4">Pref. Date</th>
-            <th className="p-4">Assigned Pilot</th>
-            <th className="p-4">Priority</th>
-            <th className="p-4">Status</th>
-            <th className="p-4 pr-6 text-right">Actions</th>
+            <th className="p-4 pl-6">{dict.admin.requests.requestId}</th>
+            <th className="p-4">{dict.admin.requests.farmer}</th>
+            <th className="p-4">{isSinhala ? "බිම් ප්‍රමාණය" : "Area"}</th>
+            <th className="p-4">{dict.admin.requests.service}</th>
+            <th className="p-4">{dict.admin.requests.date}</th>
+            <th className="p-4">{dict.admin.requests.pilot}</th>
+            <th className="p-4">{dict.admin.requests.priority}</th>
+            <th className="p-4">{dict.admin.requests.status}</th>
+            <th className="p-4 pr-6 text-right">{dict.admin.requests.actions}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100/60 text-sm">
@@ -87,12 +89,12 @@ export function RequestsTable({
                   {req.requestCode}
                 </td>
 
-                {/* Farmer Name */}
+                {/* Farmer Name (Raw / untranslated as requested) */}
                 <td className="p-4 text-slate-700 font-normal">
                   <div className="flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span className="truncate max-w-[140px]">
-                      {req.farmer?.fullName || "Unknown"}
+                      {req.farmer?.fullName || (isSinhala ? "නොදන්නා" : "Unknown")}
                     </span>
                   </div>
                 </td>
@@ -115,14 +117,14 @@ export function RequestsTable({
                   </div>
                 </td>
 
-                {/* Assigned Pilot */}
+                {/* Assigned Pilot (Raw / untranslated as requested) */}
                 <td className="p-4 text-slate-600 font-normal text-xs">
                   {req.assignedPilot ? (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-medium">
                       {req.assignedPilot.fullName}
                     </span>
                   ) : (
-                    <span className="text-slate-400 italic">Unassigned</span>
+                    <span className="text-slate-400 italic">{dict.admin.dashboard.unassigned}</span>
                   )}
                 </td>
 
@@ -147,10 +149,10 @@ export function RequestsTable({
                           onAssignPilot(req);
                         }}
                         className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-all shadow-2xs hover:shadow-xs cursor-pointer"
-                        title="Assign candidate pilot"
+                        title={isSinhala ? "නියමුවෙකු පවරන්න" : "Assign candidate pilot"}
                       >
                         <UserPlus className="w-3.5 h-3.5" />
-                        <span>Assign Pilot</span>
+                        <span>{isSinhala ? "නියමුවා පවරන්න" : "Assign Pilot"}</span>
                       </button>
                     )}
 
@@ -162,7 +164,7 @@ export function RequestsTable({
                       }}
                       className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 text-xs font-medium cursor-pointer py-1 px-1.5 rounded-lg hover:bg-emerald-50 transition-colors"
                     >
-                      <span>View</span>
+                      <span>{dict.common.view}</span>
                       <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
                     </button>
 
@@ -174,7 +176,7 @@ export function RequestsTable({
                           onDeleteRequest(req);
                         }}
                         className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                        title="Delete Request"
+                        title={dict.common.delete}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -196,9 +198,9 @@ export function RequestsTable({
               <td colSpan={9} className="p-12 text-center text-slate-400 font-normal">
                 <div className="flex flex-col items-center justify-center gap-2">
                   <AlertCircle className="w-6 h-6 text-slate-300" />
-                  <p className="text-sm text-slate-600 font-medium">No service requests found</p>
+                  <p className="text-sm text-slate-600 font-medium">{dict.admin.requests.noRequests}</p>
                   <p className="text-xs text-slate-400">
-                    Try adjusting your filters or search criteria.
+                    {isSinhala ? "සොයන පෙරහන් හෝ වචන වෙනස් කර නැවත උත්සාහ කරන්න." : "Try adjusting your filters or search criteria."}
                   </p>
                 </div>
               </td>
@@ -211,3 +213,4 @@ export function RequestsTable({
 }
 
 export default RequestsTable;
+

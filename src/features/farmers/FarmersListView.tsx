@@ -15,6 +15,7 @@ import { PageHeader, RefreshButton } from "@/components/common";
 import { useFarmers } from "./hooks/useFarmers";
 import { FarmerProfileView } from "./FarmerProfileView";
 import { DeleteFarmerDialog } from "./components/DeleteFarmerDialog";
+import { useLanguage } from "@/context/LanguageContext";
 import type { ApiFarmerItem } from "@/types/farmer";
 
 interface FarmersListViewProps {
@@ -95,17 +96,19 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
     );
   }
 
+  const { dict, isSinhala } = useLanguage();
+
   return (
-    <div className="space-y-6 font-sans">
+    <div className={`space-y-6 font-sans ${isSinhala ? "font-sinhala" : ""}`}>
       <PageHeader
-        title="Farmers Directory"
-        description="Active farming clients, registered field parcels, and engagement history"
+        title={dict.admin.farmers.title}
+        description={dict.admin.farmers.description}
       />
 
       {/* Toolbar with Search and Refetch */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-xs text-slate-500 font-normal">
-          Total Registered: <span className="font-medium text-slate-800">{totalCount}</span>
+          {isSinhala ? "මුළු ලියාපදිංචි:" : "Total Registered:"} <span className="font-medium text-slate-800">{totalCount}</span>
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -115,7 +118,7 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name, location, or NIC..."
+              placeholder={dict.admin.farmers.searchPlaceholder}
               className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200/80 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all shadow-xs"
             />
           </div>
@@ -125,7 +128,7 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
             onRefresh={() => refetch()}
             isLoading={isLoading}
             isFetching={isFetching}
-            title="Refresh farmers directory"
+            title={dict.common.refresh}
           />
         </div>
       </div>
@@ -142,7 +145,7 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
             onClick={() => refetch()}
             className="px-3 py-1 bg-red-100 hover:bg-red-200 rounded-lg font-medium text-red-800 transition-colors cursor-pointer"
           >
-            Retry
+            {dict.common.retry}
           </button>
         </div>
       )}
@@ -152,13 +155,13 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
         <table className="w-full text-left border-collapse min-w-[760px]">
           <thead>
             <tr className="border-b border-slate-100 text-slate-400 text-xs font-normal bg-slate-50/50">
-              <th className="p-4 pl-6">Farmer</th>
-              <th className="p-4">Location</th>
-              <th className="p-4">NIC</th>
-              <th className="p-4 text-center">Fields / Area</th>
-              <th className="p-4 text-center">Service Requests</th>
-              <th className="p-4 text-center">Member Since</th>
-              <th className="p-4 pr-6 text-right">Actions</th>
+              <th className="p-4 pl-6">{dict.admin.farmers.farmer}</th>
+              <th className="p-4">{isSinhala ? "ප්‍රදේශය" : "Location"}</th>
+              <th className="p-4">{dict.admin.farmers.nic}</th>
+              <th className="p-4 text-center">{isSinhala ? "වගා බිම් / ප්‍රමාණය" : "Fields / Area"}</th>
+              <th className="p-4 text-center">{isSinhala ? "සේවා ඉල්ලීම්" : "Service Requests"}</th>
+              <th className="p-4 text-center">{isSinhala ? "ලියාපදිංචි වර්ෂය" : "Member Since"}</th>
+              <th className="p-4 pr-6 text-right">{dict.common.actions}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100/60 text-sm">
@@ -190,7 +193,7 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
                     onClick={() => handleView(farmer.userId)}
                     className="hover:bg-slate-50/60 transition-colors cursor-pointer group"
                   >
-                    {/* Farmer Name & Email */}
+                    {/* Farmer Name & Email (Raw / untranslated as requested) */}
                     <td className="p-4 pl-6">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-800 font-medium text-xs flex items-center justify-center shrink-0">
@@ -198,7 +201,7 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
                         </div>
                         <div>
                           <div className="text-slate-900 font-medium text-xs sm:text-sm group-hover:text-emerald-950 transition-colors">
-                            {farmer.fullName || "Unnamed Farmer"}
+                            {farmer.fullName || (isSinhala ? "නොදන්නා ගොවියා" : "Unnamed Farmer")}
                           </div>
                           <div className="text-slate-400 text-xs truncate max-w-[200px]">
                             {farmer.email}
@@ -207,7 +210,7 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
                       </div>
                     </td>
 
-                    {/* Location */}
+                    {/* Location (Raw place name / untranslated as requested) */}
                     <td className="p-4">
                       <div className="flex items-center gap-1.5 text-slate-600 text-xs">
                         <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -221,7 +224,7 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
                     {/* Fields & Area */}
                     <td className="p-4 text-center">
                       <div className="text-xs font-medium text-slate-800">
-                        {fieldCount} {fieldCount === 1 ? "parcel" : "parcels"}
+                        {fieldCount} {isSinhala ? "බිම් කොටස්" : (fieldCount === 1 ? "parcel" : "parcels")}
                       </div>
                       <div className="text-[11px] text-slate-400">
                         {areaCount > 0 ? `${areaCount.toFixed(1)} ha` : "0.0 ha"}
@@ -256,16 +259,16 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
                             handleView(farmer.userId);
                           }}
                           className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-normal transition-colors cursor-pointer"
-                          title="View Profile"
+                          title={dict.admin.farmers.viewProfile}
                         >
-                          <span>Profile</span>
+                          <span>{dict.admin.farmers.viewProfile}</span>
                           <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
                         </button>
                         <button
                           type="button"
                           onClick={(e) => handleOpenDelete(farmer, e)}
                           className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                          title="Delete Farmer"
+                          title={dict.common.delete}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -279,11 +282,11 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
               <tr>
                 <td colSpan={7} className="p-12 text-center text-slate-400 font-normal">
                   <User className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-slate-700 mb-1">No farmers found</p>
+                  <p className="text-sm font-medium text-slate-700 mb-1">{dict.admin.farmers.noFarmers}</p>
                   <p className="text-xs text-slate-400">
                     {searchQuery
-                      ? `No registered farmers matched "${searchQuery}".`
-                      : "No farmers registered in the system."}
+                      ? (isSinhala ? `"${searchQuery}" සෙවුමට ගැළපෙන ගොවීන් හමු නොවීය.` : `No registered farmers matched "${searchQuery}".`)
+                      : (isSinhala ? "පද්ධතියේ ලියාපදිංචි ගොවීන් නොමැත." : "No farmers registered in the system.")}
                   </p>
                 </td>
               </tr>
@@ -315,8 +318,18 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
       {/* Pagination Footer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 font-normal">
         <div>
-          Showing {farmers.length} of {totalCount} farmers
-          {pagination.totalPages > 1 && ` (Page ${pagination.page} of ${pagination.totalPages})`}
+          {isSinhala ? (
+            <>
+              ගොවීන් <span className="font-medium text-slate-700">{totalCount}</span> න්{" "}
+              <span className="font-medium text-slate-700">{farmers.length}</span> ක් පෙන්වයි
+              {pagination.totalPages > 1 && ` (පිටුව ${pagination.page} / ${pagination.totalPages})`}
+            </>
+          ) : (
+            <>
+              Showing {farmers.length} of {totalCount} farmers
+              {pagination.totalPages > 1 && ` (Page ${pagination.page} of ${pagination.totalPages})`}
+            </>
+          )}
         </div>
 
         {pagination.totalPages > 1 && (
@@ -328,7 +341,7 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
               className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200/80 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-40 disabled:pointer-events-none transition-colors shadow-xs cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
-              <span>Previous</span>
+              <span>{isSinhala ? "පෙර" : "Previous"}</span>
             </button>
 
             <span className="px-3 py-1 text-slate-700 font-medium">
@@ -341,7 +354,7 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
               disabled={!pagination.hasNextPage || isLoading}
               className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200/80 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-40 disabled:pointer-events-none transition-colors shadow-xs cursor-pointer"
             >
-              <span>Next</span>
+              <span>{isSinhala ? "ඊළඟ" : "Next"}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -350,3 +363,6 @@ export function FarmersListView({ initialFarmerId, onViewProfile }: FarmersListV
     </div>
   );
 }
+
+export default FarmersListView;
+

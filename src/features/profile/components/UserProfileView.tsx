@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { PageHeader, FormField } from "@/components/common";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 const permissionsList = [
   "Read Telemetry",
@@ -12,8 +13,18 @@ const permissionsList = [
   "Configure System",
 ];
 
+const sinhalaPermissions: Record<string, string> = {
+  "Read Telemetry": "ටෙලිමෙට්‍රි දත්ත කියවීම",
+  "Deploy Missions": "මෙහෙයුම් දියත් කිරීම",
+  "Approve Invoices": "ඉන්වොයිස් අනුමත කිරීම",
+  "Create Reports": "වාර්තා සැකසීම",
+  "Manage Users": "පරිශීලකයන් කළමනාකරණය",
+  "Configure System": "පද්ධතිය වින්‍යාස කිරීම",
+};
+
 export function UserProfileView() {
   const { user } = useAuth();
+  const { dict, isSinhala } = useLanguage();
 
   const [profileData, setProfileData] = useState({
     name: user
@@ -59,11 +70,16 @@ export function UserProfileView() {
   };
 
   return (
-    <div className="space-y-6 font-sans">
+    <div className={`space-y-6 font-sans ${isSinhala ? "font-sinhala" : ""}`}>
       {/* Title Header */}
       <PageHeader
-        title="User Profile"
-        description="Manage your personal account settings, role permissions, and credentials"
+        title={dict.admin.profile.title || (isSinhala ? "පරිශීලක පැතිකඩ" : "User Profile")}
+        description={
+          dict.admin.profile.description ||
+          (isSinhala
+            ? "ඔබේ පුද්ගලික ගිණුම් සැකසීම්, අවසර සහ අක්තපත්‍ර කළමනාකරණය කරන්න"
+            : "Manage your personal account settings, role permissions, and credentials")
+        }
       />
 
       {/* Profile Layout: 2 Columns */}
@@ -73,7 +89,7 @@ export function UserProfileView() {
           {/* Card 1: Profile Information */}
           <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-xs space-y-6">
             <h3 className="text-xl font-normal text-slate-900 font-display">
-              Personal Information
+              {isSinhala ? "පුද්ගලික තොරතුරු" : "Personal Information"}
             </h3>
 
             {/* Avatar block with initials */}
@@ -82,39 +98,47 @@ export function UserProfileView() {
                 {initials}
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-medium text-slate-700 leading-none">Profile Picture</h4>
+                <h4 className="text-sm font-medium text-slate-700 leading-none">
+                  {isSinhala ? "පැතිකඩ පින්තූරය" : "Profile Picture"}
+                </h4>
                 <p className="text-[10px] text-slate-400 font-normal">
-                  Initial icon generated from active account credentials
+                  {isSinhala
+                    ? "සක්‍රීය ගිණුමේ අක්තපත්‍ර අනුව ජනනය කරන ලද මුලකුරු"
+                    : "Initial icon generated from active account credentials"}
                 </p>
               </div>
             </div>
 
-            {/* Form grid */}
+            {/* Form grid - Person name kept raw */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
-                label="Full Name"
+                label={isSinhala ? "සම්පූර්ණ නම" : "Full Name"}
                 value={profileData.name}
                 onChange={(val) => handleProfileChange("name", val)}
               />
 
               <FormField
-                label="Email Address"
+                label={isSinhala ? "විද්‍යුත් තැපැල් ලිපිනය" : "Email Address"}
                 type="email"
                 value={profileData.email}
                 onChange={(val) => handleProfileChange("email", val)}
               />
 
               <FormField
-                label="Phone Number"
+                label={isSinhala ? "දුරකථන අංකය" : "Phone Number"}
                 value={profileData.phone}
                 onChange={(val) => handleProfileChange("phone", val)}
               />
 
-              <FormField label="Role / Position" value={profileData.department} disabled />
+              <FormField
+                label={isSinhala ? "තනතුර / කාර්යභාරය" : "Role / Position"}
+                value={profileData.department}
+                disabled
+              />
             </div>
 
-            <button className="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 rounded-lg text-xs font-normal transition-colors cursor-pointer block">
-              Save Changes
+            <button className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-normal transition-colors cursor-pointer block">
+              {isSinhala ? "වෙනස්කම් සුරකින්න" : "Save Changes"}
             </button>
           </div>
 
@@ -123,13 +147,21 @@ export function UserProfileView() {
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-emerald-700" />
               <h3 className="text-xl font-normal text-slate-900 font-display">
-                Authorized Scopes & Permissions
+                {isSinhala ? "බලයලත් විෂයපථ සහ අවසර" : "Authorized Scopes & Permissions"}
               </h3>
             </div>
             <p className="text-xs text-slate-400 font-normal max-w-xl leading-relaxed">
-              Your account is assigned the <strong>Operations Manager</strong> system role. The
-              following policy tags determine what actions you can execute inside the Fertilizer
-              manager admin dashboard:
+              {isSinhala ? (
+                <>
+                  ඔබගේ ගිණුමට <strong>Operations Manager</strong> පද්ධති කාර්යභාරය පවරා ඇත. පහත ප්‍රතිපත්ති මගින් ඔබට පරිපාලක පුවරුව තුළ කළ හැකි ක්‍රියා තීරණය වේ:
+                </>
+              ) : (
+                <>
+                  Your account is assigned the <strong>Operations Manager</strong> system role. The
+                  following policy tags determine what actions you can execute inside the Fertilizer
+                  manager admin dashboard:
+                </>
+              )}
             </p>
 
             <div className="flex flex-wrap gap-2 pt-2">
@@ -138,7 +170,7 @@ export function UserProfileView() {
                   key={perm}
                   className="px-3 py-1.5 bg-slate-50 border border-slate-200 text-slate-600 rounded-lg text-xs font-normal"
                 >
-                  {perm}
+                  {isSinhala && sinhalaPermissions[perm] ? sinhalaPermissions[perm] : perm}
                 </span>
               ))}
             </div>
@@ -150,34 +182,36 @@ export function UserProfileView() {
           <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-xs space-y-6">
             <div className="flex items-center gap-2">
               <KeyRound className="w-5 h-5 text-slate-400" />
-              <h3 className="text-xl font-normal text-slate-900 font-display">Change Password</h3>
+              <h3 className="text-xl font-normal text-slate-900 font-display">
+                {isSinhala ? "මුරපදය වෙනස් කිරීම" : "Change Password"}
+              </h3>
             </div>
 
             <div className="space-y-4">
               <FormField
-                label="Current Password"
+                label={isSinhala ? "වත්මන් මුරපදය" : "Current Password"}
                 type="password"
                 value={passwordData.currentPassword}
                 onChange={(val) => handlePasswordChange("currentPassword", val)}
               />
 
               <FormField
-                label="New Password"
+                label={isSinhala ? "නව මුරපදය" : "New Password"}
                 type="password"
                 value={passwordData.newPassword}
                 onChange={(val) => handlePasswordChange("newPassword", val)}
               />
 
               <FormField
-                label="Confirm New Password"
+                label={isSinhala ? "නව මුරපදය තහවුරු කරන්න" : "Confirm New Password"}
                 type="password"
                 value={passwordData.confirmPassword}
                 onChange={(val) => handlePasswordChange("confirmPassword", val)}
               />
             </div>
 
-            <button className="w-full px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 rounded-lg text-xs font-normal transition-colors cursor-pointer block text-center">
-              Update Password
+            <button className="w-full px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-normal transition-colors cursor-pointer block text-center">
+              {isSinhala ? "මුරපදය යාවත්කාලීන කරන්න" : "Update Password"}
             </button>
           </div>
         </div>
@@ -185,3 +219,5 @@ export function UserProfileView() {
     </div>
   );
 }
+
+export default UserProfileView;

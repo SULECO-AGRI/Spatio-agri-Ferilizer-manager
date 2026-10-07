@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AlertTriangle, Loader2, X } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 import type { ApiFarmerItem } from "@/types/farmer";
 
 export interface FarmerDeleteTarget {
@@ -29,6 +30,7 @@ export function DeleteFarmerDialog({
   onConfirm,
   isDeleting = false,
 }: DeleteFarmerDialogProps) {
+  const { isSinhala } = useLanguage();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   if (!isOpen || !farmer) return null;
@@ -45,7 +47,7 @@ export function DeleteFarmerDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs font-sans animate-in fade-in duration-200">
+    <div className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs font-sans animate-in fade-in duration-200 ${isSinhala ? "font-sinhala" : ""}`}>
       <div className="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
         <div className="p-6 space-y-4">
           <div className="flex items-start gap-3">
@@ -54,14 +56,26 @@ export function DeleteFarmerDialog({
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-base font-semibold text-slate-900 font-display">
-                Delete Farmer Profile?
+                {isSinhala ? "ගොවි පැතිකඩ මකා දමන්නද?" : "Delete Farmer Profile?"}
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                Are you sure you want to permanently delete{" "}
-                <strong className="text-slate-800 font-medium font-sans">
-                  {farmer.fullName || "this farmer"}
-                </strong>
-                ? This action cannot be undone and will remove their registered client records.
+                {isSinhala ? (
+                  <>
+                    ඔබට{" "}
+                    <strong className="text-slate-800 font-medium font-sans">
+                      {farmer.fullName || "මෙම ගොවියා"}
+                    </strong>{" "}
+                    ස්ථිරවම මකා දැමීමට අවශ්‍ය බව සහතිකද? මෙම ක්‍රියාව ආපසු හැරවිය නොහැක.
+                  </>
+                ) : (
+                  <>
+                    Are you sure you want to permanently delete{" "}
+                    <strong className="text-slate-800 font-medium font-sans">
+                      {farmer.fullName || "this farmer"}
+                    </strong>
+                    ? This action cannot be undone and will remove their registered client records.
+                  </>
+                )}
               </p>
             </div>
             <button
@@ -74,33 +88,33 @@ export function DeleteFarmerDialog({
             </button>
           </div>
 
-          {/* Farmer Details Summary Card */}
+          {/* Farmer Details Summary Card - Personal details and places kept raw */}
           <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 text-xs space-y-1.5 text-slate-600">
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">NIC / ID:</span>
+              <span className="text-slate-400">{isSinhala ? "ජා.හැ.අංකය / ID:" : "NIC / ID:"}</span>
               <span className="font-medium text-slate-800 font-mono text-[11px]">
                 {farmer.nic || "N/A"}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">Contact / Email:</span>
+              <span className="text-slate-400">{isSinhala ? "සම්බන්ධතාව / විද්‍යුත් තැපෑල:" : "Contact / Email:"}</span>
               <span className="text-slate-700 truncate max-w-[200px]">
                 {farmer.mobile || farmer.email || "N/A"}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">Location:</span>
+              <span className="text-slate-400">{isSinhala ? "පිහිටුම:" : "Location:"}</span>
               <span className="text-slate-700">{farmer.address || "Sri Lanka"}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">Registered Parcels:</span>
+              <span className="text-slate-400">{isSinhala ? "ලියාපදිංචි කොටස්:" : "Registered Parcels:"}</span>
               <span className="font-medium text-slate-800">
-                {farmer.totalFields ?? 0} {farmer.totalFields === 1 ? "parcel" : "parcels"} (
+                {farmer.totalFields ?? 0} {isSinhala ? "කොටස්" : farmer.totalFields === 1 ? "parcel" : "parcels"} (
                 {Number(farmer.totalArea ?? 0).toFixed(1)} ha)
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">Service Requests:</span>
+              <span className="text-slate-400">{isSinhala ? "සේවා ඉල්ලීම්:" : "Service Requests:"}</span>
               <span className="text-slate-800 font-medium">{farmer.totalServiceRequests ?? 0}</span>
             </div>
           </div>
@@ -119,7 +133,7 @@ export function DeleteFarmerDialog({
             disabled={isDeleting}
             className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer disabled:opacity-50"
           >
-            Cancel
+            {isSinhala ? "අවලංගු කරන්න" : "Cancel"}
           </button>
           <button
             type="button"
@@ -130,10 +144,10 @@ export function DeleteFarmerDialog({
             {isDeleting ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Deleting...</span>
+                <span>{isSinhala ? "මකමින්..." : "Deleting..."}</span>
               </>
             ) : (
-              <span>Confirm Delete</span>
+              <span>{isSinhala ? "මකා දැමීම තහවුරු කරන්න" : "Confirm Delete"}</span>
             )}
           </button>
         </div>
@@ -141,3 +155,5 @@ export function DeleteFarmerDialog({
     </div>
   );
 }
+
+export default DeleteFarmerDialog;

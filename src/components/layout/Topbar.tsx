@@ -3,18 +3,21 @@ import { useNavigate } from "@tanstack/react-router";
 import { Search, Columns, CloudSun, Radio, PlayCircle, LogOut } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboardStats } from "@/features/dashboard/hooks/useDashboardStats";
+import { useLanguage } from "@/context/LanguageContext";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 
 export const Topbar = memo(function Topbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { metrics, isLoading } = useDashboardStats();
+  const { dict } = useLanguage();
 
-  const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "Admin User";
+  const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : dict.common.administrator;
   const initials = user
     ? `${user.firstName?.[0] || "A"}${user.lastName?.[0] || "U"}`.toUpperCase()
     : "AU";
   const roleDisplay =
-    user?.profile?.accessLevel || user?.profile?.department || user?.role || "Operations";
+    user?.profile?.accessLevel || user?.profile?.department || user?.role || dict.admin.topbar.operations;
 
   const handleLogout = async () => {
     logout();
@@ -33,31 +36,34 @@ export const Topbar = memo(function Topbar() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           <input
             type="text"
-            placeholder="Search requests, pilots, farmers..."
+            placeholder={dict.admin.topbar.searchPlaceholder}
             className="w-full pl-11 pr-4 py-2 rounded-lg text-sm bg-white border border-slate-200 focus:outline-hidden focus:border-slate-400 transition-colors placeholder:text-slate-400 text-slate-800 font-normal"
           />
         </div>
       </div>
 
-      {/* Right Stats & Profile */}
-      <div className="flex flex-wrap items-center justify-end gap-4 w-full md:w-auto">
+      {/* Right Stats, Language Switcher & Profile */}
+      <div className="flex flex-wrap items-center justify-end gap-3 w-full md:w-auto">
+        {/* Language Switcher */}
+        <LanguageSwitcher variant="light" />
+
         <div className="flex items-center gap-2">
           {/* Weather Widget */}
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-normal border border-slate-200 bg-white text-slate-600">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-normal border border-slate-200 bg-white text-slate-600">
             <CloudSun className="w-3.5 h-3.5 text-slate-400" />
-            <span>28°C Clear</span>
+            <span>{dict.common.weather}</span>
           </div>
 
           {/* Online Pilots */}
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-normal border border-slate-200 bg-white text-slate-600">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-normal border border-slate-200 bg-white text-slate-600">
             <Radio className="w-3.5 h-3.5 text-emerald-600" />
-            <span>{isLoading ? "..." : metrics.onlinePilots} Online</span>
+            <span>{isLoading ? "..." : metrics.onlinePilots} {dict.admin.topbar.onlinePilots}</span>
           </div>
 
           {/* Active Missions */}
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-normal border border-slate-200 bg-white text-slate-600">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-normal border border-slate-200 bg-white text-slate-600">
             <PlayCircle className="w-3.5 h-3.5 text-emerald-600" />
-            <span>{isLoading ? "..." : metrics.activeMissions} Active</span>
+            <span>{isLoading ? "..." : metrics.activeMissions} {dict.admin.topbar.activeMissions}</span>
           </div>
         </div>
 
@@ -75,7 +81,7 @@ export const Topbar = memo(function Topbar() {
           <button
             type="button"
             onClick={handleLogout}
-            title="Sign out of Admin Dashboard"
+            title={dict.admin.topbar.signOut}
             className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-colors cursor-pointer ml-1"
           >
             <LogOut className="w-4 h-4" />

@@ -5,22 +5,25 @@ import { ChevronDown } from "lucide-react";
 import { Logo } from "../primitives/Logo";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { useAuth } from "@/context/AuthContext";
-
-const navLinks = [
-  { href: "#hero", label: "Home" },
-  { href: "#roi", label: "Approach" },
-  { href: "#how-it-works", label: "Process" },
-  { href: "#demo", label: "Live Demo" },
-  { href: "#cta", label: "Contact" },
-];
+import { useLanguage } from "@/context/LanguageContext";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 
 export function Nav() {
   const { open: openAuth } = useAuthModal();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { dict } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const navLinks = [
+    { href: "#hero", label: dict.nav.home },
+    { href: "#roi", label: dict.nav.approach },
+    { href: "#how-it-works", label: dict.nav.process },
+    { href: "#demo", label: dict.nav.demo },
+    { href: "#cta", label: dict.nav.contact },
+  ];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -219,7 +222,7 @@ export function Nav() {
                         role="menuitem"
                         className="w-full flex items-center px-3 py-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors"
                       >
-                        <span>Admin Dashboard</span>
+                        <span>{dict.common.adminDashboard}</span>
                       </Link>
                     )}
 
@@ -235,7 +238,7 @@ export function Nav() {
                       role="menuitem"
                       className="w-full flex items-center px-3 py-2 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer"
                     >
-                      <span>Sign Out</span>
+                      <span>{dict.common.logout}</span>
                     </button>
                   </motion.div>
                 )}
@@ -252,10 +255,13 @@ export function Nav() {
                     : "bg-white hover:bg-slate-100 text-slate-950"
                 }`}
               >
-                Login
+                {dict.common.login}
               </button>
             </div>
           )}
+
+          {/* Language Switcher */}
+          <LanguageSwitcher variant={isScrolled ? "compact" : "glass"} />
         </div>
       </div>
     </header>
