@@ -18,24 +18,14 @@ interface CreateServiceRequestModalProps {
 
 const SERVICE_TYPE_OPTIONS = [
   {
+    id: "DRONE_MAPPING",
+    name: "Drone Mapping",
+    description: "Multispectral NDVI, aerial parcel boundary mapping & crop health survey",
+  },
+  {
     id: "FERTILIZING",
-    name: "Fertilizing Broadcast",
-    description: "Nutrient, Urea & organic bio-fertilizer aerial drone spray",
-  },
-  {
-    id: "PRECISION_SPRAYING",
-    name: "Precision Spraying",
-    description: "Targeted foliar micro-nutrients with ultra-low drift nozzles",
-  },
-  {
-    id: "PEST_CONTROL_SPRAY",
-    name: "Pest & Disease Control",
-    description: "Targeted fungicide & pesticide application against crop blight",
-  },
-  {
-    id: "SEED_BROADCASTING",
-    name: "Seed Broadcasting",
-    description: "High-efficiency aerial cover crop and paddy seeding",
+    name: "Fertilizing",
+    description: "Nutrient, Urea & organic bio-fertilizer aerial drone spray application",
   },
 ];
 
@@ -55,7 +45,7 @@ export function CreateServiceRequestModal({
   // Form State
   const [selectedFarmerId, setSelectedFarmerId] = useState<string>("");
   const [selectedFieldId, setSelectedFieldId] = useState<string>(initialFieldId ? String(initialFieldId) : "");
-  const [serviceType, setServiceType] = useState<string>("FERTILIZING");
+  const [serviceType, setServiceType] = useState<string>("DRONE_MAPPING");
   const [priority, setPriority] = useState<"LOW" | "MEDIUM" | "HIGH" | "CRITICAL">("MEDIUM");
   const [preferredDate, setPreferredDate] = useState<string>(() => {
     const d = new Date();

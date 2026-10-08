@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import type { CostEstimationBreakdown } from "@/types/request";
 import { useLanguage } from "@/context/LanguageContext";
+import { formatServiceType } from "@/lib/utils";
 
 interface CostEstimationCardProps {
   estimation: CostEstimationBreakdown | null;
@@ -145,7 +146,7 @@ export function CostEstimationCard({
               {isSinhala ? "මෙහෙයුම" : "Operation"}
             </div>
             <div className="font-semibold text-slate-800 mt-0.5 text-[11px] truncate">
-              {estimation.serviceType?.replace(/_/g, " ") || "FERTILIZING"}
+              {formatServiceType(estimation.serviceType) || "Fertilizing"}
             </div>
           </div>
 

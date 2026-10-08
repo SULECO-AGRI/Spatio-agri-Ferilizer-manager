@@ -156,7 +156,7 @@ export interface CostEstimationParams {
   fieldId?: number;
   area?: number;
   cropType?: string;
-  serviceType?: "FERTILIZING" | "PRECISION_SPRAYING" | "PEST_CONTROL_SPRAY" | "SEED_BROADCASTING" | string;
+  serviceType?: "FERTILIZING" | "DRONE_MAPPING" | "PRECISION_SPRAYING" | "PEST_CONTROL_SPRAY" | "SEED_BROADCASTING" | string;
   priority?: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" | string;
 }
 
