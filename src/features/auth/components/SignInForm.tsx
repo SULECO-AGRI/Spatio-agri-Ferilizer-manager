@@ -59,7 +59,7 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
   };
 
   const inputClass =
-    "w-full rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 px-4 py-3 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60";
+    "w-full rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 px-4 py-3 text-sm outline-none transition-all duration-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60";
 
   return (
     <div className="w-full font-sans">
@@ -118,7 +118,7 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
                 e.preventDefault();
                 alert("Password reset instructions will be sent to your email.");
               }}
-              className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer transition-colors"
+              className="text-xs text-emerald-600 hover:text-emerald-700 font-medium cursor-pointer transition-colors"
             >
               Forgot password?
             </button>
@@ -142,7 +142,7 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
               type="button"
               onClick={() => setShowPassword((p) => !p)}
               disabled={isLoading}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 focus:text-emerald-600 focus:outline-none cursor-pointer transition-colors"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -154,11 +154,11 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-70 disabled:pointer-events-none text-white font-semibold text-sm py-3.5 transition-all duration-200 shadow-sm cursor-pointer mt-1"
+          className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 active:scale-[0.99] disabled:opacity-70 disabled:pointer-events-none text-white font-semibold text-sm py-3.5 transition-all duration-200 shadow-sm shadow-emerald-700/20 hover:shadow-md hover:shadow-emerald-700/25 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 cursor-pointer mt-1"
         >
           {isLoading ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin text-white" />
               <span>Signing in...</span>
             </>
           ) : (
@@ -171,7 +171,7 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
           type="button"
           disabled={isLoading}
           onClick={() => alert("Google sign-in is not yet configured.")}
-          className="w-full flex items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.99] disabled:opacity-70 disabled:pointer-events-none text-slate-800 font-medium text-sm py-3 transition-all duration-200 cursor-pointer shadow-sm"
+          className="w-full flex items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white hover:bg-emerald-50/40 hover:border-emerald-300 active:scale-[0.99] disabled:opacity-70 disabled:pointer-events-none text-slate-800 font-medium text-sm py-3 transition-all duration-200 cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
             <path

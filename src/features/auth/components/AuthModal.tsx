@@ -38,7 +38,7 @@ export function AuthModal() {
             {/* Close Button */}
             <button
               type="button"
-              className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer z-10"
+              className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-colors cursor-pointer z-10"
               aria-label="Close modal"
               onClick={close}
             >
