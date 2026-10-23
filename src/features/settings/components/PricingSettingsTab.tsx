@@ -113,24 +113,24 @@ export function PricingSettingsTab() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Tab Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 p-6 md:p-8 text-white shadow-md border border-slate-700/50">
+      {/* Tab Header Banner - Light theme */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50/90 via-white to-slate-50 p-6 md:p-8 text-slate-900 shadow-xs border border-emerald-100/80">
         <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-medium mb-3 border border-emerald-500/30">
-            <ShieldCheck className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/90 text-emerald-800 text-[11px] font-semibold mb-3 border border-emerald-200/80">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
             <span>{isSinhala ? "පද්ධති මූල්‍ය හා ප්‍රතිශත පාලනය" : "System Pricing & Commission Control"}</span>
           </div>
-          <h2 className="text-2xl font-bold tracking-tight text-white mb-2 font-display">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-2 font-display">
             {isSinhala ? "මිල නියම කිරීම සහ නියමු කොමිස් සැකසුම්" : "Dynamic Pricing & Pilot Payout Rates"}
           </h2>
-          <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
+          <p className="text-xs md:text-sm text-slate-600 leading-relaxed">
             {isSinhala
               ? "මෙම සැකසුම් පරිපාලක විසින් ඕනෑම වේලාවක වෙනස් කළ හැක. සියලුම නව සේවා ඉල්ලීම් සහ නියමු මෙහෙයුම් සඳහා ගතිකව ක්‍රියාත්මක වේ."
               : "Control the dynamic percentage allocated to drone pilots and base pricing per hectare. Changes propagate immediately to all cost estimates and mission earnings."}
           </p>
         </div>
-        <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-8 translate-y-8">
-          <TrendingUp className="w-64 h-64 text-emerald-400" />
+        <div className="absolute right-0 bottom-0 opacity-15 pointer-events-none transform translate-x-8 translate-y-8">
+          <TrendingUp className="w-56 h-56 text-emerald-600" />
         </div>
       </div>
 
@@ -372,7 +372,7 @@ export function PricingSettingsTab() {
                 />
                 <div
                   style={{ width: `${platformPct}%` }}
-                  className="bg-slate-700 transition-all duration-300 flex items-center justify-center text-[9px] font-bold text-white"
+                  className="bg-slate-400 transition-all duration-300 flex items-center justify-center text-[9px] font-bold text-white"
                 />
               </div>
               <div className="flex justify-between text-[11px] font-medium">
@@ -381,7 +381,7 @@ export function PricingSettingsTab() {
                   {isSinhala ? `නියමුවා: LKR ${simPilotPayout.toLocaleString()}` : `Pilot: LKR ${simPilotPayout.toLocaleString()}`} ({pilotPct}%)
                 </span>
                 <span className="text-slate-600 font-semibold flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-slate-700 inline-block" />
+                  <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />
                   {isSinhala ? `ආයතනය: LKR ${simPlatformCut.toLocaleString()}` : `Platform: LKR ${simPlatformCut.toLocaleString()}`} ({platformPct}%)
                 </span>
               </div>
@@ -398,7 +398,7 @@ export function PricingSettingsTab() {
           {/* Card 4: Operation Rate Breakdown Preview */}
           <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
-              <Layers className="w-4 h-4 text-blue-600" />
+              <Layers className="w-4 h-4 text-emerald-600" />
               <span>{isSinhala ? "මෙහෙයුම් අනුව ගණනය වන මිල ගණන්" : "Operation Rates Auto-Calculated"}</span>
             </div>
 
@@ -444,7 +444,7 @@ export function PricingSettingsTab() {
           type="button"
           onClick={handleSave}
           disabled={isUpdating}
-          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm hover:shadow transition-all cursor-pointer w-full sm:w-auto justify-center disabled:opacity-50"
+          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs hover:shadow transition-all cursor-pointer w-full sm:w-auto justify-center disabled:opacity-50"
         >
           {isUpdating ? (
             <>
@@ -453,7 +453,7 @@ export function PricingSettingsTab() {
             </>
           ) : (
             <>
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <CheckCircle2 className="w-4 h-4 text-white" />
               <span>{isSinhala ? "වෙනස්කම් සුරකින්න" : "Save Pricing & Commission"}</span>
             </>
           )}
