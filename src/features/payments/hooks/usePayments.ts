@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { serviceRequestsService } from "@/services/serviceRequestsService";
+import { settingsService } from "@/services/settingsService";
 import { analyticsService } from "@/services/analyticsService";
 import type { Transaction, MetricItem, TxnStatus } from "@/types";
 
@@ -22,12 +23,18 @@ const defaultPaymentsData: PaymentsRawData = {
 };
 
 async function fetchPaymentsLedger(): Promise<PaymentsRawData> {
-  const [requestsRes] = await Promise.allSettled([
+  const [requestsRes, settingsRes] = await Promise.allSettled([
     serviceRequestsService.getServiceRequests({ limit: 100 }),
+    settingsService.getSettings(),
   ]);
 
   const requests =
     requestsRes.status === "fulfilled" && requestsRes.value ? requestsRes.value.requests || [] : [];
+
+  const dynamicPilotPct =
+    settingsRes.status === "fulfilled" && settingsRes.value
+      ? settingsRes.value.pilotCommissionPercentage || 70
+      : 70;
 
   const txns: Transaction[] = [];
 
@@ -58,7 +65,12 @@ async function fetchPaymentsLedger(): Promise<PaymentsRawData> {
 
     // 2. Pilot payout entry (if a pilot is assigned)
     if (req.assignedPilot || req.status === "COMPLETED" || req.status === "IN_PROGRESS") {
-      const payoutNum = Math.round(costNum * 0.75);
+      // Use mission payment pilotEarnings if available, otherwise calculate using dynamic percentage
+      const missionPayment = (req as any).missions?.[0]?.payment;
+      const payoutNum = missionPayment?.pilotEarnings
+        ? Number(missionPayment.pilotEarnings)
+        : Math.round((costNum * dynamicPilotPct) / 100);
+
       let payoutStatus: TxnStatus = "Pending";
       if (req.status === "COMPLETED") {
         payoutStatus = "Paid";

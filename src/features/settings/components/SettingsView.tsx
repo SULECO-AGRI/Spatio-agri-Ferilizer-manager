@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { PageHeader, FormField, LanguageSwitcher } from "@/components/common";
 import { useLanguage } from "@/context/LanguageContext";
+import { PricingSettingsTab } from "./PricingSettingsTab";
 
 const settingsTabs = [
+  "Pricing & Pilot Commission",
   "Organization Settings",
   "Service Types",
   "Chemical Catalog",
@@ -13,6 +15,7 @@ const settingsTabs = [
 ];
 
 const sinhalaSettingsTabs: Record<string, string> = {
+  "Pricing & Pilot Commission": "මිල සහ නියමු කොමිස්",
   "Organization Settings": "ආයතනික සැකසුම්",
   "Service Types": "සේවා වර්ග",
   "Chemical Catalog": "රසායනික නාමාවලිය",
@@ -23,7 +26,7 @@ const sinhalaSettingsTabs: Record<string, string> = {
 };
 
 export function SettingsView() {
-  const [activeTab, setActiveTab] = useState("Organization Settings");
+  const [activeTab, setActiveTab] = useState("Pricing & Pilot Commission");
   const { dict, isSinhala } = useLanguage();
   const [formData, setFormData] = useState({
     orgName: "Fertilizer manager Operations",
@@ -70,7 +73,9 @@ export function SettingsView() {
 
         {/* Right Settings Form Container */}
         <div className="flex-1 bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-xs w-full">
-          {activeTab === "Organization Settings" ? (
+          {activeTab === "Pricing & Pilot Commission" ? (
+            <PricingSettingsTab />
+          ) : activeTab === "Organization Settings" ? (
             <div className="space-y-6">
               <h3 className="text-xl font-normal text-slate-900 font-display">
                 {isSinhala ? "ආයතනික සැකසුම්" : "Organization Settings"}
