@@ -116,10 +116,6 @@ export function PricingSettingsTab() {
       {/* Tab Header Banner - Light theme */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50/90 via-white to-slate-50 p-6 md:p-8 text-slate-900 shadow-xs border border-emerald-100/80">
         <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/90 text-emerald-800 text-[11px] font-semibold mb-3 border border-emerald-200/80">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-            <span>{isSinhala ? "පද්ධති මූල්‍ය හා ප්‍රතිශත පාලනය" : "System Pricing & Commission Control"}</span>
-          </div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-2 font-display">
             {isSinhala ? "මිල නියම කිරීම සහ නියමු කොමිස් සැකසුම්" : "Dynamic Pricing & Pilot Payout Rates"}
           </h2>
