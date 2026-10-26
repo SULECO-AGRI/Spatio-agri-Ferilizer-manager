@@ -1,3 +1,4 @@
+import { VraPrescriptionCard } from "./components/VraPrescriptionCard";
 import {
   ArrowLeft,
   Calendar,
@@ -252,6 +253,9 @@ export function RequestDetailsView({
               </div>
             </div>
           </div>
+
+          {/* NDVI to VRA Prescription Map Card */}
+          <VraPrescriptionCard request={request} />
 
           {/* Action Control Buttons */}
           <RequestActionsPanel

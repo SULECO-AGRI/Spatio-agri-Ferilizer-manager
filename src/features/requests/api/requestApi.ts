@@ -237,7 +237,29 @@ export const requestApi = baseApi.injectEndpoints({
       ],
     }),
 
-    deleteServiceRequest: builder.mutation<
+        uploadVraMap: builder.mutation<
+      any,
+      {
+        requestId: number;
+        missionId: number;
+        fileName: string;
+        fileType?: string;
+        fileData?: string;
+        adminNotes?: string;
+      }
+    >({
+      query: ({ requestId, missionId, ...body }) => ({
+        url: "/service-requests/" + requestId + "/missions/" + missionId + "/vra-map/upload",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result, error, { requestId }) => [
+        { type: "ServiceRequest" as const, id: requestId },
+        { type: "ServiceRequest" as const, id: "LIST" },
+      ],
+    }),
+
+deleteServiceRequest: builder.mutation<
       { success: boolean; message?: string },
       number | string
     >({
@@ -301,4 +323,5 @@ export const {
   useGetCandidatePilotsQuery,
   useAssignPilotMutation,
   useDeleteServiceRequestMutation,
+  useUploadVraMapMutation,
 } = requestApi;

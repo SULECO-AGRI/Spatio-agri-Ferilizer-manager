@@ -1,3 +1,16 @@
+
+export interface ApiVraMap {
+  status: "NOT_REQUESTED" | "REQUESTED" | "UPLOADED" | string;
+  requestedAt?: string;
+  uploadedAt?: string;
+  uploadedBy?: number | null;
+  fileName?: string;
+  fileUrl?: string;
+  fileSize?: number;
+  adminNotes?: string;
+  pilotNote?: string;
+}
+
 import type { Priority } from "./common";
 
 export type ApiRequestStatus = "PENDING" | "ASSIGNED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
