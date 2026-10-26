@@ -251,6 +251,45 @@ export function RequestDetailsView({
                 <span className="text-slate-400">Status</span>
                 <StatusBadge status={request.status} />
               </div>
+              {request.assignedPilot && (
+                <>
+                  <div className="flex justify-between items-center py-2.5">
+                    <span className="text-slate-400">Assigned Pilot</span>
+                    <span className="text-slate-800 font-semibold">{request.assignedPilot.fullName}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2.5">
+                    <span className="text-slate-400">Pilot Acceptance</span>
+                    {(() => {
+                      const m = request.mission || request.missions?.[0];
+                      const mStatus = (m?.status || "").toUpperCase();
+                      if (mStatus === "ACCEPTED") {
+                        return (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/80 border border-emerald-300 px-2 py-0.5 rounded-md">
+                            ✓ Accepted by Pilot
+                          </span>
+                        );
+                      } else if (mStatus === "IN_PROGRESS") {
+                        return (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-700 bg-purple-100/80 border border-purple-300 px-2 py-0.5 rounded-md">
+                            ✈ In Flight Operations
+                          </span>
+                        );
+                      } else if (mStatus === "COMPLETED") {
+                        return (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md">
+                            Mission Completed
+                          </span>
+                        );
+                      }
+                      return (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-100/80 border border-amber-300 px-2 py-0.5 rounded-md">
+                          ⏳ Awaiting Pilot Acceptance
+                        </span>
+                      );
+                    })()}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

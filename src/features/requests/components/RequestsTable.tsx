@@ -120,9 +120,44 @@ export function RequestsTable({
                 {/* Assigned Pilot (Raw / untranslated as requested) */}
                 <td className="p-4 text-slate-600 font-normal text-xs">
                   {req.assignedPilot ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-medium">
-                      {req.assignedPilot.fullName}
-                    </span>
+                    <div className="space-y-1">
+                      <span className="font-semibold text-slate-800 block">
+                        {req.assignedPilot.fullName}
+                      </span>
+                      {(() => {
+                        const mStatus = (req.mission?.status || req.missions?.[0]?.status || "").toUpperCase();
+                        if (mStatus === "ACCEPTED") {
+                          return (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-300 px-1.5 py-0.5 rounded-md">
+                              ✓ Pilot Accepted
+                            </span>
+                          );
+                        } else if (mStatus === "IN_PROGRESS") {
+                          return (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-700 bg-purple-100/70 border border-purple-300 px-1.5 py-0.5 rounded-md">
+                              ✈ In Flight
+                            </span>
+                          );
+                        } else if (mStatus === "COMPLETED") {
+                          return (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-md">
+                              Completed
+                            </span>
+                          );
+                        } else if (mStatus === "REJECTED" || mStatus === "CANCELLED") {
+                          return (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-rose-700 bg-rose-100/70 border border-rose-300 px-1.5 py-0.5 rounded-md">
+                              Declined
+                            </span>
+                          );
+                        }
+                        return (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-700 bg-amber-100/70 border border-amber-300 px-1.5 py-0.5 rounded-md">
+                            ⏳ Awaiting Acceptance
+                          </span>
+                        );
+                      })()}
+                    </div>
                   ) : (
                     <span className="text-slate-400 italic">{dict.admin.dashboard.unassigned}</span>
                   )}
