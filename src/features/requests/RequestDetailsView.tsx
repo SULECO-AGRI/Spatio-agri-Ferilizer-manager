@@ -262,7 +262,9 @@ export function RequestDetailsView({
                     {(() => {
                       const m = request.mission || request.missions?.[0];
                       const mStatus = (m?.status || "").toUpperCase();
-                      if (mStatus === "ACCEPTED") {
+                      const notes = m?.pilotNotes || "";
+                      const isAccepted = mStatus === "ACCEPTED" || notes.includes('"pilotResponse":"ACCEPTED"') || notes.includes('"status":"ACCEPTED"');
+                      if (isAccepted) {
                         return (
                           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/80 border border-emerald-300 px-2 py-0.5 rounded-md">
                             ✓ Accepted by Pilot

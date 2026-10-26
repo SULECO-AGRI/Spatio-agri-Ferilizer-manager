@@ -125,8 +125,11 @@ export function RequestsTable({
                         {req.assignedPilot.fullName}
                       </span>
                       {(() => {
-                        const mStatus = (req.mission?.status || req.missions?.[0]?.status || "").toUpperCase();
-                        if (mStatus === "ACCEPTED") {
+                        const mission = req.mission || req.missions?.[0];
+                        const mStatus = (mission?.status || "").toUpperCase();
+                        const notes = mission?.pilotNotes || "";
+                        const isAccepted = mStatus === "ACCEPTED" || notes.includes('"pilotResponse":"ACCEPTED"') || notes.includes('"status":"ACCEPTED"');
+                        if (isAccepted) {
                           return (
                             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-300 px-1.5 py-0.5 rounded-md">
                               ✓ Pilot Accepted
@@ -170,7 +173,16 @@ export function RequestsTable({
 
                 {/* Status Badge */}
                 <td className="p-4">
-                  <StatusBadge status={req.status} />
+                  {(() => {
+                    const mission = req.mission || req.missions?.[0];
+                    const mStatus = (mission?.status || "").toUpperCase();
+                    const notes = mission?.pilotNotes || "";
+                    const isAccepted = mStatus === "ACCEPTED" || notes.includes('"pilotResponse":"ACCEPTED"') || notes.includes('"status":"ACCEPTED"');
+                    if (isAccepted) {
+                      return <StatusBadge status="Accepted" variant="emerald" dot />;
+                    }
+                    return <StatusBadge status={req.status} />;
+                  })()}
                 </td>
 
                 {/* Actions */}
