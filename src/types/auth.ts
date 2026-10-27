@@ -46,7 +46,17 @@ export interface LoginResponse {
   message: string;
   data: {
     token: string;
+    refreshToken?: string;
     user: User;
+  };
+}
+
+export interface RefreshResponse {
+  status: "success";
+  message?: string;
+  data: {
+    token: string;
+    refreshToken?: string;
   };
 }
 

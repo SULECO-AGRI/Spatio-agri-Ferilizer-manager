@@ -5,7 +5,17 @@ import { useAuthModal } from "@/context/AuthModalContext";
 import { SignInForm } from "./SignInForm";
 
 export function AuthModal() {
-  const { isOpen, close } = useAuthModal();
+  const { isOpen, open, close } = useAuthModal();
+
+  // Automatically open modal if redirected with a logout reason (idle/expired/unauthorized)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has("reason")) {
+        open();
+      }
+    }
+  }, [open]);
 
   // Close on Escape key
   useEffect(() => {

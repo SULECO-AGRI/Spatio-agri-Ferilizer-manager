@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from "react";
+import { useState, useMemo, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, Loader2, AlertCircle, Info } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/apiClient";
 
@@ -17,6 +17,23 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Parse logout reason from URL parameters
+  const logoutNotice = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    const params = new URLSearchParams(window.location.search);
+    const reason = params.get("reason");
+    if (reason === "idle") {
+      return "You have been logged out due to inactivity. Please sign in to resume.";
+    }
+    if (reason === "expired") {
+      return "Your session has expired. Please sign in to continue.";
+    }
+    if (reason === "unauthorized") {
+      return "Your session was terminated. Please sign in again.";
+    }
+    return null;
+  }, []);
 
   const isLoading = isSubmitting || isAuthLoading;
 
@@ -70,6 +87,17 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
         </h2>
         <p className="mt-1.5 text-sm text-slate-500">Sign in to your administrator account</p>
       </div>
+
+      {/* ── Logout Reason Notice ── */}
+      {logoutNotice && !errorMsg && (
+        <div
+          role="status"
+          className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800 flex items-start gap-2 animate-in fade-in"
+        >
+          <Info className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+          <span>{logoutNotice}</span>
+        </div>
+      )}
 
       {/* ── Error Banner ── */}
       {errorMsg && (
