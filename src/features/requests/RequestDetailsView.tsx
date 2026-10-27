@@ -283,6 +283,13 @@ export function RequestDetailsView({
                           </span>
                         );
                       }
+                      if (mStatus === "REJECTED" || mStatus === "CANCELLED" || mStatus === "FAILED" || notes.toLowerCase().includes("rejected") || notes.toLowerCase().includes("cancelled")) {
+                        return (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-700 bg-rose-100/80 border border-rose-300 px-2 py-0.5 rounded-md">
+                            ✕ Declined by Pilot
+                          </span>
+                        );
+                      }
                       return (
                         <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-100/80 border border-amber-300 px-2 py-0.5 rounded-md">
                           ⏳ Awaiting Pilot Acceptance

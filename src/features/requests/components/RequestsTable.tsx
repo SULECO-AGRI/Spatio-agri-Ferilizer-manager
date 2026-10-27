@@ -147,7 +147,7 @@ export function RequestsTable({
                               Completed
                             </span>
                           );
-                        } else if (mStatus === "REJECTED" || mStatus === "CANCELLED") {
+                        } else if (mStatus === "REJECTED" || mStatus === "CANCELLED" || mStatus === "FAILED" || notes.toLowerCase().includes("rejected") || notes.toLowerCase().includes("cancelled")) {
                           return (
                             <span className="inline-flex items-center gap-1 text-[10px] font-medium text-rose-700 bg-rose-100/70 border border-rose-300 px-1.5 py-0.5 rounded-md">
                               Declined
