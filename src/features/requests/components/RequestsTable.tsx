@@ -136,7 +136,19 @@ export function RequestsTable({
                           mStatus === "ACCEPTED" ||
                           notes.includes('"pilotResponse":"ACCEPTED"') ||
                           notes.includes('"status":"ACCEPTED"');
-                        if (isAccepted) {
+                        if (notes.includes("COMPLETE_REQUESTED") && mStatus !== "COMPLETED") {
+                          return (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-100/80 border border-blue-300 px-1.5 py-0.5 rounded-md">
+                              ⏳ Completion Pending Farmer
+                            </span>
+                          );
+                        } else if (notes.includes("START_REQUESTED") && mStatus !== "IN_PROGRESS" && mStatus !== "COMPLETED") {
+                          return (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-100/80 border border-amber-300 px-1.5 py-0.5 rounded-md">
+                              🛫 Dispatch Requested
+                            </span>
+                          );
+                        } else if (isAccepted && mStatus !== "IN_PROGRESS" && mStatus !== "COMPLETED") {
                           return (
                             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-300 px-1.5 py-0.5 rounded-md">
                               ✓ Pilot Accepted
@@ -190,8 +202,14 @@ export function RequestsTable({
                     const mission = req.mission || req.missions?.[0];
                     const mStatus = (mission?.status || "").toUpperCase();
                     const notes = mission?.pilotNotes || "";
+                    if (notes.includes("COMPLETE_REQUESTED") && req.status !== "COMPLETED") {
+                      return <StatusBadge status="Completion Pending" variant="blue" dot />;
+                    }
+                    if (notes.includes("START_REQUESTED") && req.status !== "IN_PROGRESS" && req.status !== "COMPLETED") {
+                      return <StatusBadge status="Start Requested" variant="amber" dot />;
+                    }
                     const isAccepted = mStatus === "ACCEPTED" || notes.includes('"pilotResponse":"ACCEPTED"') || notes.includes('"status":"ACCEPTED"');
-                    if (isAccepted) {
+                    if (isAccepted && req.status !== "IN_PROGRESS" && req.status !== "COMPLETED") {
                       return <StatusBadge status="Accepted" variant="emerald" dot />;
                     }
                     return <StatusBadge status={req.status} />;

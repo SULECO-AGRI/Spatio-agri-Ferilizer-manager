@@ -66,7 +66,7 @@ async function fetchPaymentsLedger(): Promise<PaymentsRawData> {
     // 2. Pilot payout entry (if a pilot is assigned)
     if (req.assignedPilot || req.status === "COMPLETED" || req.status === "IN_PROGRESS") {
       // Use mission payment pilotEarnings if available, otherwise calculate using dynamic percentage
-      const missionPayment = (req as any).missions?.[0]?.payment;
+      const missionPayment = (req as any).mission?.payment || (req as any).missions?.[0]?.payment;
       const payoutNum = missionPayment?.pilotEarnings
         ? Number(missionPayment.pilotEarnings)
         : Math.round((costNum * dynamicPilotPct) / 100);

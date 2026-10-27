@@ -46,7 +46,17 @@ export function RequestDetailsView({
             <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-slate-900 font-display">
               {request.requestCode}
             </h1>
-            <StatusBadge status={request.status} size="md" />
+            {(() => {
+              const mission = request.mission || request.missions?.[0];
+              const notes = mission?.pilotNotes || "";
+              if (notes.includes("COMPLETE_REQUESTED") && request.status !== "COMPLETED") {
+                return <StatusBadge status="Completion Pending" variant="blue" size="md" dot />;
+              }
+              if (notes.includes("START_REQUESTED") && request.status !== "IN_PROGRESS" && request.status !== "COMPLETED") {
+                return <StatusBadge status="Start Requested" variant="amber" size="md" dot />;
+              }
+              return <StatusBadge status={request.status} size="md" />;
+            })()}
             <StatusBadge status={request.priority} size="md" />
           </div>
           <p className="text-xs text-slate-400 mt-1">
@@ -271,7 +281,19 @@ export function RequestDetailsView({
                         mStatus === "ACCEPTED" ||
                         notes.includes('"pilotResponse":"ACCEPTED"') ||
                         notes.includes('"status":"ACCEPTED"');
-                      if (isAccepted) {
+                      if (notes.includes("COMPLETE_REQUESTED") && mStatus !== "COMPLETED") {
+                        return (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-100/80 border border-blue-300 px-2 py-0.5 rounded-md">
+                            ⏳ Completion Pending Farmer Sign-off
+                          </span>
+                        );
+                      } else if (notes.includes("START_REQUESTED") && mStatus !== "IN_PROGRESS" && mStatus !== "COMPLETED") {
+                        return (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-100/80 border border-amber-300 px-2 py-0.5 rounded-md">
+                            🛫 Dispatch Requested (Awaiting Farmer)
+                          </span>
+                        );
+                      } else if (isAccepted && mStatus !== "IN_PROGRESS" && mStatus !== "COMPLETED") {
                         return (
                           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/80 border border-emerald-300 px-2 py-0.5 rounded-md">
                             ✓ Accepted by Pilot
