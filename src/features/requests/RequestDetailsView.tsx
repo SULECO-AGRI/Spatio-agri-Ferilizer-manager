@@ -260,10 +260,17 @@ export function RequestDetailsView({
                   <div className="flex justify-between items-center py-2.5">
                     <span className="text-slate-400">Pilot Acceptance</span>
                     {(() => {
-                      const m = request.mission || request.missions?.[0];
+                      const m =
+                        request.mission ||
+                        (request.missions && request.missions.length > 0
+                          ? [...request.missions].sort((a, b) => b.missionId - a.missionId)[0]
+                          : undefined);
                       const mStatus = (m?.status || "").toUpperCase();
                       const notes = m?.pilotNotes || "";
-                      const isAccepted = mStatus === "ACCEPTED" || notes.includes('"pilotResponse":"ACCEPTED"') || notes.includes('"status":"ACCEPTED"');
+                      const isAccepted =
+                        mStatus === "ACCEPTED" ||
+                        notes.includes('"pilotResponse":"ACCEPTED"') ||
+                        notes.includes('"status":"ACCEPTED"');
                       if (isAccepted) {
                         return (
                           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/80 border border-emerald-300 px-2 py-0.5 rounded-md">
@@ -282,8 +289,14 @@ export function RequestDetailsView({
                             Mission Completed
                           </span>
                         );
-                      }
-                      if (mStatus === "REJECTED" || mStatus === "CANCELLED" || mStatus === "FAILED" || notes.toLowerCase().includes("rejected") || notes.toLowerCase().includes("cancelled")) {
+                      } else if (
+                        request.status === "PENDING" &&
+                        (mStatus === "REJECTED" ||
+                          mStatus === "CANCELLED" ||
+                          mStatus === "FAILED" ||
+                          notes.toLowerCase().includes("rejected") ||
+                          notes.toLowerCase().includes("cancelled"))
+                      ) {
                         return (
                           <span className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-700 bg-rose-100/80 border border-rose-300 px-2 py-0.5 rounded-md">
                             ✕ Declined by Pilot
